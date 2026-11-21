@@ -49,31 +49,31 @@ Logo proporcionado como activo de marca; no alterar su proporción ni asumir pal
 | Inicio `/` | Presentar el sistema/negocio al cliente | Propuesta, acceso a menú, sucursales y pedido | Hero fotográfico, CTA, bloques editoriales. No publicar afirmaciones comerciales hasta definir marca. |
 | Menú `/menu` | Explorar oferta | Categorías, productos, disponibilidad, agregar al carrito | Categorías accesibles y tarjetas. Pedido web pendiente no reserva stock; revalidar al aceptar. |
 | Sucursales `/sucursales` | Elegir/consultar sede | Dirección, horarios, contacto | Lista/tarjetas; mapa solo si se aprueba dependencia y necesidad. |
-| Pedido `/pedido` | Revisar y completar pedido | Carrito, modalidad recoger/domicilio, datos requeridos, resumen y envío | Formulario por pasos simples; mostrar expiración de 30 minutos para pedidos pendientes según SRS, sin reservar inventario y revalidando disponibilidad al aceptar. |
+| Pedido `/pedido` | Revisar y completar pedido | Carrito, modalidad recoger/domicilio, datos requeridos, resumen y envío | Solo pedidos web pendientes de confirmación por WhatsApp expiran a los 30 minutos. No aplica a pedidos aceptados ni en preparación. No reservan inventario y se revalida disponibilidad al aceptar. |
 | Seguimiento `/seguimiento/[codigo]` | Consultar estado | Estado e información mínima | Línea de progreso accesible, sin exponer datos personales. |
 
 ### Interfaz QR
 
 | Pantalla/estado | Objetivo/usuario | Información y acciones | Componentes y relación |
 |---|---|---|---|
-| QR permanente → `/mesa/[token]` | Cliente en mesa | El QR identifica mesa y sucursal, pero no autoriza pedidos por sí solo. Requiere sesión activa y token temporal válido. | Catálogo, navegación táctil y carrito; solo personal autorizado puede abrir sesión. |
+| QR permanente → `/mesa/[codigoQR]` | Cliente en mesa | El código identifica mesa y sucursal, pero no autoriza pedidos por sí solo. El servidor valida sesión activa y habilita el token temporal. | Catálogo, navegación táctil y carrito; solo personal autorizado puede abrir sesión. |
 | Carrito y confirmación | Enviar pedido asociado a cuenta | Líneas, cantidades y confirmación | Controles grandes, resumen y confirmación inequívoca. |
 | Pedido enviado | Consultar resultado/estado | Estado de cada pedido | Lista de pedidos de la sesión; enlaza a catálogo y cuenta si permitido por SRS. |
 | Token inválido/sesión cerrada | Evitar pedido fuera de sesión | Mensaje claro y ayuda para llamar al personal | Estado de error sin reintento engañoso. |
 
-La experiencia prioriza una mano, carga rápida, pocos pasos y lectores de pantalla. Cerrar sesión invalida el token temporal. La cuenta acumula pedidos aceptados según regla de negocio; el cliente no puede activar una sesión.
+La experiencia prioriza una mano, carga rápida, pocos pasos y lectores de pantalla. La ruta usa el código QR permanente para identificar mesa/sucursal; tras validar sesión activa se habilita el token temporal y cerrar sesión lo invalida. El cliente no puede abrir sesiones.
 
 ### Panel administrativo y operativo
 
 | Pantalla | Objetivo/usuario | Información/acciones | Componentes y relación |
 |---|---|---|---|
-| `/admin` | Orientar al trabajador | Resumen y accesos permitidos | Navegación lateral, indicadores del SRS; no inventar métricas. |
-| Pedidos | Atender y preparar | Cola por llegada con priorización visual según tiempo de espera; detalle, aceptación/rechazo y estado | Tabla/filtros, indicador de espera, detalle lateral. Tres minutos es prioridad visual, no expiración ni rechazo automático. Cancelaciones antes de preparación requieren aprobación del personal autorizado. |
+| `/admin` | Orientar al trabajador | Resumen y accesos permitidos | Navegación lateral e indicadores del SRS; no mostrar alertas de stock mínimo, pues no hay umbral aprobado. |
+| Pedidos | Atender y preparar | Cola por llegada con priorización visual según tiempo de espera; detalle, aceptación/rechazo y estado | Tres minutos es prioridad visual, no expiración ni rechazo automático. Cancelaciones antes de preparación requieren aprobación autorizada. La expiración de 30 minutos solo aplica a pedidos web pendientes de confirmación por WhatsApp. |
 | Mesas | Operar QR y cobro | Mesa, sesión y cuenta; abrir/cerrar independientemente | Vista de mesas, acciones claras, aviso si cuenta abierta bloquea nueva sesión. |
 | Pagos | Revisar intentos | Método, estado, importe, comprobante, verificación/rechazo/reembolso total | Transferencia requiere comprobante; efectivo no. Máximo uno por intento; reintento crea otro intento. Vista privada y motivo. |
 | Inventario | Consultar/ajustar stock | Existencias y movimientos por sucursal | Tabla filtrable, historial, formulario; mostrar movimientos pendientes separados del disponible. |
 | Reposiciones | Gestionar abastecimiento | Solicitudes, aprobación, despachos y recepciones aptas/dañadas | Dañadas cuentan como recibidas, pero no aumentan inventario. Mostrar saldos derivados y trazabilidad del cierre/reversa total en la línea; separar cierre previo y posterior al despacho. |
-| Entregas | Coordinar reparto | Asignación, estado, incidencias, recaudo declarado/recibido | Lista por estado; una conciliación por entrega. El repartidor declara y empleado autorizado registra lo recibido. |
+| Entregas | Coordinar reparto | Asignación, estado, incidencias, recaudo declarado/recibido | Lista por estado y permisos; el repartidor solo ve sus propias entregas. Una conciliación por entrega: repartidor declara y empleado autorizado registra lo recibido. |
 | Productos/categorías | Mantener catálogo | Datos aprobados del producto | Tabla y formulario reutilizable con vista previa de tarjeta. |
 | Usuarios | Gestionar accesos | Usuarios, roles y sucursales asociadas | Tabla/formulario; sin permisos individuales. Admin sin permisos operativos heredados. |
 | Reportes | Consultar métricas aprobadas | Reportes del alcance SRS | Filtros por periodo/sucursal y tablas/gráficos solo donde agreguen comprensión. |
@@ -158,7 +158,7 @@ Los esquemas son estructura de contenido, no diseño visual final. `[]` represen
 ┌────────────────────────────────────────────────────────────┐
 │ ← Menú                         Tu pedido        [Paso 1/3]  │
 ├────────────────────────────────────┬───────────────────────┤
-│ Producto / opciones existentes     │ Resumen                │
+│ Producto / presentación             │ Resumen                │
 │ [Foto] Nombre                      │ Ítem × cantidad        │
 │ Descripción                        │ Subtotal               │
 │ Precio                             │ Domicilio (si aplica)  │
@@ -166,7 +166,7 @@ Los esquemas son estructura de contenido, no diseño visual final. `[]` represen
 │                                    │ [Continuar]            │
 ├────────────────────────────────────┴───────────────────────┤
 │ Paso siguiente: recoger/domicilio → sucursal/dirección →    │
-│ datos y confirmación. Aviso de 30 min y sin reserva stock.   │
+│ datos y confirmación. Pendiente WhatsApp: 30 min; sin reserva│
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -200,7 +200,7 @@ Estados alternos: token/sesión inválidos muestran mensaje y llamada al persona
 │ Marca         │ Sucursal activa [selector autorizado]      │
 │ Inicio        ├─────────────────────────────────────────────┤
 │ Pedidos       │ Resumen operativo según SRS                 │
-│ Mesas         │ [Pendientes] [En curso] [Inventario alerta]  │
+│ Mesas         │ [Pendientes] [En curso] [Accesos frecuentes]  │
 │ Pagos         ├─────────────────────┬───────────────────────┤
 │ Inventario    │ Cola/actividad       │ Accesos frecuentes   │
 │ Reposiciones  │ con tiempos visibles│ [Pedidos] [Mesas]    │
@@ -274,6 +274,7 @@ El detalle muestra cada despacho y su recepción vinculada. Cierre/reversa viven
 │             │ Pedido · destino      │ Entrega seleccionada  │
 │             │ Repartidor · estado   │ datos mínimos         │
 │             │ ...                   │ [Asignar / actualizar]│
+│             │                       │ Solo entregas propias │
 │             │                       │ Recaudo: declarado    │
 │             │                       │ recibido · diferencia │
 │             │                       │ motivo / responsable  │
