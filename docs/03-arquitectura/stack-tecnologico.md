@@ -16,8 +16,6 @@ Stack recomendado en el chat final para el MVP:
 | ORM | Prisma | Propuesto |
 | Validación | Zod | Propuesto |
 
-El usuario pidió reutilizar herramientas del proyecto SpacesApps_2, usar Next.js y TypeScript, y dejar la decisión de despliegue al equipo. El `package.json` compartido se describió en el chat como Next.js 16.4.6, React 19.3.0, TypeScript 5.9.3, Tailwind CSS 4.3.3, Motion/Framer Motion, Three.js, React Three Fiber, Drei, Lucide React y MapLibre GL. Esos números reflejan el archivo compartido entonces; no son garantía de que sigan vigentes ni de que este directorio los tenga instalados.
-
 ## Dependencias opcionales
 
 - React Hook Form para formularios.
@@ -40,8 +38,3 @@ La idea de Render + Neon se formuló como solicitud dentro del cuadro de texto a
 ## No incorporar por defecto
 
 Redis, Docker, microservicios, Express separado, GSAP, PixiJS, Rive o herramientas con suscripción. Cualquier inclusión posterior requiere necesidad concreta y revisión de costo.
-
-## Fuentes
-
-- [Stack y comparación PostgreSQL/MySQL](https://chatgpt.com/share/6b01d123-58a4-83e9-ba45-329495ddbd6d)
-- [Arquitectura, costes y estrategia local](https://chatgpt.com/share/6b01d131-5274-83e9-938e-5488f72f99f5)
