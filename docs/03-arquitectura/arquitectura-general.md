@@ -2,7 +2,7 @@
 
 ## Estado
 
-Documento de arquitectura y preparación del MVP. El proyecto actual contiene documentación, materiales gráficos y el anteproyecto; aún no contiene una aplicación web implementada. No crear código, esquema de base de datos ni migraciones hasta cerrar arquitectura/UI/UX y recibir autorización expresa para desarrollar.
+Arquitectura de referencia del MVP. El usuario autorizó iniciar la primera implementación visual y el repositorio ya contiene la aplicación Next.js, el catálogo público y recursos gráficos. Esta entrega no configura persistencia, Prisma, base de datos ni migraciones; los módulos operativos continúan planificados.
 
 ## Producto
 
@@ -95,6 +95,7 @@ La estructura prioriza componentes y código del servidor separados sin obligar 
 |---|---|---|
 | `/` | Inicio y presentación | Público |
 | `/menu` | Catálogo, productos y categorías | Público |
+| `/menu/[categoria]` | Vista de Panadería, Fritos o Bebidas (`panaderia`, `fritos`, `bebidas`) | Público |
 | `/sucursales` | Ubicaciones e información | Público |
 | `/pedido` | Carrito y selección/configuración de pedido | Público |
 | `/seguimiento/[codigo]` | Estado del pedido con datos mínimos | Público con código no adivinable |

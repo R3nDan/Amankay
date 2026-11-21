@@ -8,6 +8,22 @@
 - **Pendiente:** requiere confirmación o completar análisis.
 - **Descartada/sustituida:** una decisión posterior la reemplazó.
 
+## Implementación inicial y ajuste visual aprobado (21-11-2026)
+
+Fuente: instrucciones directas del usuario en este chat, posteriores a la planificación UI/UX. No modifica las decisiones de modelado.
+
+| Tema | Decisión vigente y justificación | Estado |
+|---|---|---|
+| Desarrollo | El usuario autorizó la primera aplicación Next.js y su portada visual. Continúan excluidos Prisma, PostgreSQL, migraciones y reglas de negocio en esta entrega. Sustituye la espera general de autorización para programar el frontend. | Aprobada |
+| Catálogo | Panadería, Fritos y Bebidas. Fritos comprende empanadas, pasteles y papas; Bebidas, avena y sevillana. Amplía el contenido del catálogo visual más allá de panes, usando las categorías existentes. | Aprobada |
+| Cabecera | SVG centrado, sin texto Amankay adicional, navegación inferior INICIO / PANADERÍA / FRITOS / BEBIDAS. Referencia de jerarquía: MASA. | Aprobada |
+| Título | Todas las páginas públicas de esta entrega usan únicamente «Amankay» como título de pestaña; reemplaza «Panadería \| Amankay». No fija nombre comercial definitivo. | Aprobada |
+| Paleta | Retirar verde y usar cacao, crema, trigo, durazno y cobre del logo, conservando marfil. Contrastes y usos en UI/UX. Sustituye verde hoja/terracota/mostaza como dirección estética. | Aprobada |
+| Proceso | Video proporcionado, con avance y retroceso mediante scroll. Sustituye las cuatro fotografías seleccionables. | Aprobada |
+| Accesibilidad del clip | Movimiento reducido inicia con controles manuales; se puede activar scroll expresamente o saltar el recorrido. Seeks secuenciales, sin capturar desplazamiento ni añadir dependencias de animación. | Elección técnica dentro de la implementación autorizada |
+| Recursos | Originales conservados; fotografías WebP para web, MP4 en carpeta de videos. No reutilizar imágenes de MASA. | Elección técnica dentro de la implementación autorizada |
+| Datos comerciales | Fotos de Fritos/Bebidas, precios, recetas y disponibilidad siguen por confirmar. No inferirlos de la referencia. | Pendiente |
+
 ## Decisiones aprobadas para el cierre del modelado (21-11-2026)
 
 - Conservación de eventos originales de despacho y recepción. Corrección mediante anulación completa y registro nuevo cuando las dependencias lo permitan; anulación documental y movimientos compensatorios son operaciones separadas.

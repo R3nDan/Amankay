@@ -1,17 +1,30 @@
-export type Product = {
-  name: string; category: "Clásicos" | "Dulces"; photo: string; description: string; price: number;
-};
-
-// Selección y precios de muestra para la primera entrega visual.
-export const products: readonly Product[] = [
-  { name: "Pan blandito", category: "Clásicos", photo: "blandito", description: "Capas tiernas, corteza dorada y una miga que se abre con las manos.", price: 2500 },
-  { name: "Pan de leche", category: "Clásicos", photo: "leche", description: "Redondo y suave, con una miga fina para acompañar el café.", price: 3000 },
-  { name: "Pan azucarado", category: "Dulces", photo: "azucar", description: "Un bollo esponjoso con una cubierta crujiente de azúcar.", price: 3500 },
-];
-
-export const stages = [
-  { title: "Amasar", image: "masa", alt: "Manos amasando sobre una mesa enharinada", description: "Harina, agua y el movimiento de las manos hasta que la masa se vuelve elástica." },
-  { title: "Dar forma", image: "forma", alt: "Una tira de masa enrollada a mano", description: "La masa se divide, se enrolla y descansa en la bandeja." },
-  { title: "Hornear", image: "horno", alt: "Panecillos dorándose en una bandeja dentro del horno", description: "El calor levanta la miga y le da a la corteza su tono dorado." },
-  { title: "Compartir", image: "hornada", alt: "Pan recién abierto con la miga a la vista", description: "Al salir del horno, el pan reposa. Al partirlo aparece la miga." },
+export const categories = [
+  { slug: "panaderia", name: "Panadería", number: "01", detail: "Panes, croissants y mojicones.", intro: "Cortezas doradas, miga suave y algo rico para compartir." },
+  { slug: "fritos", name: "Fritos", number: "02", detail: "Empanadas, pasteles y papas.", intro: "Empanadas, pasteles y papas: descubre este lado de nuestra selección." },
+  { slug: "bebidas", name: "Bebidas", number: "03", detail: "Avena y sevillana.", intro: "Una avena o una sevillana para acompañar tu elección." },
 ] as const;
+
+export type CategorySlug = typeof categories[number]["slug"];
+export type Product = { id: string; name: string; category: CategorySlug; photo?: string; description?: string; price?: number };
+
+// Catálogo visual. Precios, recetas y disponibilidad comercial por confirmar.
+export const products: readonly Product[] = [
+  { id: "pan-queso", name: "Pan de queso", category: "panaderia", photo: "/imagenes/productos/panaderia/pan-queso.webp" },
+  { id: "croissant", name: "Croissant", category: "panaderia", photo: "/imagenes/productos/panaderia/croissant.webp" },
+  { id: "mojicon-bocadillo", name: "Mojicón de bocadillo", category: "panaderia", photo: "/imagenes/productos/panaderia/mojicon-bocadillo.webp" },
+  { id: "pan-hawaiano", name: "Pan hawaiano", category: "panaderia", photo: "/imagenes/productos/panaderia/pan-hawaiano.webp" },
+  { id: "pan-salchicha", name: "Pan de salchicha", category: "panaderia", photo: "/imagenes/productos/panaderia/pan-salchicha.webp" },
+  { id: "pan-agridulce", name: "Pan agridulce", category: "panaderia", photo: "/imagenes/productos/panaderia/pan-agridulce.webp" },
+  { id: "mojicon-queso", name: "Mojicón de queso", category: "panaderia", photo: "/imagenes/productos/panaderia/mojicon-queso.webp" },
+  { id: "mojicon-arequipe-queso", name: "Mojicón de arequipe y queso", category: "panaderia", photo: "/imagenes/productos/panaderia/mojicon-arequipe-queso.webp" },
+  { id: "empanada", name: "Empanada", category: "fritos", photo: "/imagenes/productos/fritos/empanada.webp" },
+  { id: "arepa-huevo", name: "Arepa de huevo", category: "fritos", photo: "/imagenes/productos/fritos/arepa-huevo.webp" },
+  { id: "pastel-carne", name: "Pastel de carne", category: "fritos", photo: "/imagenes/productos/fritos/pastel-carne.webp" },
+  { id: "pastel-chorizo", name: "Pastel de chorizo", category: "fritos", photo: "/imagenes/productos/fritos/pastel-chorizo.webp" },
+  { id: "pastel-huevo", name: "Pastel de huevo", category: "fritos", photo: "/imagenes/productos/fritos/pastel-huevo.webp" },
+  { id: "pastel-mixto", name: "Pastel mixto", category: "fritos", photo: "/imagenes/productos/fritos/pastel-mixto.webp" },
+  { id: "pastel-pollo", name: "Pastel de pollo", category: "fritos", photo: "/imagenes/productos/fritos/pastel-pollo.webp" },
+  { id: "papas", name: "Papas", category: "fritos" },
+  { id: "avena", name: "Avena", category: "bebidas" },
+  { id: "sevillana", name: "Sevillana", category: "bebidas" },
+];

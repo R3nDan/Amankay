@@ -4,9 +4,9 @@ import { Footer, Header } from "@/components/site-shell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Panadería | Amankay", template: "%s | Amankay" },
-  description: "Explora el catálogo de panadería, conoce el proceso del pan y consulta las sucursales.",
-  icons: { icon: "/imagenes/amankay.svg" },
+  title: "Amankay",
+  description: "Panadería, fritos y bebidas. Descubre nuestro catálogo, el oficio del pan y nuestras sucursales.",
+  icons: { icon: "/imagenes/marca/amankay.svg" },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

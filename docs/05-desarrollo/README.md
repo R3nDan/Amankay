@@ -2,7 +2,7 @@
 
 ## Estado y puerta de inicio
 
-Este documento prepara el orden de construcción; no inicia la implementación. El repositorio actual no contiene la aplicación. El desarrollo comenzará cuando arquitectura y UI/UX estén revisados y el usuario autorice expresamente iniciar código. MER listo para aprobación no equivale por sí solo a autorización de programación.
+El usuario autorizó iniciar la primera entrega visual. La base Next.js y el sitio público ya están implementados: inicio, catálogo, Panadería/Fritos/Bebidas, acceso a sucursales y video del pan vinculado al scroll. Las fotografías de panadería recibidas se integran como recursos optimizados. Precios, disponibilidad, fotografías de las otras categorías y datos de sucursales siguen pendientes. No se ha conectado persistencia ni implementado reglas operativas.
 
 ## Secuencia propuesta
 
@@ -38,4 +38,4 @@ Construir rebanadas verticales funcionales: interfaz, validación, caso de uso y
 
 Al iniciar desarrollo, definir criterios de aceptación concretos por flujo según SRS. Revisar accesibilidad de teclado/contraste, móvil, manejo de estados de carga/vacío/error/éxito y consistencia en servidor. No considerar terminado un módulo solo por renderizar su interfaz; los flujos críticos necesitan persistencia y autorización verificables.
 
-No se crea todavía el proyecto Next.js, esquema Prisma, migración o base de datos en esta fase documental.
+La aplicación Next.js está creada. Prisma, migraciones y base de datos permanecen fuera de esta entrega visual.

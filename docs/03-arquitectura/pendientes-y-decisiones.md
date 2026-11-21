@@ -2,6 +2,12 @@
 
 Esta lista complementa la matriz de conciliación en [decisiones técnicas](decisiones-tecnicas.md). “Reportada” significa que aparece en el resumen de ChatGPT que compartió el usuario, pero no se corroboró en los once enlaces. Ningún modelo queda aprobado por este documento.
 
+## Decisiones visuales del prototipo
+
+El 21-11-2026 el usuario aprobó tres categorías iniciales del catálogo, el logo centrado, navegación superior con INICIO/PANADERÍA/FRITOS/BEBIDAS, el título de pestaña «Amankay», los colores cálidos del logo sin verde y el clip del pan vinculado al scroll. Son decisiones de presentación del prototipo; el nombre comercial sigue pendiente y esto no aprueba el MER. La matriz detallada está en [Diseño UI/UX](../04-diseno-ui-ux/README.md#ajuste-visual-e-implementacion-inicial--21-11-2026).
+
+Pendiente para completar catálogo real: confirmar nombres finales, descripciones, fotografías, precios y disponibilidad de todos los productos; las imágenes y precios todavía ausentes no se simulan como definitivos.
+
 | ID | Tema | Estado | Definición actual | Procedencia / evidencia | Siguiente paso |
 | --- | --- | --- | --- | --- | --- |
 | P-01 | Nombre comercial | Pendiente | Confirmar si el negocio es El Alambique. | Anteproyecto menciona El Alambique; chats nombran Amankay. | Confirmación del usuario. |

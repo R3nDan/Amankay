@@ -1,13 +1,20 @@
 import Image from "next/image";
+import { CupSoda, Utensils } from "lucide-react";
 import { formatPrice } from "@/lib/currency";
-import { products } from "@/data/bakery";
+import { categories, type Product } from "@/data/bakery";
 
-export function ProductGrid() {
-  return <ul className="product-grid">{products.map(product =>
-    <li key={product.photo}><article>
-      <div className="product-photo"><Image src={`/imagenes/${product.photo}.webp`} alt={product.name} fill sizes="(max-width: 600px) 94vw, 32vw" /></div>
-      <div className="product-meta"><span>{product.category}</span><span>{formatPrice(product.price)}</span></div>
-      <h3>{product.name}</h3><p>{product.description}</p>
+export function ProductGrid({ items }: { items: readonly Product[] }) {
+  return <ul className="product-grid">{items.map(product =>
+    <li key={product.id}><article>
+      {product.photo ? <div className="product-photo"><Image src={product.photo} alt={product.name} fill sizes="(max-width: 600px) 90vw, (max-width: 900px) 43vw, 30vw" /></div>
+        : <div className="product-photo product-pending" aria-label="Fotografía pendiente">
+          {product.category === "bebidas" ? <CupSoda size={48} strokeWidth={1} aria-hidden /> : <Utensils size={48} strokeWidth={1} aria-hidden />}
+          <span>Pronto, en imágenes.</span>
+        </div>}
+      <div className="product-meta"><span>{categories.find(category => category.slug === product.category)?.name}</span>
+        {product.price !== undefined && <span>{formatPrice(product.price)}</span>}
+      </div>
+      <h3>{product.name}</h3>{product.description && <p>{product.description}</p>}
     </article></li>
   )}</ul>;
 }

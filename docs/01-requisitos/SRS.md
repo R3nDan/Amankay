@@ -70,6 +70,8 @@ El modelo de clases registra repartidores como `Usuario` con un rol, no como una
 
 El cliente puede consultar productos y sus precios, categorías, sucursales, horarios y datos informativos del negocio.
 
+Las categorías iniciales confirmadas por el usuario son **Panadería**, **Fritos** (empanadas, pasteles y papas) y **Bebidas** (avena y sevillana). Son categorías del catálogo existente; no crean entidades ni reglas de pedidos adicionales. Las variedades, recetas, precios y disponibilidad se completan con datos confirmados.
+
 ### RF-02 Pedido para recoger
 
 El cliente selecciona la sucursal de recogida. El sistema valida el carrito completo contra el inventario de esa sede. Si no alcanza para todos los ítems, informa cuáles faltan y recomienda una sucursal capaz de completar el carrito entero. No recomendar con base únicamente en el primer producto faltante.

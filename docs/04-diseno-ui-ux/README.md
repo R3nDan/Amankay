@@ -4,7 +4,7 @@
 
 Diseñar tres experiencias diferenciadas dentro de una aplicación web: un sitio público atractivo, un pedido QR centrado en móvil y un panel operativo rápido y claro. La identidad visual debe servir al negocio de comidas sin inventar que Amankay y El Alambique sean la misma marca. El nombre comercial sigue pendiente; mientras tanto, usar Amankay como nombre del sistema y conservar el logo recibido como referencia, sujeto a confirmar titularidad/uso.
 
-Dirección visual: **cocina contemporánea cálida**. Fondos marfil y crema, texto carbón, acentos verde hoja y terracota para acciones y énfasis. Fotografía real de producto con luz natural, encuadres cercanos y fondos sobrios. Evitar estética de plantilla SaaS azul; el panel conserva el mismo lenguaje cromático con menor decoración.
+Dirección visual: **cocina contemporánea cálida**. Por decisión explícita del usuario del 21-11-2026, se elimina el verde y se utiliza la paleta cálida del logo: cacao, crema, trigo, durazno y cobre. El fondo marfil se conserva y la tinta pasa a marrón oscuro. Fotografía real de producto con luz natural, encuadres cercanos y fondos sobrios. Evitar estética de plantilla SaaS azul; el panel conserva el mismo lenguaje cromático con menor decoración.
 
 ## Sistema visual propuesto
 
@@ -12,22 +12,24 @@ Dirección visual: **cocina contemporánea cálida**. Fondos marfil y crema, tex
 
 | Token | Color | Uso |
 |---|---|---|
-| Tinta | `#20241F` | Texto principal y navegación oscura. |
+| Tinta | `#30231D` | Texto principal, sin matiz verde. |
 | Marfil | `#F7F4ED` | Fondo público. |
-| Blanco | `#FFFFFF` | Tarjetas, formularios y superficies. |
-| Verde hoja | `#355C45` | Acción primaria y estados positivos. |
-| Terracota accesible | `#A8492E` | Acentos, botones con texto blanco y promociones puntuales. |
-| Mostaza | `#D5A642` | Superficie de atención/pendiente con texto tinta. |
-| Rojo | `#B33A35` | Errores y acciones destructivas con confirmación. |
-| Gris | `#6B716B` | Texto secundario y bordes. |
+| Blanco | `#FFFFFF` | Superficies auxiliares. |
+| Cacao | `#6B3F2A` | Color dominante del logo; navegación, acciones y sección del proceso. |
+| Crema | `#FAF0DD` | Fondos cálidos y texto sobre cacao. |
+| Trigo | `#EDD2A5` | Acentos y texto sobre cacao. |
+| Durazno | `#E2B28A` | Superficies de acento con texto cacao. |
+| Cobre | `#C48359` | Detalles decorativos; usar tinta si contiene texto. |
+| Texto secundario | `#746052` | Texto sobre marfil/crema. |
+| Rojo semántico | `#B33A35` | Errores y acciones destructivas, acompañado de texto/icono. |
 
-Contraste calculado según WCAG para texto normal (mínimo AA 4.5:1): tinta sobre marfil 14.34:1 y blanco 15.75:1; blanco sobre verde hoja 7.59:1, terracota accesible 5.74:1 y rojo 5.88:1; tinta sobre mostaza 7.02:1; gris `#6B716B` sobre blanco 5.02:1. Todas estas combinaciones cumplen AA. El terracota original `#B85C3A` con texto blanco daba 4.54:1; se ajustó a `#A8492E` para margen. No usar blanco sobre mostaza ni tinta sobre verde/terracota/rojo para texto normal. Color nunca será la única señal de estado.
+Contrastes calculados con luminancia relativa sRGB, WCAG AA para texto normal (mínimo 4.5:1): cacao/marfil **8.07:1**, cacao/crema **7.84:1**, cacao/trigo **6.06:1**, cacao/durazno **4.63:1**, tinta/cobre **4.87:1**, tinta/marfil **13.82:1**, secundario/marfil **5.40:1**, secundario/crema **5.25:1**, blanco/cacao **8.86:1**, blanco/rojo **5.88:1**. No usar blanco sobre trigo, durazno o cobre para texto normal. El color nunca será la única señal de estado. El verde hoja, la mostaza y la terracota anteriores dejan de formar parte de la dirección visual vigente.
 
 ### Tipografía e identidad
 
 Usar una sans legible y disponible localmente para interfaz (por ejemplo, Inter o Geist Sans si el paquete del proyecto lo incluye) y una serif editorial discreta para títulos públicos si la fuente está disponible sin dependencia externa. No descargar fuentes remotas obligatorias. Jerarquía: títulos breves, cuerpo 16px o superior en flujos de cliente, datos tabulares compactos pero legibles en escritorio.
 
-Logo proporcionado como activo de marca; no alterar su proporción ni asumir paleta oficial hasta confirmar identidad comercial. Usar ilustración/fotografía solo donde ayude a comprender comida, sucursal o promoción.
+El usuario autorizó usar el SVG recibido y sus colores en el prototipo. Conservar su proporción y centrarlo en la cabecera, sin añadir el texto «Amankay» junto a él. El título de pestaña es únicamente «Amankay». Esto no resuelve la identidad comercial definitiva ni la relación con El Alambique. Usar fotografía solo donde ayude a comprender comida, sucursal o promoción.
 
 ### Componentes reutilizables
 
@@ -38,7 +40,7 @@ Logo proporcionado como activo de marca; no alterar su proporción ni asumir pal
 - Diálogo: confirmar acciones irreversibles; foco contenido y retorno al control que lo abrió.
 - Badge: estado con texto e icono, no solo color.
 - Toast/notificación: confirmación breve; errores importantes quedan visibles junto al contexto.
-- Navegación: cabecera pública; navegación inferior/acciones persistentes en QR; lateral plegable en escritorio para panel.
+- Navegación pública: cabecera sticky de dos niveles, visible al desplazarse. Logo centrado arriba; debajo, `INICIO`, `PANADERÍA`, `FRITOS`, `BEBIDAS`, con indicador de página activa. El indicador cambia con una transición suave; al hacer clic, el enlace se comprime y recupera su forma como confirmación táctil. Se respeta `prefers-reduced-motion`. Accesos secundarios a sucursales y catálogo a los lados del logo; en móvil se mantienen las cuatro categorías visibles. La franja de categorías usa 45 px en escritorio y 44 px en móvil para liberar espacio sin reducir el área táctil. QR y panel conservan su navegación propia.
 
 ## Experiencias y pantallas
 
@@ -48,6 +50,7 @@ Logo proporcionado como activo de marca; no alterar su proporción ni asumir pal
 |---|---|---|---|
 | Inicio `/` | Presentar el sistema/negocio al cliente | Propuesta, acceso a menú, sucursales y pedido | Hero fotográfico, CTA, bloques editoriales. No publicar afirmaciones comerciales hasta definir marca. |
 | Menú `/menu` | Explorar oferta | Categorías, productos, disponibilidad, agregar al carrito | Categorías accesibles y tarjetas. Pedido web pendiente no reserva stock; revalidar al aceptar. |
+| Categoría `/menu/[categoria]` | Explorar una categoría | `panaderia`, `fritos`, `bebidas`; listado filtrado por categoría | Reutiliza tarjetas y navegación. La primera entrega solo presenta el catálogo, sin carrito ni disponibilidad real. |
 | Sucursales `/sucursales` | Elegir/consultar sede | Dirección, horarios, contacto | Lista/tarjetas; mapa solo si se aprueba dependencia y necesidad. |
 | Pedido `/pedido` | Revisar y completar pedido | Carrito, modalidad recoger/domicilio, datos requeridos, resumen y envío | Solo pedidos web pendientes de confirmación por WhatsApp expiran a los 30 minutos. No aplica a pedidos aceptados ni en preparación. No reservan inventario y se revalida disponibilidad al aceptar. |
 | Seguimiento `/seguimiento/[codigo]` | Consultar estado | Estado e información mínima | Línea de progreso accesible, sin exponer datos personales. |
@@ -121,14 +124,17 @@ Los esquemas son estructura de contenido, no diseño visual final. `[]` represen
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ [Logo / Amankay]       Menú  Sucursales  [Ver menú]          │
+│ [Sucursales]             [Logo]             [Catálogo]      │
+│            INICIO · PANADERÍA · FRITOS · BEBIDAS              │
 ├──────────────────────────────────────────────────────────────┤
 │ [Foto principal de producto / ambiente]  │ Cocina cercana   │
 │                                           │ [Explorar menú]  │
 ├──────────────────────────────────────────────────────────────┤
 │ Categorías destacadas / tarjetas de productos               │
 ├──────────────────────────────────────────────────────────────┤
-│ Sucursales y horarios     │ Cómo pedir / recoger / domicilio │
+│ Clip del proceso del pan controlado por scroll               │
+├──────────────────────────────────────────────────────────────┤
+│ Sucursales y horarios / acceso a información confirmada       │
 ├──────────────────────────────────────────────────────────────┤
 │ Footer: contacto, enlaces y datos confirmados                │
 └──────────────────────────────────────────────────────────────┘
@@ -138,10 +144,11 @@ Los esquemas son estructura de contenido, no diseño visual final. `[]` represen
 
 ```text
 ┌───────────────────────────────────────────────────────────┐
-│ [Logo]  Menú  Sucursales                   [Carrito · n]   │
+│ [Sucursales]          [Logo centrado]          [Catálogo]    │
+│          INICIO · PANADERÍA · FRITOS · BEBIDAS              │
 ├───────────────────────────────────────────────────────────┤
 │ Menú / sede seleccionada                         [Cambiar] │
-│ (Todos) (Categoría) (Categoría) (Categoría)                 │
+│ (Todos) (Panadería) (Fritos) (Bebidas)                      │
 ├───────────────────────────────────────────────────────────┤
 │ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐         │
 │ │ Foto         │ │ Foto         │ │ Foto         │         │
@@ -282,3 +289,15 @@ El detalle muestra cada despacho y su recepción vinculada. Cierre/reversa viven
 ```
 
 Recaudo distingue declaración del repartidor y registro de recibido por empleado autorizado, una conciliación por entrega. Si retorna producto, mostrar inspección obligatoria antes de reincorporar unidades aptas.
+
+## Ajuste visual e implementación inicial — 21-11-2026
+
+**Decisiones aprobadas por el usuario:** categorías Panadería, Fritos (empanadas, pasteles, papas) y Bebidas (avena, sevillana); cabecera centrada sin nombre añadido al SVG; título de pestaña «Amankay»; retirar verde y utilizar los colores del logo; sustituir el selector de fotos del pan por un clip que avance y retroceda con el scroll.
+
+**Referencia visual:** [MASA](https://www.somosmasa.com/) y su [catálogo de panadería](https://www.somosmasa.com/categorias/panaderia-y-hojaldres). Se retoman la jerarquía de la cabecera y el protagonismo de las fotografías, con recursos, colores y composición propios. No se incorporan sus funciones comerciales.
+
+**Aplicación:** portada fotográfica amplia; tarjetas con imagen enlazan a Panadería y Fritos; Bebidas conserva un tratamiento tipográfico mientras llegan fotos. Productos destacados usan las imágenes recibidas de panadería; el clip aporta una pausa narrativa; pasos de pedido, presentación sin historia inventada y acceso a sucursales completan la portada. No se muestran direcciones, horarios ni contactos de prueba. Interacciones ligeras: subrayado de navegación, entrada progresiva de contenido y zoom suave de fotografías. Sin librería adicional de animación.
+
+**Recorrido del pan:** utiliza el archivo `Proceso_Del_Pan.mp4` proporcionado, publicado como `/videos/proceso/proceso-del-pan.mp4`. Se mantiene la proporción completa del clip. Dentro de una sección sticky, el desplazamiento define su posición temporal: bajar avanza y subir retrocede. No hay autoplay ni captura del scroll. Se ofrecen control manual y enlace para saltar el recorrido; con movimiento reducido se inicia en modo manual, y el usuario puede activar explícitamente el scroll. El video no necesita audio para comprenderse. Incluye mensaje de carga, alternativa ante error y descripción textual.
+
+**Recursos y contenido:** originales en `assets/originales/`; derivados en `public/imagenes/productos/panaderia/`, `public/imagenes/productos/fritos/`, `public/imagenes/marca/`, `public/imagenes/portada/` y `public/videos/proceso/`. Se integran ocho fotos de Panadería y siete de Fritos, optimizadas como WebP, con los originales preservados. Empanadas y pasteles muestran las variedades de las fotos, incluida arepa de huevo; papas y Bebidas siguen sin fotografía. Los precios y la disponibilidad están por confirmar. No se muestran precios inventados ni se implementan carrito, pago, inventario o reglas transaccionales. Los wireframes operativos anteriores describen el alcance previsto, no funcionalidades ya construidas.
