@@ -7,8 +7,8 @@ export const categories = [
 export type CategorySlug = typeof categories[number]["slug"];
 export type Product = { id: string; name: string; category: CategorySlug; photo?: string; description?: string; price?: number };
 
-// Catálogo visual. Precios, recetas y disponibilidad comercial por confirmar.
-export const products: readonly Product[] = [
+// Precios indicados por el usuario; recetas y existencias comerciales siguen pendientes.
+const catalogProducts: readonly Product[] = [
   { id: "pan-queso", name: "Pan de queso", category: "panaderia", photo: "/imagenes/productos/panaderia/pan-queso.webp" },
   { id: "croissant", name: "Croissant", category: "panaderia", photo: "/imagenes/productos/panaderia/Croissant.jpeg" },
   { id: "mojicon-bocadillo", name: "Mojicón de bocadillo", category: "panaderia", photo: "/imagenes/productos/panaderia/mojicon-bocadillo.webp" },
@@ -28,3 +28,30 @@ export const products: readonly Product[] = [
   { id: "sevillana", name: "Sevillana", category: "bebidas", photo: "/imagenes/productos/Bebidas/Sevillana.jpeg" },
   { id: "guarapo", name: "Guarapo", category: "bebidas", photo: "/imagenes/productos/Bebidas/Gurapo.jpeg" },
 ];
+
+const shortDescriptions: Record<string, string> = {
+  "pan-queso": "Miga tierna y dorado apetitoso: un clásico para disfrutar sin afán.",
+  croissant: "Capas delicadas, exterior dorado y forma de media luna irresistible.",
+  "mojicon-bocadillo": "Suave por dentro, doradito por fuera y con el dulce sabor del bocadillo.",
+  "pan-hawaiano": "Un pan suave y dorado, perfecto para darle un toque especial a la pausa.",
+  "pan-salchicha": "Pan suave con salchicha: práctico, sabroso y listo para disfrutar.",
+  "pan-agridulce": "Un bocado de contraste entre notas dulces y saladas, con miga suave.",
+  "mojicon-queso": "Mojicón dorado con queso: pequeño, suave y lleno de sabor.",
+  "mojicon-arequipe-queso": "El encuentro del arequipe y el queso en un mojicón tierno y doradito.",
+  empanada: "Masa crujiente, forma clásica y un relleno que invita a otro mordisco.",
+  "arepa-huevo": "Arepa dorada y crujiente, con huevo en el corazón de cada bocado.",
+  "pastel-carne": "Masa doradita y relleno de carne: un frito contundente para cualquier pausa.",
+  "pastel-chorizo": "Crujiente por fuera y con el sabor intenso del chorizo en su interior.",
+  "pastel-huevo": "Una cubierta dorada guarda un relleno sencillo y sabroso de huevo.",
+  "pastel-mixto": "Una mezcla de sabores envuelta en masa crujiente, ideal para abrir el apetito.",
+  "pastel-pollo": "Pollo envuelto en una masa dorada y crujiente, perfecto para cualquier pausa.",
+  avena: "Suave y refrescante, acompaña muy bien una pausa con pan o algo frito.",
+  sevillana: "Una bebida tradicional, fresca y lista para acompañar tus antojos.",
+  guarapo: "Fresco y sencillo: el compañero ideal para bajar el calor y seguir disfrutando.",
+};
+
+export const products: readonly Product[] = catalogProducts.map(product => ({
+  ...product,
+  price: product.category === "panaderia" ? 2000 : product.id === "guarapo" ? 3000 : 3500,
+  description: shortDescriptions[product.id],
+}));

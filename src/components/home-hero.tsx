@@ -18,7 +18,7 @@ const frames = [
 function HeroActions({ mobile = false }: { mobile?: boolean }) {
   return <div className={`hero-actions ${mobile ? "hero-actions-mobile" : "hero-actions-desktop"}`}>
     <a className="process-button" href="#proceso">Ver el proceso <ArrowDown size={17} aria-hidden /></a>
-    <ActionLink href="/menu">Ver el menú</ActionLink>
+    <ActionLink href="/menu">Ver el catálogo</ActionLink>
   </div>;
 }
 

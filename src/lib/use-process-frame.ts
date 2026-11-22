@@ -18,6 +18,8 @@ export function useProcessFrame(ref: RefObject<HTMLElement | null>, enabled: boo
     const headerHeight = () => document.querySelector(".masthead")?.getBoundingClientRect().height ?? 0;
     const distance = () => section.getBoundingClientRect().top - headerHeight();
     let previous = distance();
+    let previousScrollY = window.scrollY;
+    let scrollDirection = 0;
     const radius = () => Math.min(220, Math.max(150, (window.innerHeight - headerHeight()) * 0.42));
     const stopForUserInput = () => {
       window.clearTimeout(timer);
@@ -50,13 +52,21 @@ export function useProcessFrame(ref: RefObject<HTMLElement | null>, enabled: boo
     };
     const onScroll = () => {
       const current = distance();
+      const scrollDelta = window.scrollY - previousScrollY;
+      if (Math.abs(scrollDelta) > 0.5) scrollDirection = Math.sign(scrollDelta);
       if (!frame) {
         if (Math.abs(current) > radius() * 1.7) settled = false;
-        approaching = Math.abs(current) < Math.abs(previous) || (current * previous < 0);
+        // Sticky sections can keep the same viewport position over many scroll
+        // events. Use the actual scroll direction as well as the measured
+        // distance, so approaching from below (scrolling up) still arms snap.
+        approaching = Math.abs(current) < Math.abs(previous)
+          || (current * previous < 0)
+          || (Math.abs(current) <= radius() && Math.sign(current) === scrollDirection);
         window.clearTimeout(timer);
         if (approaching) timer = window.setTimeout(align, 160);
       }
       previous = current;
+      previousScrollY = window.scrollY;
     };
     const onTouchStart = () => { touching = true; stopForUserInput(); };
     const onTouchEnd = () => { touching = false; timer = window.setTimeout(align, 160); };

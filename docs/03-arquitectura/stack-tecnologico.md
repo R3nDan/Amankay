@@ -13,7 +13,7 @@ Stack recomendado en el chat final para el MVP:
 | Animación | Motion + GSAP | Instalados. Motion cubre transiciones de interfaz; GSAP queda disponible para secuencias puntuales. |
 | Backend web | Route Handlers de Next.js y capa de servicios | Recomendado |
 | Base de datos | PostgreSQL | Recomendado sobre MySQL; dirección aprobada junto con arquitectura |
-| ORM | Prisma | Propuesto |
+| ORM | Prisma | Aprobado por el usuario; paquetes instalados para PostgreSQL (22-11-2026) |
 | Validación | Zod | Propuesto |
 
 ## Dependencias opcionales

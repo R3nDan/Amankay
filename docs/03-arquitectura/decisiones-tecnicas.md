@@ -19,17 +19,25 @@ Fuente: instrucciones directas del usuario en este chat, posteriores a la planif
 
 | Tema | Decisión vigente y justificación | Estado |
 |---|---|---|
-| Desarrollo | El usuario autorizó la primera aplicación Next.js y su portada visual. Continúan excluidos Prisma, PostgreSQL, migraciones y reglas de negocio en esta entrega. Sustituye la espera general de autorización para programar el frontend. | Aprobada |
+| Desarrollo | El usuario autorizó la primera aplicación Next.js y su portada visual. Posteriormente pidió instalar Prisma ORM para TypeScript/PostgreSQL; están aprobados sus paquetes y el adaptador de PostgreSQL. La instalación no autoriza por sí sola a crear el esquema, migraciones o base de datos; el MER sigue pendiente de aprobación. Sustituye la espera general de autorización para programar el frontend. | Aprobada; persistencia pendiente |
 | Catálogo | Panadería, Fritos y Bebidas. Para la implementación inicial, Fritos comprende empanadas y pasteles; las papas quedan aplazadas por petición posterior del usuario. Bebidas comprende avena y sevillana. Amplía el contenido visual más allá de panes, usando las categorías existentes. | Aprobada; papas futuras |
 | Cabecera | SVG centrado, sin texto Amankay adicional, navegación inferior INICIO / PANADERÍA / FRITOS / BEBIDAS. Referencia de jerarquía: MASA. | Aprobada |
 | Título y nombre | Amankay es el nombre confirmado por el usuario para el negocio y el título de pestaña de las páginas públicas. Sustituye la duda anterior sobre el nombre comercial del anteproyecto. | Aprobada, 22-11-2026 |
 | Paleta | Retirar verde y usar cacao, crema, trigo, durazno y cobre del logo, conservando marfil. Contrastes y usos en UI/UX. Sustituye verde hoja/terracota/mostaza como dirección estética. | Aprobada |
 | Accesos públicos | «Contáctanos» conduce a las sucursales dentro de Inicio, en el lugar antes ocupado por «Del horno». «Pide» queda a la derecha de la navbar como acceso al catálogo y, después, al flujo de pedidos. | Aprobada, 22-11-2026 |
-| Datos de sucursales | Sede principal real: Calle 4 # 5-55, Centro de Neiva; lunes a viernes 6:30 a. m.–6:30 p. m., sábados 6:30 a. m.–1:00 p. m.; cerrada domingos y festivos; teléfono 312 586 4045. La segunda sede aún no existe: para el prototipo local se usa una dirección de prueba en Neiva, el mismo horario y el teléfono general, siempre rotulados como demostración. Sustituir estos datos antes de presentar una segunda sede como operativa. | Principal aprobada por el usuario; segunda provisional para MVP, 22-11-2026 |
+| Datos de sucursales | Sede principal: Calle 4 # 5-55, Centro de Neiva. Sede secundaria: Carrera 7 # 19-20, Neiva. Ambas se habilitan como opciones de recogida, con horario compartido (lunes a viernes 6:30 a. m.–6:30 p. m.; sábados 6:30 a. m.–1:00 p. m.; domingos y festivos cerrado) y teléfono 312 586 4045. No mostrar numeración ni etiquetas auxiliares en sus tarjetas. | Actualización directa del usuario, 22-11-2026 |
 | Proceso | Video proporcionado, con avance y retroceso mediante scroll. Sustituye las cuatro fotografías seleccionables. | Aprobada |
 | Accesibilidad del clip | Movimiento reducido inicia con controles manuales; se puede activar scroll expresamente o saltar el recorrido. Seeks secuenciales, sin capturar desplazamiento; el clip se mantiene independiente de Motion. | Elección técnica dentro de la implementación autorizada |
 | Recursos | Originales conservados; fotografías WebP para web, MP4 en carpeta de videos. No reutilizar imágenes de MASA. | Elección técnica dentro de la implementación autorizada |
 | Datos comerciales | Fotos de Fritos/Bebidas, precios, recetas y disponibilidad siguen por confirmar. No inferirlos de la referencia. | Pendiente |
+
+## Desarrollo del pedido público (22-11-2026)
+
+- **Autorización:** el usuario confirmó que ya concluyeron análisis y diseño y pidió implementar el apartado público de pedidos. Sustituye el límite de la primera entrega solo visual. La aprobación no inventa reglas aún pendientes ni equivale a aprobar el MER.
+- **Precios aprobados:** Panadería 2.000 COP por producto, Fritos 3.500 COP, Avena y Sevillana 3.500 COP, Guarapo 3.000 COP. Sustituye la parte de «precios por confirmar» en la tabla de implementación inicial; recetas y existencias siguen pendientes.
+- **Interacción aprobada:** toque en tarjeta para abrir detalle breve y selector de cantidad; símbolo del tipo de producto animado hacia «Pide» al agregar; bolsa con indicador, resumen y elección entre recogida y domicilio. Las páginas individuales de categoría quitan el título repetido de su franja texturizada y repiten esa franja al final.
+- **Ajuste de la bolsa (22-11-2026):** el usuario sustituyó el icono genérico y su tapa animada por una bolsa de papel de pan. El símbolo del producto viaja reducido, espera un segundo sobre la abertura y entra cuando la bolsa se abre por sí misma; el punto de contenido no lleva contorno y queda más cerca de la esquina.
+- **Límite actual:** la bolsa local prepara una solicitud en WhatsApp al teléfono de contacto. Sin persistencia, inventario ni confirmación del personal, la interfaz la presenta como solicitud por confirmar, no como pedido creado o aceptado. La formalización de pedidos y seguimiento sigue siendo trabajo pendiente del MVP.
 
 ## Decisiones aprobadas para el cierre del modelado (21-11-2026)
 
@@ -82,7 +90,7 @@ El usuario aportó un segundo resumen de ChatGPT sobre el proyecto. Se usa como 
 | Cancelación | Definida: cliente solicita antes de preparación; personal encargado aprueba. | Los once chats respaldan la ventana antes de preparación. La aprobación por personal aparece en el flujo UML general, pero la autorización específica se había marcado ambigua. El resumen nuevo la reporta como acuerdo. | Actualizar SRS como decisión reportada por el usuario; anotar la procedencia y mantenerla verificable contra el chat original si luego se aporta. |
 | Incidencias de entrega | Definidas: estados y observaciones simples; sin entidad nueva. | Los chats respaldan registrar incidencias, pero no permiten confirmar esa decisión de modelado simple. | Adoptar la regla funcional reportada; no crear clase Incidencia en la propuesta de MVP. Revisar representación en UML/MER. |
 | Sucursal para domicilio | Automática según disponibilidad del pedido completo y proximidad; no dividir pedidos. | El historial original deja asignación por inventario/proximidad como propuesta, no decisión explícita. El texto nuevo la reporta como ya decidida. | Incorporar como decisión reportada y regla a reflejar; documentar “pedido completo, sin división”. |
-| Tarifa domicilio | 4.000 COP, configurable desde administración. | No aparece en los once chats revisados. | Incorporar como decisión reportada; falta precisar unidad, alcance (por pedido/zona) y si aplica a todas las sedes. |
+| Tarifa domicilio | 2.000 COP adicionales por solicitud de domicilio; cobertura disponible en Neiva para el prototipo. | Instrucción directa del usuario del 22-11-2026, que reemplaza el importe anterior de 4.000 COP. | Actualizar el cálculo y la comunicación al cliente; la disponibilidad se confirma al atender la solicitud. |
 | Cobertura | Inicialmente Neiva. | No aparece en los once chats revisados. | Incorporar como alcance geográfico inicial reportado. |
 | Nombre del negocio | Amankay, confirmado por el usuario el 22-11-2026. | El Alambique queda como nombre histórico del anteproyecto. | Resuelto; actualizar referencias públicas y documentación. |
 | Conteo de entidades | Los inventarios históricos de 22 y 27 eran de etapas distintas. | Modelo vigente: 24 entidades de dominio + 2 asociativas = 26. No hay entidad independiente de cierre. | Conteo actual consolidado para revisión del MER. |
@@ -162,3 +170,8 @@ Las fórmulas y claves exactas son propuesta para el modelo lógico y quedan suj
 ## Cómo actualizar
 
 Cuando el usuario tome una nueva decisión, actualizar el archivo dueño (`SRS.md`, `UML.md`, `MER.md` o documento de arquitectura), cambiar el estado y añadir una fila de cambio aquí que indique la regla anterior, la nueva regla, la fecha y la referencia de conversación si existe. Mantener intacta la historia necesaria para explicar por qué se cambió.
+
+
+### 2026-11-22 — Selección en el reverso de la tarjeta
+
+**Decisión aprobada:** por instrucción posterior del usuario, se sustituye la vista previa superpuesta por un giro 3D en la propia tarjeta. El frente coloca el precio junto al título; el reverso concentra descripción, símbolo, cantidad y acción de agregar. Agregar o volver restaura el frente. Los patrones usan un reloj compartido para mantener su recorrido al cambiar de apartado.

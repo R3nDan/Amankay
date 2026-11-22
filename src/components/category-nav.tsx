@@ -1,18 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Contact, ShoppingBag } from "lucide-react";
+import { ContactBookIcon } from "@/components/ui/contact-book-icon";
 import { motion } from "motion/react";
 import { useSiteReducedMotion } from "@/components/ui/motion-preference";
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useRef, useState } from "react";
 import { categories } from "@/data/bakery";
+import { useOrder } from "@/components/order-experience";
+import { PaperBreadBag } from "@/components/ui/paper-bread-bag";
 
 export function CategoryNav() {
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
   const linkRefs = useRef(new Map<string, HTMLAnchorElement>());
   const reduceMotion = useSiteReducedMotion();
+  const order = useOrder();
   const [indicator, setIndicator] = useState({ x: 0, width: 0 });
   const links = [{ name: "Inicio", href: "/#inicio", route: "/" }, ...categories.map(category => ({
     name: category.name, href: `/menu/${category.slug}`, route: `/menu/${category.slug}`,
@@ -39,8 +42,7 @@ export function CategoryNav() {
 
   return <nav ref={navRef} className="category-nav" aria-label="Navegación principal">
     <Link className="category-nav-tool category-nav-contact" href="/#contacto" aria-label="Contáctanos">
-      <Contact size={20} strokeWidth={1.6} aria-hidden="true" />
-      <span className="category-nav-tool-label">Contáctanos</span>
+      <ContactBookIcon />
     </Link>
     <div className="category-nav-links">
     {links.map(link => {
@@ -51,10 +53,9 @@ export function CategoryNav() {
       </Link>;
     })}
     </div>
-    <Link className="category-nav-tool category-nav-order" href="/menu" aria-label="Pide: explorar el catálogo">
-      <span className="category-nav-tool-label">Pide</span>
-      <ShoppingBag size={20} strokeWidth={1.6} aria-hidden="true" />
-    </Link>
+    <button type="button" className="category-nav-tool category-nav-order" onClick={order.openDrawer} aria-label={`Pide: abrir la bolsa${order.count ? `, ${order.count} productos` : ""}`} aria-expanded={order.drawerOpen}>
+      <span className="order-bag-icon"><PaperBreadBag open={order.receiving} />{order.count > 0 && <span className="order-bag-dot" aria-hidden="true" />}</span>
+    </button>
     <motion.span className="category-indicator" aria-hidden
       animate={{ left: indicator.x, width: indicator.width }}
       transition={reduceMotion

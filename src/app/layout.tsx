@@ -5,6 +5,7 @@ import { RouteTransition } from "@/components/route-transition";
 import { HomeContent } from "@/components/home-content";
 import { CategoryContent } from "@/components/category-content";
 import { categories } from "@/data/bakery";
+import { OrderProvider } from "@/components/order-experience";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return <html lang="es-CO" data-motion="full"><body>
+  return <html lang="es-CO" data-motion="full"><body><OrderProvider>
     <a href="#contenido" className="skip">Saltar al contenido</a>
     <Header />
     <RouteTransition panels={[
@@ -22,5 +23,5 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       ...categories.map(category => <CategoryContent key={category.slug} slug={category.slug} />),
     ]}>{children}</RouteTransition>
     <Footer />
-  </body></html>;
+  </OrderProvider></body></html>;
 }

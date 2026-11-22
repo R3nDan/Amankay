@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { categories } from "@/data/bakery";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { ActionLink } from "@/components/ui/action-link";
 import { BakerySymbolSet } from "@/components/ui/bakery-symbol-pattern";
 
 const categoryVisuals = [
@@ -31,7 +30,7 @@ export function CategoryIndex() {
     </nav>
     <div className="category-showcase-cta">
       <span className="category-cta-rule" aria-hidden="true" />
-      <ActionLink subtle arrow={false} href="/menu">Ver catálogo completo</ActionLink>
+      <div className="category-heading-art category-cta-symbols" aria-hidden="true"><BakerySymbolSet /></div>
       <span className="category-cta-rule" aria-hidden="true" />
     </div>
   </section>;

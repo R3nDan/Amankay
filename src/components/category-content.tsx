@@ -6,19 +6,20 @@ import { BebidasSymbolPattern, FritosSymbolPattern, PanaderiaSymbolPattern } fro
 export function CategoryContent({ slug }: { slug: CategorySlug }) {
   const category = categories.find(item => item.slug === slug)!;
   return <main id="contenido" className="inner-page catalog-page category-page">
-    <section className={`category-heading-band${slug === "panaderia" ? " bakery-heading-band" : ""}`}>
+    <section className={`category-heading-band category-page-texture${slug === "panaderia" ? " bakery-heading-band" : ""}`} aria-label={`Textura de ${category.name}`}>
       {slug === "panaderia" ? <PanaderiaSymbolPattern /> : slug === "fritos" ? <FritosSymbolPattern /> : <BebidasSymbolPattern />}
-      <div className="wrap category-page-content">
-        <div className="catalog-heading category-page-heading">
-          <h1>{category.name}</h1>
-        </div>
-      </div>
     </section>
     <section className="category-products-band">
       <div className="wrap category-page-content">
+        <h1 className="visually-hidden">{category.name}</h1>
         <ProductGrid items={products.filter(product => product.category === slug)} />
-        <ActionLink subtle href="/menu">Explorar todo el catálogo</ActionLink>
+        <div className="category-products-cta">
+          <ActionLink href="/menu">Ver el catálogo</ActionLink>
+        </div>
       </div>
     </section>
+    <div className={`category-heading-band category-page-texture${slug === "panaderia" ? " bakery-heading-band" : ""}`} aria-hidden="true">
+      {slug === "panaderia" ? <PanaderiaSymbolPattern /> : slug === "fritos" ? <FritosSymbolPattern /> : <BebidasSymbolPattern />}
+    </div>
   </main>;
 }

@@ -6,7 +6,7 @@ Amankay es el sistema web para atender pedidos y organizar la operación de un n
 
 Primera aplicación visual implementada con Next.js App Router, React, TypeScript, Tailwind CSS y Lucide React, tras autorización expresa del usuario. Incluye inicio público, catálogo y sus tres categorías (Panadería, Fritos, Bebidas), acceso a sucursales y una galería temporizada de imágenes del proceso del pan. El clip de proceso se reproduce silenciado en bucle y sin controles.
 
-La sede principal tiene dirección, horario y teléfono confirmados; la segunda sede usa datos claramente marcados como demostración porque aún no existe. Los demás datos comerciales requieren confirmación. Esta entrega no conecta una base de datos ni implementa pedidos, pagos o inventario. La documentación de `docs/` conserva las reglas del proyecto.
+Las dos sedes están disponibles como opciones para recoger pedidos, con horarios y teléfonos de contacto. Los precios del catálogo fueron indicados por el usuario. El sitio incluye selección de productos y una bolsa que prepara la solicitud por WhatsApp; todavía no registra pedidos en una base de datos ni valida inventario, pagos o disponibilidad en tiempo real. La documentación de `docs/` conserva las reglas del proyecto.
 
 ### Ejecución local
 
@@ -21,7 +21,7 @@ Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 310
 
 - `src/app/`: rutas y estilos globales.
 - `src/components/`: cabecera, navegación, tarjetas, ilustraciones SVG originales, recorrido del pan y componentes de interfaz.
-- `src/data/`: catálogo visual tipado; precios y disponibilidad por confirmar.
+- `src/data/`: catálogo visual tipado con los precios indicados; disponibilidad por confirmar.
 - `src/lib/`: utilidades compartidas.
 
 ## Orden de trabajo acordado

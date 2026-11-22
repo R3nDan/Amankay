@@ -70,9 +70,11 @@ El modelo de clases registra repartidores como `Usuario` con un rol, no como una
 
 El cliente puede consultar productos y sus precios, categorías, sucursales, horarios y datos informativos del negocio.
 
-Para el prototipo público, el usuario confirmó los datos de Amankay Sede_Principal: Calle 4 # 5-55, Centro de Neiva; lunes a viernes de 6:30 a. m. a 6:30 p. m.; sábados de 6:30 a. m. a 1:00 p. m.; cerrado domingos y festivos; teléfono 312 586 4045. La segunda sede aún no existe. El usuario autorizó datos de demostración para ella durante el MVP; su dirección y horario de prueba no son datos comerciales aprobados ni deben presentarse como una sede operativa. El modelo de horario aún debe resolver cómo registrar cierres por festivos.
+Para la implementación pública, la sede principal tiene dirección confirmada en Calle 4 # 5-55, Centro de Neiva; lunes a viernes de 6:30 a. m. a 6:30 p. m.; sábados de 6:30 a. m. a 1:00 p. m.; cerrada domingos y festivos; teléfono 312 586 4045. La sede secundaria queda habilitada como opción de recogida en Carrera 7 # 19-20, Neiva, con el mismo horario y teléfono de contacto. Las tarjetas no muestran etiquetas de numeración. El modelo de horario aún debe resolver cómo registrar cierres por festivos.
 
-Las categorías iniciales confirmadas por el usuario son **Panadería**, **Fritos** (empanadas y pasteles) y **Bebidas** (avena y sevillana). Las papas quedan fuera de la implementación inicial, aunque podrán reconsiderarse después. Son categorías del catálogo existente; no crean entidades ni reglas de pedidos adicionales. Las variedades, recetas, precios y disponibilidad se completan con datos confirmados.
+Las categorías iniciales confirmadas por el usuario son **Panadería**, **Fritos** (empanadas y pasteles) y **Bebidas** (avena, sevillana y guarapo). Las papas quedan fuera de la implementación inicial, aunque podrán reconsiderarse después. Son categorías del catálogo existente; no crean entidades ni reglas de pedidos adicionales. Las recetas y la disponibilidad se completan con datos confirmados.
+
+El 22-11-2026 el usuario fijó los precios para el catálogo inicial: todos los panes a **2.000 COP**, todos los fritos a **3.500 COP**, Avena y Sevillana a **3.500 COP**, y Guarapo a **3.000 COP**. Las recetas y existencias siguen pendientes.
 
 ### RF-02 Pedido para recoger
 
@@ -80,7 +82,7 @@ El cliente selecciona la sucursal de recogida. El sistema valida el carrito comp
 
 ### RF-03 Pedido a domicilio
 
-El cliente proporciona dirección y referencias necesarias. La sucursal de preparación se asigna automáticamente según disponibilidad del pedido completo y proximidad; no se divide un pedido entre sedes. El alcance inicial de cobertura es Neiva. La tarifa es 4.000 COP y se configura desde administración. Estas tres reglas fueron aportadas como decisiones previas en el resumen de ChatGPT que el usuario compartió el 21-11-2026; no estaban en los once enlaces originales, así que quedan marcadas como decisiones reportadas por el usuario y vinculadas a esa fuente secundaria en la matriz de conciliación.
+El cliente proporciona dirección y referencias necesarias. La sucursal de preparación se asigna automáticamente según disponibilidad del pedido completo y proximidad; no se divide un pedido entre sedes. La cobertura de domicilio disponible para el prototipo es Neiva y la tarifa adicional es de 2.000 COP por solicitud de domicilio, según instrucción directa del usuario del 22-11-2026. Esta tarifa reemplaza el valor reportado anteriormente de 4.000 COP. La asignación automática de sede sigue registrada como decisión reportada en la matriz de conciliación.
 
 ### RF-04 Pedido de mesa
 
@@ -182,12 +184,11 @@ El anteproyecto propone pruebas de acceso QR, consulta de información/productos
 2. Permiso de cancelación: aprobación automática o revisión/decisión de trabajador.
 3. Flujo de incidencias de entrega y quién decide el siguiente paso.
 4. Definición exacta de “Atención: both” y parámetros administrativos de reportes.
-5. Alcance de los 4.000 COP (por pedido, zona u otra unidad) y confirmación de tarifa igual para todas las sedes.
-6. Duración de sesión de mesa; quedó como detalle técnico pendiente.
-7. Tecnología de notificaciones al cliente; no definida.
-8. Proceso exacto para reversar stock según unidades consumidas, dañadas o devueltas.
-9. Qué inventario de productos terminados se cargará al iniciar y quién puede hacer ajustes/mermas.
-10. Estados y permisos de pedido, pago y entrega; los estados de solicitud de reposición aprobados son `PENDIENTE_REVISION`, `RECHAZADA`, `EN_PROCESO` y `COMPLETADA`. `BORRADOR` solo se incorpora si el flujo necesita guardar solicitudes sin enviar. Los permisos operativos se aplican por rol y sucursal mediante asociaciones existentes, sin permisos individuales ni doble autorización por defecto.
+5. Duración de sesión de mesa; quedó como detalle técnico pendiente.
+6. Tecnología de notificaciones al cliente; no definida.
+7. Proceso exacto para reversar stock según unidades consumidas, dañadas o devueltas.
+8. Qué inventario de productos terminados se cargará al iniciar y quién puede hacer ajustes/mermas.
+9. Estados y permisos de pedido, pago y entrega; los estados de solicitud de reposición aprobados son `PENDIENTE_REVISION`, `RECHAZADA`, `EN_PROCESO` y `COMPLETADA`. `BORRADOR` solo se incorpora si el flujo necesita guardar solicitudes sin enviar. Los permisos operativos se aplican por rol y sucursal mediante asociaciones existentes, sin permisos individuales ni doble autorización por defecto.
 11. Criterios cuantificables y método de evaluación de aceptación/usabilidad.
 13. Reconciliar el conteo de 22 entidades citado en el resumen nuevo con las clases base y refinamientos documentados, antes de aprobar UML/MER.
 

@@ -23,10 +23,10 @@ export function BakerySymbolPattern() {
   </div>;
 }
 
-function BreadShape({ kind }: { kind: "salchicha" | "mojicon" | "queso" | "bolillo" | "trenza" | "croissant" }) {
+function BreadShape({ kind }: { kind: "salchicha" | "mojicon" | "mojicon-queso" | "mojicon-bocadillo" | "mojicon-arequipe" | "queso" | "bolillo" | "trenza" | "croissant" }) {
   if (kind === "croissant") return <Croissant strokeWidth={1.5} />;
   if (kind === "salchicha") return <svg viewBox="0 0 64 48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 28c0-11 9-19 23-19 15 0 25 8 25 19 0 8-7 14-20 14H24C14 42 7 37 7 28Z"/><path d="M13 28c2 7 7 11 15 12m9 0c-4-6-4-14 2-19 5-4 12-2 15 4"/><path d="M45 26c4-1 8 1 9 5-2 5-7 7-12 6-3-3-3-8 0-10m5 4 3 1M17 20c6-5 15-7 23-5"/></svg>;
-  if (kind === "mojicon") return <svg viewBox="0 0 56 56" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M28 7c4-4 9-2 11 2 5-1 9 3 9 8 5 3 5 8 2 12 3 5 0 10-5 11-2 6-8 8-13 5-5 4-11 2-14-2-6 1-10-3-10-8-5-3-5-9-1-13-2-6 2-10 7-10 3-5 9-5 14-5Z"/><path d="M28 20c-7 0-12 5-12 11s5 11 12 11 12-5 12-11-5-11-12-11Zm0 8c-3 0-5 1-5 4 0 2 2 4 5 4s5-2 5-4c0-3-2-4-5-4Z"/><path d="m16 13 4 7m17-8-3 8M9 27l8 3m30-4-8 4M16 42l5-6m17 7-4-7"/></svg>;
+  if (kind.startsWith("mojicon")) return <svg viewBox="0 0 56 56" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M28 7c4-4 9-2 11 2 5-1 9 3 9 8 5 3 5 8 2 12 3 5 0 10-5 11-2 6-8 8-13 5-5 4-11 2-14-2-6 1-10-3-10-8-5-3-5-9-1-13-2-6 2-10 7-10 3-5 9-5 14-5Z"/><path d="M28 20c-7 0-12 5-12 11s5 11 12 11 12-5 12-11-5-11-12-11Zm0 8c-3 0-5 1-5 4 0 2 2 4 5 4s5-2 5-4c0-3-2-4-5-4Z"/><path d="m16 13 4 7m17-8-3 8M9 27l8 3m30-4-8 4M16 42l5-6m17 7-4-7"/>{kind === "mojicon-queso" && <path d="m24 32 4-3 4 3-4 4-4-4Zm3-1 2 2"/>}{kind === "mojicon-bocadillo" && <path d="M25 29h6v6h-6z"/>}{kind === "mojicon-arequipe" && <path d="M25 31c2-3 6-2 6 1 0 3-5 4-6 1m4-4 3 5"/>}</svg>;
   if (kind === "bolillo") return <svg viewBox="0 0 64 48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 28c1-10 9-19 24-19 16 0 27 8 28 20-3 8-12 12-27 12C16 41 8 37 6 28Z"/><path d="m16 18 8 11m4-16 8 14m4-11 7 12M11 31c10 5 28 7 42 0"/><path d="m18 21 4 2m8-5 4 3m9 0 3 3"/></svg>;
   if (kind === "trenza") return <svg viewBox="0 0 64 48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 33c-5-5 1-13 8-10-2-8 7-12 12-6 5-7 15-3 13 5 8-1 12 8 6 13-8 7-31 7-39-2Z"/><path d="m20 24 5 10m4-16 5 17m5-16-3 16m8-12-7 11"/></svg>;
   return <svg viewBox="0 0 64 48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 29c1-11 12-19 26-19s25 8 26 19c0 8-10 13-26 13S6 37 6 29Z"/><path d="m17 16 7 12m6-17 6 16m9-11 5 12M11 31c11 4 31 4 42 0"/><path d="m21 20 4 2m7-7 4 2m9 4 4 2"/></svg>;
@@ -58,6 +58,13 @@ function DrinkShape({ kind }: { kind: DrinkKind }) {
   if (kind === "botella") return <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M26 8h12v8l4 6v27c0 4-3 7-7 7h-6c-4 0-7-3-7-7V22l4-6V8ZM26 16h12M22 30h20M22 43h20"/><path d="M30 36h4"/></svg>;
   const liquid = kind === "avena" ? <><path d="M17 24c9 3 21 3 30 0M20 36c7 2 17 2 24 0"/><path d="M25 31h1m6 2h1m7-3h1"/></> : kind === "sevillana" ? <><path d="M17 25c9 4 21 4 30 0M20 38c8 3 17 3 24 0"/><path d="m24 18 2 2m7-3 2 2m6 0 2 2m-8 12 2 2"/></> : <><path d="M17 25c10 3 20 3 30 0M20 38c7-2 16 2 24 0"/><circle cx="27" cy="32" r="1.5"/><circle cx="37" cy="34" r="1"/></>;
   return <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 19c0-4 8-7 19-7s19 3 19 7l-6 36H19l-6-36ZM13 19c0 4 8 6 19 6s19-2 19-6M38 18 48 5h5M19 55c2 2 7 3 13 3s11-1 13-3"/>{liquid}</svg>;
+}
+
+export function ProductSymbol({ id, category }: { id: string; category: "panaderia" | "fritos" | "bebidas" }) {
+  if (category === "bebidas") return <DrinkShape kind={id === "guarapo" ? "guarapo" : id === "sevillana" ? "sevillana" : "avena"} />;
+  if (category === "fritos") return <FritoShape kind={id === "empanada" ? "empanada" : id === "arepa-huevo" ? "arepa" : "pastel"} />;
+  const kind = id === "croissant" ? "croissant" : id === "mojicon-queso" ? "mojicon-queso" : id === "mojicon-bocadillo" ? "mojicon-bocadillo" : id === "mojicon-arequipe-queso" ? "mojicon-arequipe" : id === "pan-salchicha" ? "salchicha" : id === "pan-hawaiano" ? "trenza" : id === "pan-queso" ? "queso" : "bolillo";
+  return <BreadShape kind={kind} />;
 }
 
 export function BebidasSymbolPattern() {

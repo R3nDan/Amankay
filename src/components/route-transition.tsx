@@ -53,6 +53,13 @@ export function RouteTransition({ children, panels }: { children: ReactNode; pan
 
   const active = journey.pathname === pathname && journey.running;
   useLayoutEffect(() => {
+    // Real pages and transition panels share the document animation clock.
+    // Newly mounted patterns continue at the same phase instead of restarting.
+    document.querySelectorAll(".hero-symbol-track").forEach(track => {
+      track.getAnimations().forEach(animation => { animation.startTime = 0; });
+    });
+  }, [pathname, active, verticalReturn]);
+  useLayoutEffect(() => {
     if (active) {
       if (!window.location.hash) window.scrollTo({ top: 0, behavior: "instant" });
       return;

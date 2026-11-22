@@ -2,7 +2,7 @@
 
 ## Estado y puerta de inicio
 
-El usuario autorizó iniciar la primera entrega visual. La base Next.js y el sitio público ya están implementados: inicio, catálogo, Panadería/Fritos/Bebidas, sucursales dentro de Inicio y en su propia ruta, tarjeta de fotos del proceso con transición temporizada y video del pan en bucle sin controles. «Pide» abre el catálogo mientras se desarrolla el flujo de pedidos. Las fotografías recibidas se integran en las tres categorías. La sede principal tiene dirección, horario y teléfono confirmados; la segunda sede se muestra con datos de demostración porque aún no existe. Precios y disponibilidad siguen pendientes. No se ha conectado persistencia ni implementado reglas operativas.
+El usuario confirmó el 22-11-2026 que análisis y diseño ya concluyeron y autorizó desarrollar el apartado público de pedidos. La base Next.js y el sitio público ya están implementados: inicio, catálogo, Panadería/Fritos/Bebidas, sucursales dentro de Inicio y en su propia ruta, tarjeta de fotos del proceso con transición temporizada y video del pan en bucle sin controles. «Pide» abre una bolsa local con selección, cantidades, modalidad y datos básicos; prepara una solicitud por WhatsApp. Las fotografías recibidas se integran en las tres categorías. La sede principal tiene dirección, horario y teléfono confirmados; la segunda sede se muestra con datos de demostración porque aún no existe. Los precios del catálogo fueron indicados por el usuario. La disponibilidad, persistencia y reglas operativas permanecen pendientes de integración; el envío a WhatsApp no equivale a un pedido registrado o aceptado en Amankay.
 
 ## Secuencia propuesta
 
@@ -38,4 +38,4 @@ Construir rebanadas verticales funcionales: interfaz, validación, caso de uso y
 
 Al iniciar desarrollo, definir criterios de aceptación concretos por flujo según SRS. Revisar accesibilidad de teclado/contraste, móvil, manejo de estados de carga/vacío/error/éxito y consistencia en servidor. No considerar terminado un módulo solo por renderizar su interfaz; los flujos críticos necesitan persistencia y autorización verificables.
 
-La aplicación Next.js está creada. Prisma, migraciones y base de datos permanecen fuera de esta entrega visual.
+La aplicación Next.js está creada. Prisma ORM 7, Prisma Client y el adaptador PostgreSQL están instalados; todavía no se ha configurado el cliente, creado el esquema o generado migraciones, ni creado/conectado una base de datos. El MER continúa pendiente de aprobación.

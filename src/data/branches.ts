@@ -6,7 +6,6 @@ export type Branch = {
   saturday: string;
   sundaysAndHolidays: string;
   phone: string;
-  demo: boolean;
 };
 
 export const branches: Branch[] = [
@@ -18,16 +17,14 @@ export const branches: Branch[] = [
     saturday: "6:30 a. m. – 1:00 p. m.",
     sundaysAndHolidays: "Cerrado",
     phone: "312 586 4045",
-    demo: false,
   },
   {
-    id: "sede-demo",
-    name: "Segunda sede",
-    address: "Carrera 7 # 19-20, Neiva (dirección de prueba)",
+    id: "sede-secundaria",
+    name: "Sede secundaria",
+    address: "Carrera 7 # 19-20, Neiva",
     weekdays: "6:30 a. m. – 6:30 p. m.",
     saturday: "6:30 a. m. – 1:00 p. m.",
     sundaysAndHolidays: "Cerrado",
     phone: "312 586 4045",
-    demo: true,
   },
 ];
