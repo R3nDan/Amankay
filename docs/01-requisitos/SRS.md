@@ -133,7 +133,7 @@ La asignación es manual por el trabajador de atención. Un pedido a domicilio p
 
 Las incidencias se registran de forma simple en la propia `Entrega`, mediante su estado y observaciones; no se crea una entidad independiente `Incidencia` en el MVP. La decisión sobre quién autoriza un reintento, retorno u otra resolución después de una entrega no realizada permanece pendiente. Los estados de entrega aprobados son `PENDIENTE_ASIGNACION`, `ASIGNADA`, `RECOGIDA`, `EN_CAMINO`, `ENTREGADA` y `NO_ENTREGADA`.
 
-Si una entrega falla y regresan productos, estos quedan **Pendientes de inspección**, separados de las existencias disponibles. Un trabajador autorizado registra responsable, fecha, cantidad y observaciones. Las unidades aptas vuelven al inventario; las no aptas se registran como pérdida con motivo. Un mismo pedido puede tener unidades aptas y dañadas. Ninguna unidad vuelve a la venta sin inspección.
+Si una entrega falla, la incidencia se registra en la propia `Entrega` mediante su estado y observaciones. La gestión formal de devoluciones, las inspecciones y la reincorporación de productos quedan fuera del MVP. Los productos que regresen físicamente no se reincorporan automáticamente al inventario disponible. Esta decisión del 22-11-2026 sustituye la regla anterior de inspección obligatoria.
 
 ### RF-13 Reposiciones
 
@@ -160,7 +160,7 @@ Registrar con `RegistroAuditoria` solo acciones administrativas importantes, inc
 - Recomendación de sucursal de recogida considera el carrito completo.
 - Entrega, pedido y pago son ciclos de estado separados.
 - La principal atiende el ciclo de aprobación y despacho de reposición; secundaria solicita y recibe.
-- Recepción de devoluciones de domicilio exige inspección antes de disponibilidad comercial.
+- La gestión formal de devoluciones de entregas fallidas está aplazada fuera del MVP; un producto que regrese físicamente no se reincorpora automáticamente al inventario disponible.
 - El reembolso es manual, solo total y registrado dentro del `Pago`; Amankay registra el proceso, no mueve fondos.
 - Trazabilidad del intento de pago se conserva aun cuando se elimina el archivo rechazado.
 - Toda confirmación concurrente que afecte inventario o saldo requiere protección transaccional.

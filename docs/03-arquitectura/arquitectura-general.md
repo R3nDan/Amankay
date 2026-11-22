@@ -2,7 +2,7 @@
 
 ## Estado
 
-Arquitectura de referencia del MVP. El usuario confirmó el 22-11-2026 que análisis y diseño concluyeron, aprobó el MER lógico y autorizó avanzar con el desarrollo del ecosistema. La aplicación pública y la navegación base están implementadas según el avance reportado. PostgreSQL está instalado localmente según el usuario. La presencia y versiones reales de Prisma, Prisma Client y el adaptador deben verificarse en el repositorio antes de instalar o actualizar paquetes; backend, esquema y conexión local son el siguiente trabajo.
+Arquitectura aprobada para el MVP el 22-11-2026 y stack actualizado por decisión posterior del mismo día. La aplicación pública y la navegación base están implementadas. El backend Java y la persistencia de la aplicación todavía no están creados. Java 25 LTS es la versión objetivo de compilación y ejecución, aunque el equipo tenga JDK 27; se usará Maven Wrapper y no Maven global. Prisma permanece instalado, pero no administrará ni modificará las tablas de PostgreSQL.
 
 ## Producto
 
@@ -18,33 +18,30 @@ No es solo un sitio informativo ni una aplicación móvil nativa. No se automati
 
 | Capa | Tecnología | Uso previsto |
 |---|---|---|
-| Aplicación web | Next.js App Router, React, TypeScript | Rutas, vistas públicas y privadas, endpoints del servidor. |
+| Frontend | Next.js App Router, React, TypeScript | Sitio público, interfaz QR y panel web; consume la API Java. No contiene las reglas de negocio propietarias ni escritura directa en PostgreSQL. |
 | Estilos y componentes | Tailwind CSS, shadcn/ui | Sistema responsive y componentes reutilizables. |
 | Iconos y movimiento | Lucide React, Motion, GSAP | Iconografía, transiciones UI y secuencias puntuales. |
-| Formularios/validación | React Hook Form cuando aporte valor, Zod | Formularios del cliente y panel; validación en servidor. |
-| Persistencia | PostgreSQL local y Prisma ORM | Modelo lógico aprobado e implementación autorizada; verificar paquetes/versiones en el repositorio y configurar esquema, cliente y conexión local. |
+| Backend | Java 25 LTS, Spring Boot 4.2.0 | Monolito modular con API REST bajo /api/v1. |
+| Seguridad | Spring Security | Autenticación del personal y autorización según roles y sucursales asignadas. Los clientes externos no requieren iniciar sesión. |
+| Persistencia | PostgreSQL local, Spring Data JPA/Hibernate | Único ORM de la aplicación y responsable exclusivo de las escrituras. |
+| Migraciones | Flyway + `flyway-database-postgresql` | Fuente versionada de cambios de esquema; el módulo PostgreSQL permite a Flyway operar con esta base. JPA valida el esquema, no lo genera. |
+| Construcción | Maven Wrapper | El repositorio llevará su Wrapper; Maven global no está disponible en el equipo. |
+| Documentación | JavaDocs, Springdoc/OpenAPI 3.2.1 y Swagger UI | JavaDocs para el código Java; Springdoc 3.2.1 es compatible con Boot 4.2.0 según su matriz oficial; OpenAPI documenta los endpoints REST. |
+| Formularios/validación frontend | React Hook Form cuando aporte valor, Zod | Validación de interfaz complementaria a la validación autoritativa del backend. |
+
+La combinación vigente es Java 25, Spring Boot 4.2.0 y Springdoc 3.2.1. Boot 4.2 admite Java 17–27 y Springdoc registra 3.2.1 para Boot 4.2.x. Java 25 se fija como versión de compilación y ejecución para obtener una configuración reproducible y alineada con la LTS aprobada. Spring Data JPA, Hibernate, Spring Security, Flyway y el driver PostgreSQL deben usar las versiones administradas por el BOM de Boot salvo excepción justificada. Flyway requiere incluir `flyway-database-postgresql` para esta base. Volver a verificar la matriz y los artefactos al iniciar el backend.
 
 Three.js/React Three Fiber/Drei están instalados para escenas promocionales 3D concretas, con carga diferida y alternativa estática si el rendimiento se afecta. PixiJS queda disponible para visuales 2D interactivos. Se mantienen fuera de los paneles operativos y de flujos críticos. No añadir Express separado, microservicios, Redis, colas o infraestructura pagada para el MVP.
 
 ## Arquitectura lógica
 
-```text
-Navegador
-  ├── sitio público
-  ├── interfaz QR
-  └── panel operativo
-          │ Server Components / formularios / fetch
-          ▼
-Next.js (Route Handlers y Server Actions cuando convenga)
-          ▼
-Servicios de aplicación (casos de uso y reglas del dominio)
-          ▼
-Repositorios/adaptadores Prisma
-          ▼
-PostgreSQL local
-```
+Flujo aprobado:
 
-Mantener una aplicación modular monolítica. Las vistas no implementan reglas críticas; pasan solicitudes al servidor. Los servicios de dominio coordinan autorización, validación y transacciones; el acceso a datos queda detrás de funciones/repositorios Prisma para que no se disperse por componentes. No se separan procesos o servicios en red sin necesidad funcional.
+Navegador → frontend Next.js → API REST Java/Spring Boot (/api/v1) → módulos de aplicación y dominio → repositorios Spring Data JPA/Hibernate → PostgreSQL local.
+
+Flyway aplica migraciones versionadas y JPA valida el esquema. Next.js no escribe tablas ni ejecuta lógica de negocio como propietario alternativo. Prisma permanece instalado, pero no se emplea contra las tablas de la aplicación. Mantener un monolito modular; no separar servicios en red.
+
+En desarrollo, el frontend Next.js y Spring Boot se ejecutan en puertos locales distintos. La opción preferida es enrutar /api/v1 al backend mediante un proxy de mismo origen; si el navegador llama directamente al backend, limitar CORS a los orígenes explícitos del entorno. La demostración local no requiere infraestructura pagada.
 
 ### Módulos funcionales
 
@@ -63,31 +60,14 @@ Los módulos comparten la base de datos, pero acceden a otros procesos a través
 
 ## Estructura de carpetas propuesta para el futuro
 
-```text
-src/
-├── app/
-│   ├── (publico)/
-│   ├── mesa/[token]/
-│   ├── seguimiento/[codigo]/
-│   └── admin/
-├── components/
-│   ├── ui/                 # componentes base reutilizables
-│   ├── public/             # presentación y catálogo
-│   ├── ordering/           # carrito y flujo de pedido
-│   ├── mesa/               # UI QR
-│   └── admin/              # navegación, tablas y formularios
-├── features/               # módulos verticales por dominio
-├── server/
-│   ├── auth/
-│   ├── services/
-│   ├── repositories/
-│   └── db/                  # cliente Prisma únicamente en servidor
-├── lib/                     # validación, utilidades y configuración
-└── types/
-prisma/                      # modelo/migraciones solo tras autorización
-```
+Estructura propuesta, aún no creada:
 
-La estructura prioriza componentes y código del servidor separados sin obligar a crear abstracciones vacías. Las carpetas son una propuesta de arranque, no fueron creadas en esta etapa.
+- El proyecto raíz conserva el frontend Next.js y sus carpetas actuales src/app, src/components, src/data y src/lib.
+- backend/ contendrá pom.xml, Maven Wrapper, src/main/java con la aplicación y paquetes modulares de configuración, seguridad, catálogo, sucursales, pedidos, pagos, inventario, reposiciones, entregas, mesas, reportes y auditoría.
+- backend/src/main/resources contendrá la configuración de aplicación y db/migration con scripts Flyway.
+- backend/src/test contendrá pruebas Java y de integración del backend.
+
+La distribución interna de clases y módulos se refinará al crear el backend; esta guía no crea carpetas ni implica que todos deban implementarse en una sola entrega.
 
 ## Rutas
 
@@ -147,7 +127,7 @@ Desarrollar y demostrar localmente con Node.js, Next.js y PostgreSQL local, sin 
 
 - Mecanismo concreto de autenticación y manejo de sesión web.
 - Ubicación local privada de comprobantes y política de respaldo/eliminación.
-- Versiones compatibles de dependencias al iniciar el repositorio de aplicación.
+- Compatibilidad de dependencias externas que no gestione el BOM de Spring Boot y de bibliotecas opcionales al crear el backend.
 - Necesidad de notificaciones casi en tiempo real; la primera versión puede usar actualización explícita o refresco razonable si satisface el SRS.
 
 No bloquean el diseño de alto nivel ni justifican añadir infraestructura. Resolver antes del módulo correspondiente.

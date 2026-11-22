@@ -2,7 +2,7 @@
 
 ## Decisión de dirección técnica
 
-Stack recomendado en el chat final para el MVP:
+Dirección aprobada para el MVP por el usuario el 22-11-2026.
 
 | Capa | Tecnología | Estado |
 | --- | --- | --- |
@@ -11,10 +11,32 @@ Stack recomendado en el chat final para el MVP:
 | Componentes | shadcn/ui | seleccionado; verificar instalación en el repositorio y añadir componentes según necesidad. |
 | Iconos | Lucide React | Propuesto/seleccionado |
 | Animación | Motion + GSAP | Seleccionados para usos puntuales; verificar qué paquetes están instalados realmente antes de modificar dependencias. |
-| Backend web | Route Handlers de Next.js y capa de servicios | Recomendado |
-| Base de datos | PostgreSQL | Recomendado sobre MySQL; dirección aprobada junto con arquitectura |
-| ORM | Prisma | Aprobado por el usuario; verificar instalación y versiones en el repositorio |
-| Validación | Zod | Propuesto |
+| Backend | Java con Spring Boot, monolito modular | Aprobado |
+| API | Servicios web REST bajo /api/v1 | Aprobada |
+| Base de datos | PostgreSQL local | Aprobada |
+| Persistencia | Spring Data JPA/Hibernate; único ORM propietario de las tablas | Aprobada |
+| Migraciones | Flyway, con `flyway-database-postgresql` para el motor PostgreSQL | Aprobado |
+| Construcción | Maven Wrapper; no se requiere Maven global | Aprobada |
+| Documentación API/código | Springdoc/OpenAPI con Swagger UI y JavaDocs | Aprobada |
+| Seguridad | Spring Security | Aprobada |
+| Prisma | Permanece instalado; no se utilizará para administrar ni modificar las tablas PostgreSQL | Aprobado |
+| Validación frontend | Zod | Propuesto |
+
+## Versiones objetivo aprobadas
+
+Combinación aprobada por el usuario el 22-11-2026 y verificada en la documentación oficial consultada en esa fecha:
+
+| Componente | Objetivo | Compatibilidad / condición |
+| --- | --- | --- |
+| Java | JDK 25 LTS | Versión objetivo tanto de compilación como de ejecución. Aunque el equipo tenga JDK 27, el proyecto se compilará y ejecutará con JDK 25. |
+| Spring Boot | 4.2.0 | Versión aprobada; Java 25 está dentro del rango compatible oficial de Java 17 a 27. |
+| Springdoc/OpenAPI | 3.2.1 | Compatible con Spring Boot 4.2.0 según la matriz oficial de Springdoc. |
+| Persistencia | Spring Data JPA + Hibernate | Único ORM; usar las versiones administradas por el BOM de Spring Boot. |
+| Migraciones | Flyway + `flyway-database-postgresql` | El módulo específico de PostgreSQL es necesario para que Flyway opere con esta base. Preferir las versiones administradas por el BOM de Spring Boot. |
+| Driver de base de datos | PostgreSQL JDBC | Preferir la versión administrada por el BOM de Spring Boot. |
+| Maven | Maven Wrapper | Se usará Wrapper; no hay Maven global. El proyecto se configurará con JDK 25. |
+
+Spring Boot administra versiones compatibles de sus dependencias mediante el BOM. Esas versiones prevalecen sobre versiones fijadas manualmente; una excepción debe justificarse y verificarse. La compatibilidad Boot 4.2.0/Springdoc 3.2.1 está confirmada por la matriz de Springdoc. Volver a comprobar versiones y compatibilidad al iniciar la construcción, porque las versiones estables pueden cambiar.
 
 ## Dependencias opcionales
 
@@ -28,7 +50,7 @@ Stack recomendado en el chat final para el MVP:
 
 ## Comparación de base de datos
 
-PostgreSQL fue recomendado frente a MySQL por flexibilidad de restricciones, transacciones y consultas complejas para consistencia de pagos e inventario. Ambos son compatibles con Prisma. La propuesta es ejecutar PostgreSQL localmente durante desarrollo y demostración, sin servicio administrado de pago.
+PostgreSQL se mantiene como base de datos del MVP, instalada localmente para desarrollo y demostración sin servicio administrado de pago obligatorio. Flyway será el mecanismo de evolución del esquema; JPA/Hibernate validará y accederá al esquema, sin crearlo ni cambiarlo automáticamente. Prisma queda excluido de la administración de esas tablas para evitar dos ORM con autoridad de escritura.
 
 ## Restricción de costos
 
@@ -38,4 +60,4 @@ La idea de Render + Neon se formuló como solicitud dentro del cuadro de texto a
 
 ## No incorporar por defecto
 
-Redis, Docker, microservicios, Express separado y Rive. GSAP, PixiJS y herramientas 3D fueron seleccionadas por solicitud expresa del usuario del 21-11-2026; utilizarlas solo en piezas públicas concretas, cargar escenas grandes bajo demanda y mantener los paneles de operación sin 3D.
+Redis, Docker, microservicios, Express separado, OAuth, JWT, Rive y nuevos servicios pagados. JWT u OAuth se incorporarían solo si una rúbrica o decisión funcional concreta lo exige. GSAP, PixiJS y herramientas 3D fueron seleccionadas para piezas públicas puntuales; cargar escenas grandes bajo demanda y mantener los paneles de operación sin 3D.

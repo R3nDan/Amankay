@@ -108,7 +108,7 @@ La experiencia prioriza una mano, carga rápida, pocos pasos y lectores de panta
 6. Mesa: abrir sesión y cuenta → aceptar pedidos → cerrar sesión → mantener cuenta abierta si falta cobro → cerrar cuenta.
 7. Reposición: solicitud → revisión → despacho parcial → recepción vinculada a despacho → seguimiento de pendientes/cierre.
 8. Entrega: asignar → recoger → salir → entregar o incidencia → registrar monto declarado y recibido cuando aplique.
-9. Devolución: informar incidencia → recibir e inspeccionar obligatoriamente → mantener separado mientras está pendiente → reincorporar solo unidades aptas. Las dañadas/no aptas no vuelven al stock.
+9. Entrega fallida: registrar incidencia en Entrega. La gestión formal de devoluciones e inspecciones queda fuera del MVP; un producto que regrese físicamente no se reincorpora automáticamente al stock disponible.
 
 Estos flujos son inventario de diseño, no implementación ni ampliación del SRS. Confirmar estados y permisos en los documentos de requisitos antes de dibujar prototipos detallados.
 
@@ -240,7 +240,7 @@ La espera destaca visualmente sin expirar/rechazar automáticamente a los tres m
 ```text
 ┌─────────────┬───────────────────────────────────────────────┐
 │ Navegación  │ Inventario       [Sucursal] [Buscar producto] │
-│             │ [Disponible] [Pendiente inspección]           │
+│             │ [Disponible]                                   │
 │             ├───────────────────────────────────────────────┤
 │             │ Producto │ Disponible │ Pendiente │ Acciones  │
 │             │ ...      │ ...         │ ...       │ [Ver]     │
@@ -250,7 +250,7 @@ La espera destaca visualmente sin expirar/rechazar automáticamente a los tres m
 └─────────────┴───────────────────────────────────────────────┘
 ```
 
-No hay editar/borrar movimiento original; ajustes se agregan como registros nuevos autorizados. Productos devueltos quedan pendientes de inspección y solo aptos retornan al stock.
+No hay editar/borrar movimiento original; ajustes se agregan como registros nuevos autorizados. La gestión formal de devoluciones e inspección queda fuera del MVP; los productos que regresen físicamente no se reincorporan automáticamente al stock disponible.
 
 ### 8. Reposiciones
 
@@ -288,7 +288,7 @@ El detalle muestra cada despacho y su recepción vinculada. Cierre/reversa viven
 └─────────────┴───────────────────────┴───────────────────────┘
 ```
 
-Recaudo distingue declaración del repartidor y registro de recibido por empleado autorizado, una conciliación por entrega. Si retorna producto, mostrar inspección obligatoria antes de reincorporar unidades aptas.
+Recaudo distingue declaración del repartidor y registro de recibido por empleado autorizado, una conciliación por entrega. Una entrega fallida se registra en Entrega; el retorno físico no activa una inspección ni una reincorporación automática de stock en el MVP.
 
 ## Ajuste visual e implementación inicial — 21-11-2026
 

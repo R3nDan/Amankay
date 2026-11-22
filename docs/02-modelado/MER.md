@@ -21,7 +21,7 @@ La lista resume los grupos del MER lógico aprobado. No se incorpora `CierreFalt
 
 ## Inventario técnico entidad por entidad
 
-El inventario histórico de 27 candidatas corresponde a una etapa anterior y no representa el modelo vigente. El modelo lógico aprobado contiene 24 entidades de dominio y 2 asociativas, total 26. La aprobación cubre entidades, relaciones y reglas conceptuales; los detalles físicos de Prisma/PostgreSQL deben concretarse sin alterar el modelo. Los vacíos que no puedan resolverse con requisitos aprobados se registran como bloqueos, no se completan por suposición.
+El inventario histórico de 27 candidatas corresponde a una etapa anterior y no representa el modelo vigente. El modelo lógico aprobado contiene 24 entidades de dominio y 2 asociativas, total 26. La aprobación cubre entidades, relaciones y reglas conceptuales; la implementación física corresponde a PostgreSQL con JPA/Hibernate y Flyway. Los vacíos que no puedan resolverse con requisitos aprobados se registran como bloqueos, no se completan por suposición.
 
 | Entidad | Propósito y atributos documentados (tipo conceptual; `?` = opcional/provisional) | PK y FKs candidatas | Relaciones / cardinalidad candidata | Prioridad y estado |
 | --- | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ El inventario histórico de 27 candidatas corresponde a una etapa anterior y no 
 | `Categoria` | Clasifica productos: `id UUID`, `nombre String`, `descripcion String?`, `activa Boolean`. | PK `id`. | 1:N `Producto`; unicidad de nombre y ámbito global/sucursal pendientes. | Esencial; UML base. |
 | `Producto` | Catálogo global: `id UUID`, `nombre String`, `descripcion String?`, `imagen String?`, `precio Decimal`, `activo Boolean`, `fechaCreacion DateTime`, `fechaActualizacion DateTime`. | PK `id`; FK `categoriaId`. | M:1 `Categoria`; 1:N a inventarios, detalles de pedido y detalle de solicitud. Unicidad/variantes pendientes. | Esencial; UML base. |
 | `InventarioSucursal` | Saldo disponible de producto terminado por sede: `id UUID`, `stockDisponible Integer`, `fechaActualizacion DateTime`. | PK `id`; FKs `sucursalId`, `productoId`. | M:1 a cada una; única pareja `(sucursalId, productoId)`. | Esencial; UML base. |
-| `MovimientoInventario` | Historial de entradas/salidas/ajustes: `id UUID`, `tipo TipoMovimiento`, `cantidad Integer`, `stockAnterior Integer`, `stockResultante Integer`, `fechaHora DateTime`, `motivo String`. | PK `id`; FK requerida a `InventarioSucursal`; `usuarioId?` según movimiento. No duplicar FKs a producto y sucursal porque se derivan de `InventarioSucursal`. La referencia al evento de origen sigue sin decisión. | M:1 a `InventarioSucursal`; M:1 opcional a usuario responsable. | Esencial; la referencia al origen es bloqueo técnico previo a la migración. |
+| `MovimientoInventario` | Historial de entradas/salidas/ajustes: `id UUID`, `tipo TipoMovimiento`, `cantidad Integer`, `stockAnterior Integer`, `stockResultante Integer`, `fechaHora DateTime`, `motivo String`. | PK `id`; FK requerida a `InventarioSucursal`; `usuarioId?` según movimiento. No duplicar FKs a producto y sucursal porque se derivan de `InventarioSucursal`. La referencia al evento de origen sigue pendiente de análisis y aprobación. | M:1 a `InventarioSucursal`; M:1 opcional a usuario responsable. No agregar relaciones de origen ni cardinalidades hasta aprobación. | Esencial; la referencia al origen es bloqueo técnico previo a la migración. |
 | `Pedido` | Pedido externo o QR: `id UUID`, `codigoSeguimiento String`, `tipo TipoPedido`, `canalOrigen CanalOrigen`, `estado EstadoPedido`, `fechaCreacion DateTime`, `total Decimal`, `costoDomicilioHistorico Decimal?`, `nombreCliente String?`, `telefonoCliente String?`, `direccionEntrega String?`, `barrio String?`, `referenciaDireccion String?`, `nombreDestinatario String?`, `telefonoDestinatario String?`. | PK `id`; FKs `sucursalId`, `cuentaMesaId?`; cliente sin login, no asumir FK a usuario. | 1:N `DetallePedido`; externo pertenece a una sucursal responsable; QR pertenece obligatoriamente a una cuenta de mesa. Solo pedidos externos tienen `cuentaMesaId = NULL`. Pedido domicilio: 0..1 `Entrega`. | Esencial; validar coherencia del tipo con FK opcional. |
 | `DetallePedido` | Línea e importe histórico: `id UUID`, `cantidad Integer`, `precioUnitarioHistorico Decimal`, `nombreProductoHistorico String`. | PK `id`; FKs `pedidoId`, `productoId`. | M:1 pedido y producto; no existe `DetalleCuenta`; la cuenta se deriva de pedidos aceptados. | Esencial; UML base. |
 | `Mesa` | Mesa identificada por sucursal: `id UUID`, `identificador String`, `identificadorQR String`, `activa Boolean`. | PK `id`; FK `sucursalId`. | M:1 sucursal; 1:N sesiones históricas. Unicidad de identificador/QR por sede por definir. | Esencial; UML base. |
@@ -96,7 +96,7 @@ El inventario histórico de 27 candidatas corresponde a una etapa anterior y no 
 - Calcular cantidades de reposición pendientes desde solicitudes/despachos/recepciones; no duplicar contadores derivados.
 - Registrar el cierre final de faltante y su posible reversa total en el detalle de solicitud o de despacho cuyo saldo afectan.
 - Conservar despachos y recepciones originales; corregir anulando el evento completo cuando sea seguro y registrando uno nuevo. No usar deltas.
-- Distinguir inventario disponible de productos devueltos pendientes de inspección.
+- La gestión formal de devoluciones de entregas fallidas está fuera del MVP; los productos que regresen físicamente no se incorporan automáticamente al stock disponible.
 - La cantidad despachada acumulada por detalle no puede superar la cantidad aprobada.
 - La cantidad recibida acumulada por detalle de despacho no puede superar la cantidad enviada.
 - Los movimientos compensatorios son nuevos registros independientes de `MovimientoInventario`; los movimientos pendientes no afectan existencia disponible.
@@ -104,8 +104,8 @@ El inventario histórico de 27 candidatas corresponde a una etapa anterior y no 
 ## Transición a la implementación
 
 1. El MER lógico consolidado fue aprobado el 22-11-2026. No reabrir entidades ni cardinalidades sin decisión expresa.
-2. Antes de la migración inicial, cerrar nulabilidad de atributos provisionales, catálogo de estados de `Pedido`/`Pago`, unicidades pendientes y referencia de origen de `MovimientoInventario`.
-3. Pasar las entidades, relaciones, cardinalidades y restricciones aprobadas al esquema Prisma.
+2. Antes de la primera migración Flyway, cerrar nulabilidad de atributos provisionales, catálogo de estados de `Pedido`/`Pago`, unicidades pendientes y la trazabilidad de `MovimientoInventario`.
+3. Tras la aprobación de esos bloqueos, trasladar las entidades, relaciones, cardinalidades y restricciones aprobadas a migraciones SQL versionadas y al mapeo JPA, sin alterar el MER aprobado.
 4. Mantener las decisiones funcionales pendientes en su matriz; no inventar comportamientos para módulos aún no implementados.
 5. Crear y verificar migraciones en PostgreSQL local una vez cerrados los bloqueos del esquema.
 
@@ -130,7 +130,7 @@ Los cierres se registran en el mismo detalle cuyo saldo afectan. No existe `Cier
 
 Los eventos originales se conservan y sus cantidades no se editan ni borran para corregirlos. Cuando sea seguro gestionar dependencias, se anula por completo el despacho o recepción y se registra uno nuevo. La anulación conserva motivo, actor y fecha en el evento. No hay eventos correctivos por delta.
 
-La anulación documental no altera automáticamente `InventarioSucursal`. Todo movimiento compensatorio es un nuevo registro independiente de `MovimientoInventario`; un movimiento pendiente no afecta la existencia disponible. Una transacción que aplique movimiento debe preservar saldo no negativo. Si el producto ya fue consumido, se mantiene el historial de ventas y el caso queda para revisión administrativa; no se registra stock negativo ni regularización automática.
+La anulación documental no altera automáticamente `InventarioSucursal`. Todo movimiento compensatorio es un nuevo registro de `MovimientoInventario`; el registro original permanece inalterado. La cantidad máxima y la posibilidad de compensación parcial o de compensar una compensación siguen pendientes de confirmación; no fijar restricciones definitivas por ahora. Un movimiento pendiente no afecta la existencia disponible. Una transacción que aplique movimiento debe preservar saldo no negativo. Si el producto ya fue consumido, se mantiene el historial de ventas y el caso queda para revisión administrativa; no se registra stock negativo ni regularización automática.
 
 ## Restricciones de base de datos y de aplicación
 
@@ -165,9 +165,9 @@ La anulación documental no altera automáticamente `InventarioSucursal`. Todo m
 
 ### Detalles por concretar durante la implementación
 
-- Definir tipos SQL, nulabilidad y nombres físicos de PK/FK al trasladar el MER aprobado a Prisma; mantener las cardinalidades y restricciones ya consolidadas.
+- Definir tipos SQL, nulabilidad y nombres físicos de PK/FK al trasladar el MER aprobado a PostgreSQL/JPA mediante Flyway; mantener las cardinalidades y restricciones ya consolidadas.
 - Cerrar la nulabilidad de los atributos marcados `?`: el signo indica opcionalidad conceptual/provisional y no autoriza a Codex a decidir sin criterio de negocio.
-- Definir cómo `MovimientoInventario` referencia el evento que lo origina. Su relación requerida con `InventarioSucursal` está definida; no duplicar FKs a producto/sucursal ni introducir referencias polimórficas sin aprobación.
+- Definir y aprobar cómo `MovimientoInventario` referencia el evento que lo origina. Analizar, sin dar por aprobadas las relaciones ni sus cardinalidades, los detalles de pedido, despacho de reposición, recepción de reposición y el vínculo consigo mismo para compensaciones. Confirmar también cómo identificar ajustes manuales; no incorporar devoluciones formales al MVP ni duplicar FKs a producto/sucursal. No introducir referencias polimórficas sin aprobación.
 - Consolidar valores y transiciones de `EstadoPedido` y `EstadoPago`; no inventar enums.
 - Resolver unicidades pendientes (identificador/QR de mesa, nombres de catálogo y configuración de domicilio) antes de fijar índices únicos.
 - Aplicar desactivación en vez de borrar registros ya referenciados, y mapear las operaciones a roles y sucursales documentados.
@@ -255,4 +255,4 @@ Las decisiones aprobadas conjuntamente el 21-11-2026 prevalecen sobre propuestas
 - Estados de solicitud: `PENDIENTE_REVISION`, `RECHAZADA`, `EN_PROCESO`, `COMPLETADA`; `BORRADOR` solo si el flujo realmente requiere guardar sin enviar. Los pendientes se calculan desde las cantidades registradas.
 - Permisos por rol y sucursal con asociaciones existentes; no hay permisos individuales ni doble autorización por defecto. Personal autorizado de inventario gestiona reposiciones; administrador interviene en anulaciones excepcionales. Una persona puede registrar y autorizar operaciones ordinarias.
 
-El usuario aprobó el MER lógico consolidado el 22-11-2026 y confirmó que las etapas previas al desarrollo concluyeron. El esquema Prisma y el backend pueden construirse desde este modelo. Los detalles SQL de implementación y las decisiones funcionales todavía abiertas se registrarán sin reabrir ni alterar el modelo aprobado; cualquier cambio futuro de cardinalidades o entidades requerirá una decisión explícita y trazabilidad.
+El usuario aprobó el MER lógico consolidado el 22-11-2026: se conservan 24 entidades de dominio y 2 asociativas, total 26. El backend Java con JPA/Hibernate y Flyway se construirá respetando este modelo. La trazabilidad de `MovimientoInventario` sigue pendiente: este documento no agrega relaciones, cardinalidades ni atributos para resolverla. Los detalles físicos y decisiones funcionales abiertas se registrarán sin reabrir el conteo aprobado; cualquier cambio futuro de cardinalidades o entidades requiere decisión explícita y trazabilidad.

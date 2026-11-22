@@ -6,7 +6,9 @@ Amankay es el sistema web para atender pedidos y organizar la operación de un n
 
 Primera aplicación visual implementada con Next.js App Router, React, TypeScript, Tailwind CSS y Lucide React, tras autorización expresa del usuario. Incluye inicio público, catálogo y sus tres categorías (Panadería, Fritos, Bebidas), acceso a sucursales y una galería temporizada de imágenes del proceso del pan. El clip de proceso se reproduce silenciado en bucle y sin controles.
 
-Las dos sedes están disponibles como opciones para recoger pedidos, con horarios y teléfonos de contacto. Los precios del catálogo fueron indicados por el usuario. El sitio incluye selección de productos y una bolsa que prepara la solicitud por WhatsApp; todavía no registra pedidos en una base de datos ni valida inventario, pagos o disponibilidad en tiempo real. La documentación de `docs/` conserva las reglas del proyecto.
+Las dos sedes están disponibles como opciones para recoger pedidos, con horarios y teléfonos de contacto. Los precios del catálogo fueron indicados por el usuario. El sitio incluye selección de productos y una bolsa que prepara la solicitud por WhatsApp; todavía no registra pedidos en una base de datos ni valida inventario, pagos o disponibilidad en tiempo real.
+
+La arquitectura aprobada conserva Next.js, React y TypeScript como frontend, y define un backend Java 25 LTS con Spring Boot 4.2.0, monolito modular y API REST bajo `/api/v1`. Usa PostgreSQL local, Spring Data JPA/Hibernate, Flyway con `flyway-database-postgresql`, Spring Security, JavaDocs, Springdoc 3.2.1/Swagger UI y Maven Wrapper. Java 25 es la versión objetivo de compilación y ejecución aunque el equipo tenga JDK 27. El backend aún no está creado y Maven global no está disponible. Prisma permanece instalado, pero no administrará las tablas de la aplicación. Las versiones gestionadas por el BOM de Spring Boot prevalecen sobre versiones fijadas manualmente, salvo justificación. La documentación de docs/ conserva las decisiones y los pendientes.
 
 ### Ejecución local
 
@@ -31,7 +33,7 @@ Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 310
 3. Completar y aprobar el MER.
 4. Definir arquitectura y decisiones técnicas.
 5. Diseñar UI/UX antes del desarrollo.
-6. Iniciar desarrollo únicamente cuando el usuario dé esa indicación.
+6. Implementar por etapas la arquitectura aprobada cuando el usuario autorice iniciar el código; las decisiones funcionales y de esquema que siguen pendientes no se presumen resueltas.
 
 ## Documentación central
 
