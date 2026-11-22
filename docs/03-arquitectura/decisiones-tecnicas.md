@@ -8,22 +8,44 @@
 - **Pendiente:** requiere confirmación o completar análisis.
 - **Descartada/sustituida:** una decisión posterior la reemplazó.
 
-## Actualización arquitectónica y funcional aprobada (22-11-2026)
+## Actualización arquitectónica y funcional aprobada (22-11-2026; fotografía inicial)
+
+Esta sección registra lo que se aprobó antes de varias confirmaciones posteriores del mismo día. Para el estado vigente usa la tabla “Estado técnico vigente después de la implementación” al final de este documento.
 
 - **Arquitectura:** se conserva Next.js/React/TypeScript como frontend. El backend será Java con Spring Boot en un monolito modular, API REST bajo /api/v1, PostgreSQL local, Spring Data JPA/Hibernate como único ORM, Flyway, Maven Wrapper, Spring Security, JavaDocs y Springdoc/OpenAPI con Swagger UI. Prisma permanece instalado y no administrará ni modificará las tablas de PostgreSQL.
 - **Selección inicial de versiones (sustituida posteriormente el 22-11-2026):** JDK 25 LTS, Spring Boot 3.5.16 y Springdoc 2.10.1. Fue la dirección aprobada inicialmente, antes de la evaluación final de versiones. No representa el stack vigente.
 - **Devoluciones fallidas:** la decisión anterior de inspección obligatoria queda sustituida. La gestión formal de devoluciones está fuera del MVP y el producto que regrese físicamente no vuelve automáticamente al stock disponible.
-- **Trazabilidad y compensaciones:** el MER continúa con 26 entidades. El origen de MovimientoInventario no está cerrado ni aprobado. La recomendación de una compensación total como máximo por movimiento original sigue siendo propuesta pendiente de confirmación, no una regla del modelo.
+- **Trazabilidad y compensaciones en esa fecha:** el MER conserva 26 entidades. Al registrarse esta fotografía, el origen y la política compensatoria seguían pendientes; el usuario los aprobó después el 22-11-2026. La decisión vigente usa `tipoOrigen` + `idOrigen` y una FK autorreferenciada opcional, única, total y no encadenable.
 - **Alcance:** esta actualización es documental. No se creó backend, código Java, esquema ni migración y no se modificó la base de datos.
 
 ## Actualización definitiva del stack tecnológico aprobada (22-11-2026)
 
 - **Stack vigente:** Java 25 LTS, Spring Boot 4.2.0, Springdoc 3.2.1, Next.js/React/TypeScript, PostgreSQL, Spring Data JPA/Hibernate, Flyway, Spring Security, Maven Wrapper, API REST bajo `/api/v1` y monolito modular. Prisma permanece instalado, pero no se utilizará como ORM ni para persistencia.
-- **Java:** JDK 25 es la versión objetivo de compilación y ejecución aunque el equipo tenga instalado JDK 27. La versión local no cambia el target declarado del proyecto.
+- **Java:** JDK 25 es la versión objetivo de compilación y ejecución. Temurin 25.0.5.1 quedó instalado el 22-11-2026 y `JAVA_HOME` de usuario se configuró a esa versión; JDK 27 permanece instalado, pero no se usa para este proyecto.
 - **Compatibilidad documental:** la matriz oficial de Springdoc 3 confirma 3.2.1 para Spring Boot 4.2.x.
 - **Flyway:** incluir `flyway-database-postgresql` además del módulo base correspondiente; el soporte PostgreSQL de Flyway está separado en un artefacto específico.
 - **Versiones de dependencias:** prevalecen las versiones administradas por el BOM de Spring Boot. Fijar otra versión requiere justificación y verificación de compatibilidad.
-- **Alcance:** se actualiza la documentación del stack. No se creó estructura ni código Java, no se instalaron ni actualizaron dependencias, no se configuró Java/Maven y no se modificó PostgreSQL o el MER.
+
+## Trazabilidad de MovimientoInventario aprobada (origen; compensación confirmada después)
+
+- Cada movimiento identifica la operación que lo origina mediante `tipoOrigen` (tipo de proceso) e `idOrigen` (registro concreto).
+- Java valida que el registro exista y corresponda al tipo indicado. No se crearán múltiples claves foráneas opcionales para las entidades de origen.
+- Los movimientos originales son inmutables. Los compensatorios conservan trazabilidad hacia el movimiento corregido.
+- La creación de movimientos se realiza exclusivamente mediante servicios autorizados del backend; no se permiten escrituras que omitan las validaciones de Java.
+- Se conservan las 26 entidades aprobadas. La cantidad y el encadenamiento de compensaciones quedaron resueltos después: como máximo una compensación total por original, sin cadenas ni parcialidad, mediante FK autorreferenciada opcional y única.
+- **Alcance en la fecha de esta nota:** fue una actualización documental. La instrucción posterior del usuario autorizó la implementación; el estado actual y sus límites se registran al final del documento.
+
+## Primera base técnica del backend implementada (22-11-2026; snapshot sustituido)
+
+Este apartado conserva el estado de la primera base técnica antes de crear entidades y módulos de dominio. La implementación posterior consta en “Estado técnico vigente después de la implementación”.
+
+- **Estructura:** se creó backend/ como proyecto Maven independiente con paquete base com.amankay.backend, configuración, módulo técnico de salud, recursos y prueba MVC. El paquete inverso com.amankay se eligió como convención interna; no presupone titularidad de un dominio.
+- **Versiones en el snapshot inicial:** pom.xml heredaba Spring Boot 4.2.0, fijaba Java release 25 y declaraba Springdoc 3.2.1. Maven Wrapper 3.3.4 descargaba Apache Maven 3.10.2. En ese momento JDK 25 no estaba instalado y las comprobaciones se hicieron con JDK 27 usando `--release 25`; este dato es histórico. El 22-11-2026 se instaló Temurin JDK 25.0.5.1 y las comprobaciones actuales se repitieron con esa versión.
+- **Dependencias:** se verificó la resolución de MVC, Spring Data JPA/Hibernate, Spring Security, Validation, Flyway, PostgreSQL JDBC y Springdoc. El BOM administró las versiones de Boot, Spring, Hibernate, Flyway y PostgreSQL; solo Springdoc mantiene la versión aprobada fijada.
+- **Configuración y protección:** la conexión se declara mediante DB_HOST, DB_PORT, DB_NAME, DB_USERNAME y DB_PASSWORD del entorno del proceso. backend/.env.example es solo plantilla y no se carga automáticamente. Hibernate usa ddl-auto=none y la inicialización SQL está desactivada.
+- **Flyway:** starter y módulo PostgreSQL están en el classpath; la ubicación convencional está declarada. spring.flyway.enabled=false está en la configuración común y local, la creación de esquemas está desactivada y clean está bloqueado. La carpeta no contiene migraciones SQL.
+- **Seguridad y API en esa primera entrega:** solo salud y documentación OpenAPI eran públicas; las demás rutas se denegaban. Entonces no existían usuarios ni autenticación de negocio. GET /api/v1/health informa el estado del proceso y no consulta PostgreSQL.
+- **Límites de verificación:** se resolvieron dependencias, se validó Maven, se compilaron fuentes Java y pasaron pruebas MVC. No se inició el contexto completo que inicializa JPA, no se validó la conexión real y no se ejecutaron migraciones. La base, esquema y credenciales no están confirmados. No se hicieron operaciones DDL/DML ni cambios al MER o frontend.
 
 ## Implementación inicial y ajuste visual aprobado (21-11-2026)
 
@@ -36,7 +58,7 @@ Fuente: instrucciones directas del usuario en este chat, posteriores a la planif
 
 | Tema | Decisión vigente y justificación | Estado |
 |---|---|---|
-| Desarrollo | Análisis y diseño concluidos y MER lógico aprobado. La arquitectura actual es Java/Spring Boot + JPA/Hibernate + Flyway sobre PostgreSQL local, con Next.js como frontend. El código backend aún no se ha creado; los pendientes funcionales y de esquema no se presumen resueltos. | Aprobada, 22-11-2026 |
+| Desarrollo (fotografía histórica del diseño UI) | En ese corte aún no había persistencia ni módulos Java; una instrucción posterior autorizó e implementó el esquema físico y el backend inicial. | Estado sustituido; ver estado vigente al final del documento. |
 | Catálogo | Panadería, Fritos y Bebidas. Para la implementación inicial, Fritos comprende empanadas y pasteles; las papas quedan aplazadas por petición posterior del usuario. Bebidas comprende avena y sevillana. Amplía el contenido visual más allá de panes, usando las categorías existentes. | Aprobada; papas futuras |
 | Cabecera | SVG centrado, sin texto Amankay adicional, navegación inferior INICIO / PANADERÍA / FRITOS / BEBIDAS. Referencia de jerarquía: MASA. | Aprobada |
 | Título y nombre | Amankay es el nombre confirmado por el usuario para el negocio y el título de pestaña de las páginas públicas. Sustituye la duda anterior sobre el nombre comercial del anteproyecto. | Aprobada, 22-11-2026 |
@@ -48,21 +70,21 @@ Fuente: instrucciones directas del usuario en este chat, posteriores a la planif
 | Recursos | Originales conservados; fotografías WebP para web, MP4 en carpeta de videos. No reutilizar imágenes de MASA. | Elección técnica dentro de la implementación autorizada |
 | Datos comerciales | Fotos de Fritos/Bebidas, precios, recetas y disponibilidad siguen por confirmar. No inferirlos de la referencia. | Pendiente |
 
-### Aprobación del MER e inicio del backend (22-11-2026)
+### Aprobación del MER e inicio del backend (22-11-2026; decisión vigente)
 
 - **MER:** el usuario confirmó que el modelo lógico consolidado de `docs/02-modelado/MER.md` está aprobado. Se sustituye su estado anterior de «pendiente de aprobación»; no se repiten las etapas de análisis y diseño.
-- **Desarrollo (actualización 22-11-2026):** se aprobó la dirección Java/Spring Boot y la propiedad de persistencia por JPA/Flyway. La recomendación anterior de Prisma como backend quedó sustituida. No iniciar código hasta recibir la autorización indicada en la solicitud de actualización documental.
-- **Límites:** las decisiones funcionales aún listadas en el SRS y en la matriz de pendientes siguen abiertas; no se inventan ni se consideran bloqueos para implementar módulos cuyo comportamiento ya está definido.
+- **Desarrollo:** se aprobó la dirección Java/Spring Boot, la persistencia exclusiva por JPA/Flyway y, posteriormente, la implementación integral del esquema y backend. La recomendación anterior de Prisma como backend quedó sustituida.
+- **Límites:** una solicitud posterior cerró reglas para pedidos web, pagos, cancelaciones, repartos, inventario, compensaciones, QR y domicilios. La base de datos real sigue sin configurarse y no se ha modificado.
 
-## Desarrollo del pedido público (22-11-2026)
+## Desarrollo del pedido público (22-11-2026; snapshot del frontend anterior al backend)
 
 - **Autorización:** el usuario confirmó que ya concluyeron análisis y diseño y pidió implementar el apartado público de pedidos. Sustituye el límite de la primera entrega solo visual. La aprobación no inventa reglas aún pendientes ni equivale a aprobar el MER.
 - **Precios aprobados:** Panadería 2.000 COP por producto, Fritos 3.500 COP, Avena y Sevillana 3.500 COP, Guarapo 3.000 COP. Sustituye la parte de «precios por confirmar» en la tabla de implementación inicial; recetas y existencias siguen pendientes.
 - **Interacción aprobada:** toque en tarjeta para abrir detalle breve y selector de cantidad; símbolo del tipo de producto animado hacia «Pide» al agregar; bolsa con indicador, resumen y elección entre recogida y domicilio. Las páginas individuales de categoría quitan el título repetido de su franja texturizada y repiten esa franja al final.
 - **Ajuste de la bolsa (22-11-2026):** el usuario sustituyó el icono genérico y su tapa animada por una bolsa de papel de pan. El símbolo del producto viaja reducido, espera un segundo sobre la abertura y entra cuando la bolsa se abre por sí misma; el punto de contenido no lleva contorno y queda más cerca de la esquina.
-- **Límite actual:** la bolsa local prepara una solicitud en WhatsApp al teléfono de contacto. Sin persistencia, inventario ni confirmación del personal, la interfaz la presenta como solicitud por confirmar, no como pedido creado o aceptado. La formalización de pedidos y seguimiento sigue siendo trabajo pendiente del MVP.
+- **Límite de esa entrega:** la bolsa preparaba una solicitud en WhatsApp, sin persistencia ni confirmación del personal. La decisión posterior aprobó registrar el pedido desde Java antes de abrir WhatsApp, con confirmación manual y vencimiento a 30 minutos; el backend ya expone ese flujo y falta integrar el frontend.
 
-## Decisiones aprobadas para el cierre del modelado (21-11-2026)
+## Decisiones aprobadas para el cierre del modelado (21-11-2026; historial complementario)
 
 - Conservación de eventos originales de despacho y recepción. Corrección mediante anulación completa y registro nuevo cuando las dependencias lo permitan; anulación documental y movimientos compensatorios son operaciones separadas.
 - Los movimientos de inventario pendientes no afectan el stock disponible. No se permiten existencias negativas. Si el producto ya fue consumido, se deriva a revisión administrativa sin reescribir ventas ni automatizar deuda, pérdida o regularización.
@@ -104,148 +126,38 @@ El anteproyecto `AnteProyecto_PW.docx` también se revisó. Contiene datos perso
 10. **Stack:** el usuario pidió revisar las dependencias de SpacesApps_2, usar Next.js y TypeScript, comparar MySQL/PostgreSQL y evitar gastos. La idea de migración a Render + Neon aparece como texto redactado en el cuadro de entrada, no como mensaje enviado/decisión adoptada.
 11. **Arquitectura/costos (propuesta histórica sustituida):** la dirección anterior recomendaba Next.js Route Handlers y Prisma como backend. La decisión del usuario del 22-11-2026 la sustituye por Java/Spring Boot con JPA/Flyway y conserva Next.js como frontend. Ningún despliegue público pagado queda como requisito.
 
-## Matriz de conciliación vigente
+## Estado técnico vigente después de la implementación (22-11-2026)
 
-El resumen de ChatGPT compartido por el usuario el 21-11-2026 se contrastó con los once enlaces y con las decisiones posteriores expresas del proyecto. La siguiente tabla refleja el estado consolidado vigente; no debe leerse como que cada frase aparece literalmente en los once chats.
+El usuario aprobó la dirección y precisiones funcionales siguientes. Se implementaron el modelo físico de 26 tablas, las entidades JPA, migraciones Flyway V1/V2 y módulos backend descritos en `backend/README.md`. Esta sección reemplaza las matrices de estado anteriores de este archivo; las secciones cronológicas previas se conservan como historia, no como especificación vigente.
 
-| Tema | Estado vigente | Regla consolidada | Pendiente real |
-| --- | --- | --- | --- |
-| Cancelación | Definida | El cliente solicita antes de iniciar preparación; personal autorizado aprueba o rechaza. | Asignar el permiso a roles existentes y definir efecto por estado de stock/pago. |
-| Incidencias de entrega | Definida parcialmente | Estado y observaciones dentro de `Entrega`; no entidad `Incidencia`. | Quién autoriza reintento, retorno u otra resolución. |
-| Sucursal para domicilio | Definida | Asignación automática por disponibilidad del pedido completo y proximidad; no dividir. | Método técnico de distancia y desempate. |
-| Sin sede con pedido completo | Regla mínima definida | No aceptar ni dividir el pedido si ninguna sede puede completarlo. | Presentación UX de alternativas, si aporta valor. |
-| Cobertura y tarifa | Definidas para el prototipo | Neiva; 2.000 COP adicionales por domicilio, configurables. | Validación de dirección/cobertura en el flujo real. |
-| Nombre comercial | Resuelto | Amankay; El Alambique queda como nombre histórico del anteproyecto. | Ninguno. |
-| Entidades | Aprobado | 24 entidades de dominio + `UsuarioRol` y `UsuarioSucursal` = 26. | Ningún cambio de entidades/cardinalidades sin aprobación expresa. |
-| Cliente | Definido | No requiere iniciar sesión para consultar o realizar pedidos externos; QR requiere sesión temporal de mesa. | Ninguno para el esquema base. |
-| Pagos | Definido parcialmente | Intentos múltiples; máximo un comprobante por intento; reembolso manual total; no sobrepagar. | Si cada intento puede ser parcial; almacenamiento privado del comprobante. |
-| Criterios de aceptación | Pendientes de aprobación | Criterios observables redactados en `criterios-aceptacion.md`. | Aprobar métricas, tareas y protocolo académico de usabilidad. |
-| Dependencias técnicas | Dirección aprobada; backend aún no creado | Next.js/React/TypeScript, Java 25/Spring Boot 4.2.0, PostgreSQL, Spring Data JPA/Hibernate, Flyway + `flyway-database-postgresql`, Spring Security, Maven Wrapper y Springdoc 3.2.1. Prisma sigue instalado, pero no es ORM de las tablas de la aplicación. Las versiones del BOM prevalecen salvo justificación. | Configurar JDK 25 y usar Maven Wrapper al iniciar el backend. |
+| Área | Decisión vigente | Estado / límite |
+|---|---|---|
+| Arquitectura | Frontend Next.js/React/TypeScript; backend Java 25, Spring Boot 4.2.0, Springdoc 3.2.1, REST `/api/v1`, monolito modular; JPA/Hibernate como único ORM; PostgreSQL; Flyway; Spring Security; Maven Wrapper. | Implementado en parte. Temurin JDK 25.0.5.1 instalado y usado para validar; Prisma no participa en persistencia. |
+| MER y esquema | 24 entidades de dominio y 2 asociativas, 26 en total. `tipoOrigen` + `idOrigen` identifica el origen de cada movimiento; FK autorreferenciada opcional identifica compensación. | Entidades y scripts preparados; no se altera el MER ni se ejecutaron scripts. |
+| Pedido web/WhatsApp | Guardar desde Java antes de abrir WhatsApp; confirmación manual, vence a los 30 minutos, sin reserva de stock ni API WhatsApp. | Implementado en servicio REST; integración del frontend pendiente. |
+| WhatsApp recibido por el negocio | Atención registra manualmente el pedido externo en la misma cola de confirmación; no vence automáticamente a los 30 minutos, regla exclusiva del pedido web. | Implementado en `POST /api/v1/staff/orders/whatsapp`; sin integración automática. |
+| Pagos | Cada intento cubre el saldo completo. Reintentos conservados; sin pago parcial ni sobrepago; reembolso manual total. | Servicio Java transaccional implementado; requiere integración y prueba con PostgreSQL. |
+| Cancelación | Atención autorizada aprueba cancelaciones antes de iniciar preparación. | Validación de estado y rol implementada. |
+| Entrega fallida | Repartidor solo registra estados/incidencias propias; operaciones autorizadas decide reintentos y resolución. Devolución formal fuera del MVP y retorno físico no suma stock automáticamente. | Estados/observaciones y permisos implementados; no existe entidad de devolución. |
+| Inventario | Personal autorizado registra existencias iniciales, ajustes y mermas; todo ajuste exige motivo. | Servicio con historial append-only y límites de saldo implementado. Stock real no se ha cargado. |
+| Compensación | Una compensación total como máximo por original, sin parcialidad ni cadena; FK autorreferenciada y vínculo inverso. Original inmutable; Java valida delta/stock y motivo. | Aprobada por el usuario y reflejada en SQL/Java. La base aún no se ha ejecutado. |
+| QR | TTL configurable con valor de ocho horas; cierre manual invalida token al instante; expiración no cierra cuenta; sondeo REST. | Implementado; no se ha validado contra una BD iniciada. |
+| Domicilios | GPS voluntario con consentimiento; coordenadas conservadas en `Pedido` y visibles en la entrega protegida. Sin GPS, dirección/barrio y asignación manual de sede con disponibilidad del pedido entero. No dividir. La cobertura comercial es Neiva. | Lógica parcial: sin coordenadas reales de sucursales y un límite geográfico de Neiva no se garantiza la cobertura GPS. |
+| Devoluciones | Inspección y gestión formal de devolución de entrega fallida aplazadas fuera del MVP. | Aprobada; sustituye la antigua regla histórica de inspección. |
+| Efectivo de entrega | La declaración vigente del repartidor se almacena en `Entrega.montoEfectivoDeclarado` y se copia al crear `ConciliacionEfectivo`; las declaraciones quedan auditadas. La rectificación actualiza la fila operativa y deja su antes/después ligado a ella en auditoría. | Implementado en JPA/SQL sin agregar entidades ni duplicar la conciliación vigente. |
+| Cancelación externa | Puede solicitarse en `PENDIENTE_CONFIRMACION` o `ACEPTADO`, siempre antes de preparación. La negativa restaura el estado anterior; aprobar un pendiente no genera compensación de inventario. | Implementado conforme al alcance aprobado; los pagos solo se pueden iniciar desde estados aceptados/activos del pedido. |
+| Domicilio con GPS | Solo se reciben coordenadas con consentimiento explícito; se persisten en el pedido y se exponen en la vista protegida de la entrega. Sin GPS son obligatorios dirección y barrio. | Implementado en el modelo existente `Pedido`; la cobertura geográfica precisa de Neiva y coordenadas reales de sedes quedan pendientes de datos/configuración. |
 
-## Decisiones consolidadas
+## Pendientes técnicos reales y límites de verificación
 
-| Tema | Decisión y fundamento | Estado |
-| --- | --- | --- |
-| Producto almacenado | Inventario de productos terminados, no ingredientes. | Aprobada |
-| Momento de descuento | Al aceptar el pedido; la aceptación y el descuento son atómicos. | Aprobada |
-| Personalización | Sin modificaciones de productos en el MVP. | Aprobada |
-| Cliente | No necesita cuenta para pedidos externos ni consulta pública; el acceso QR se habilita mediante sesión temporal iniciada por personal. | Aprobada |
-| Mesa | Varios pedidos aceptados se acumulan en una cuenta por sesión; cada pedido conserva su revisión individual. | Aprobada |
-| Cancelación | El cliente solicita antes de preparación; personal autorizado aprueba/rechaza. | Aprobada; rol exacto pendiente |
-| WhatsApp | Pedido recibido por WhatsApp lo registra manualmente el trabajador en el panel. Sin API. | Aprobada |
-| Recogida | Cliente elige sede; validar el carrito completo y recomendar una sede que pueda completarlo. | Aprobada |
-| Domicilio | Asignación automática según disponibilidad del pedido completo y proximidad; no dividir el carrito. | Aprobada |
-| Sin sede disponible | No aceptar ni dividir el pedido si ninguna sede puede completarlo. | Regla mínima consolidada |
-| Repartidores | Asignación manual por atención; el repartidor solo consulta/actualiza sus entregas asignadas. | Aprobada |
-| Horarios | Configurables por sucursal; horario actual compartido documentado en SRS/UI-UX. | Aprobada |
-| Sesión QR | QR permanente identifica mesa/sucursal, no autoriza. Personal abre sesión y se genera token temporal; cerrar sesión invalida token. | Aprobada; duración técnica pendiente |
-| Cola | FIFO de presentación; 3 minutos es prioridad visual sugerida, no expiración ni rechazo automático. | Regla de UX documentada |
-| Reposición | Secundaria solicita/recibe; principal revisa, aprueba, prepara y despacha. Múltiples despachos y recepciones parciales. | Aprobada |
-| Devolución domiciliaria | Gestión formal e inspección fuera del MVP; los productos que regresen físicamente no se reincorporan automáticamente al stock disponible. | Aprobada, 22-11-2026; sustituye la regla histórica |
-| Pagos | Intentos múltiples, máximo un comprobante por intento, verificación manual y sin sobrepago. | Aprobada |
-| Reembolsos | Manuales, exclusivamente totales y registrados dentro de `Pago`; no entidad separada. | Aprobada |
-| Efectivo de entregas | Una conciliación simple por entrega; repartidor declara y trabajador autorizado registra lo recibido; diferencia requiere motivo. | Aprobada |
-| Auditoría genérica | `RegistroAuditoria` solo para acciones administrativas importantes; eventos operativos conservan sus registros propios. | Aprobada |
-| Sesión y cuenta de mesa | Relación obligatoria 1:1; se crean juntas y se cierran independientemente. Una cuenta abierta bloquea nueva sesión. | Aprobada |
-| Entrega y sucursal | `Entrega` no duplica `sucursalId`; deriva desde el pedido. | Decisión técnica incorporada al MER |
-| Reportes | Ventas por sede/periodo, historial/estados de pedidos, inventario/movimientos y reposiciones. Excluir productos más vendidos. | Aprobada |
-| Costos | Desarrollo y demostración local sin servicio obligatorio pagado. | Aprobada |
-| Fases | Análisis y diseño concluidos; MER aprobado; continuar implementación por etapas. | Aprobada |
+- Elegir y autorizar una base/esquema PostgreSQL de prueba aislado; no se conocen DB_NAME, esquema ni credenciales y no se intentó conexión.
+- Revisar V1/V2 y obtener aprobación expresa del destino antes de habilitar Flyway. El Flyway deshabilitado sigue siendo sobrescribible por configuración externa; no iniciar la aplicación con variables de DB no verificadas.
+- Probar arranque completo de Spring/JPA, integración de constraints, bloqueos/transacciones y migraciones contra el destino autorizado.
+- Configurar `AMANKAY_PRIVATE_FILES_DIR` para comprobantes; configurar coordenadas y stock real de sucursales/productos.
+- Integrar frontend Next.js, panel operativo y QR con la API; probar seguridad desde ambos clientes.
+- Definir el protocolo académico medible de usabilidad y aceptación (P-18); no bloquea este primer desarrollo.
 
-## Diferencias entre decisiones y recomendaciones
-
-1. **Permisos de cancelación:** está aprobado que personal autorizado decida la solicitud; falta asignar el permiso a roles existentes. No inferir una jerarquía.
-2. **Atención: both:** se conserva como expresión histórica sin interpretación organizativa concluyente. No crear actores/roles nuevos por esa frase.
-3. **Incidencias:** está definido el registro simple en `Entrega`; sigue pendiente quién decide reintento/retorno.
-4. **Pago parcial:** varios intentos no equivalen a un intento parcial. Falta decidir si un intento puede cubrir menos del saldo. El reembolso parcial sí está descartado.
-5. **Despliegue:** Render + Neon no quedó aprobado; el objetivo inicial es ejecución local.
-6. **Conteos:** 20 clases y 22/27 candidatas pertenecen a etapas históricas. El conteo vigente aprobado es 24 entidades de dominio + 2 asociativas = 26.
-7. **Prisma:** permanece instalado, pero la decisión aprobada el 22-11-2026 excluye su uso para administrar o modificar las tablas de PostgreSQL. No desinstalarlo como parte de la actualización documental.
-
-## Bloqueos técnicos antes de la migración inicial
-
-El MER lógico está aprobado, pero estos detalles no deben ser inventados por Codex:
-
-- **Nulabilidad:** revisar cada atributo marcado `?` en `MER.md` y asignar `NOT NULL` o nullable según la regla funcional documentada. Si no puede determinarse, registrar la pregunta en vez de escoger arbitrariamente.
-- **Origen de `MovimientoInventario`:** está definido que cada movimiento afecta un `InventarioSucursal`, pero no se ha aprobado cómo referenciar el origen. Mantener pendiente el análisis de los detalles de pedido, despacho/recepción de reposición y compensaciones; no incorporar devoluciones formales al MVP. No añadir FKs redundantes a producto/sucursal ni una referencia polimórfica sin aprobación.
-- **Estados de `Pedido` y `Pago`:** sus enums aparecen como atributos, pero el catálogo completo de valores y transiciones no está consolidado en un único lugar. No inventar valores.
-- **Unicidades pendientes:** identificador/QR de mesa, nombres de categoría/producto y configuración singleton requieren decisión o regla explícita antes de fijar índices.
-- **Tipos físicos:** precisión/escala monetaria, longitudes, defaults, nombres SQL y política de borrado deben documentarse de manera consistente al pasar a PostgreSQL/JPA con migraciones Flyway.
-
-Los demás detalles funcionales que no afectan las tablas iniciales pueden resolverse al implementar el módulo correspondiente, manteniendo la matriz de pendientes.
-
-## Decisión definitiva de reposiciones parciales
-
-El usuario confirmó expresamente que la opción aprobada es permitir múltiples despachos y múltiples recepciones parciales por solicitud, sin límite funcional. La simplificación posterior a un despacho y una recepción queda **descartada** y no reemplaza este acuerdo.
-
-1. Una solicitud puede generar varios despachos; cada despacho y sus detalles conservan las cantidades realmente enviadas.
-2. Cada recepción se relaciona con el despacho concreto que atiende y registra cantidades recibidas aptas y dañadas.
-3. Pendiente de despacho = cantidad aprobada menos suma de cantidades despachadas por detalle, sin permitir resultado negativo.
-4. Pendiente de recepción por despacho/detalle = cantidad enviada menos suma de cantidades recibidas vinculadas, sin permitir resultado negativo.
-5. Las cantidades dañadas son recibidas físicamente, pero no se agregan al inventario disponible para la venta.
-6. Los faltantes definitivos se registran mediante cierre autorizado con motivo, responsable y fecha; no se infieren automáticamente por demora.
-7. Despachos y recepciones originales se conservan. Para corregirlos se anula el evento completo y se registra uno nuevo cuando sea seguro; no se usan deltas ni se modifica/borrar el evento original.
-
-Las fórmulas y claves exactas son propuesta para el modelo lógico y quedan sujetas a revisión técnica del MER; las reglas funcionales anteriores están definidas.
-
-## Decisiones consolidadas
-
-| Tema | Decisión y fundamento | Estado |
-| --- | --- | --- |
-| Producto almacenado | Inventario de productos terminados, no ingredientes; “finished” respondía qué se inventaría. | Aprobada |
-| Momento de descuento | El usuario dijo descontar al aceptar pedido; protege de pedidos no aceptados. El diagrama de pedidos repite descuento atómico al aceptar. | Aprobada |
-| Personalización | Sin modificaciones de productos en el MVP. | Aprobada |
-| Mesa | Varios pedidos aceptados se acumulan en una cuenta de sesión; cada pedido se revisa/acepta individualmente. | Aprobada |
-| Cancelación | El cliente solicita antes de empezar preparación. El trabajador autoriza/rechaza fue explicación del asistente, sin confirmación explícita inequívoca. | Ventana aprobada; autoridad pendiente |
-| WhatsApp | Pedido directo lo registra manualmente el trabajador en panel de externos. Automatización futura. | Aprobada |
-| Recogida | Cliente elige la sede; validar carrito entero; si falta inventario recomendar sede que complete todo. | Aprobada |
-| Domicilio | La sede según inventario/proximidad aparece en el UML del asistente, no como decisión explícita del usuario. | Pendiente |
-| Repartidores | Asignación manual por atención; el repartidor no se autoasigna y solo ve pedidos propios. | Aprobada |
-| Horarios | Configurables por sucursal. | Aprobada |
-| Sesión QR | QR permanente identifica mesa/sede pero no autoriza. Personal abre sesión con token temporal, cerrado se invalida. | Aprobada |
-| Cola | FIFO de presentación; umbral recomendado de 3 minutos escala a atención prioritaria, no rechazo automático ni bloqueo. | Recomendación; umbral no finalizado |
-| Reposición | Secundaria solicita/recibe; principal revisa, aprueba, prepara/ despacha. | Aprobada en flujo solicitado/corregido |
-| Recepción | Recepción parcial, cantidades pendientes y diferencias registradas. | Aprobada explícitamente |
-| Devolución domiciliaria | Inspección obligatoria y reincorporación de unidades aptas. | Decisión histórica sustituida el 22-11-2026: gestión formal aplazada fuera del MVP; no reincorporación automática |
-| Pagos rechazados | Eliminar archivo de comprobante rechazado; conservar intento, fecha, estado y motivo. | Aprobada explícitamente |
-| Reembolsos | Manuales, exclusivamente totales y registrados dentro de `Pago`; no hay entidad separada ni parcialidad. | Definido en instrucción directa más reciente; sustituye la interpretación anterior |
-| Efectivo de entregas | Registrar monto declarado por repartidor y monto recibido por sucursal; motivo obligatorio ante diferencia. Es un flujo simple distinto del pago del cliente; no es conciliación bancaria avanzada. | Aprobada explícitamente en chat 6; conservar en alcance mínimo |
-| Auditoría genérica | Limitar `RegistroAuditoria` a acciones administrativas importantes; pagos, inventario, reposiciones y efectivo mantienen registros operacionales propios. | Definido en instrucción directa más reciente |
-| Sesión y cuenta de mesa | Relación obligatoria 1:1; crear ambas juntas y cerrar independientemente; impedir nueva sesión mientras siga abierta la cuenta. | Aprobada por el usuario |
-| Entrega y sucursal | Omitir `sucursalId` redundante en `Entrega`; derivar desde `Entrega.pedidoId -> Pedido.sucursalId`. | Recomendación técnica de esta revisión |
-| Repartidor | Entrega separada del pedido; transición recogido antes de entregado; incidencias recomendadas. | Estados aprobados por continuidad; resolución de incidencia pendiente |
-| Reportes | Ventas, pedidos, productos, inventario y reposiciones se agruparon; luego el usuario propuso eliminar productos más vendidos y dijo aprobar lo demás tras revisión. Excluir “productos más vendidos”. | Decisión posterior sustituye alcance anterior |
-| Stack anterior | Next.js/React/TypeScript con Route Handlers y Prisma como backend. | Propuesta anterior, sustituida por la arquitectura Java aprobada el 22-11-2026 |
-| Costos | Desarrollo y presentación local; no servicio obligatorio pagado ni cargos automáticos. | Restricción explícita |
-| Fases | Usuario corrigió al asistente: después de UML no se crea ya la base, se sigue el paso a paso acordado; se continuó con MER. Arquitectura/UI/UX precede programación. | Instrucción explícita |
-
-## Diferencias entre decisiones y recomendaciones
-
-1. **Cancelación:** “customer” identifica quién solicita; “before/preparation” define el plazo. No es contradicción. La exigencia de aprobación del trabajador no está confirmada. La sugerencia inicial de permitir hasta antes de preparación con autorización se conserva como pendiente, no como hecho.
-2. **Inventario “finished” vs. “before”:** la decisión “finished” fue resumida por el asistente como inventario de productos terminados (tipo de artículos), mientras que “before” era respuesta al momento de descuento en pedidos de mesa. El mensaje de usuario anterior dijo descontar cuando el trabajador acepta. Por ello no hay evidencia suficiente para sustituir aceptación por “al terminar”; el SRS documenta productos terminados y descuento al aceptar. Verificar si el contexto original deja alguna duda antes del esquema final.
-3. **Actor de atención “both”:** el término se conserva como frase del usuario; los chats no aclaran exactamente si se refiere a ambas sedes. La documentación usa un solo actor Trabajador de atención según diagramas posteriores, sin inferir su asignación organizativa.
-4. **Reportes:** en una etapa se aprobaron cinco reportes incluido productos más vendidos. Después, el usuario sugirió quitarlo y aprobó los demás tras revisión. La decisión posterior prevalece: quitarlo del MVP.
-5. **Incidencias de reparto:** el reporte de incidencias y el historial personal aparecen en el diagrama general que el usuario aprobó. La alternativa recomendada era dejar la entrega en incidencia para que atención decida; no se vio elección A/B inequívoca, por lo que queda pendiente quién resuelve y si se permite reintento.
-6. **Despliegue:** el pedido de migrar a Render + Neon aparece como texto no enviado en el cuadro de entrada del chat de stack. La última respuesta recomienda operar localmente y no depender de un plan gratis. Render/Neon no es decisión aprobada.
-7. **UML/MER:** las 20 clases y 31 relaciones corresponden a una base previa a refinamientos. Añadir las clases aprobadas en fases posteriores y revisar cardinalidades; no fijar estos conteos como definitivos.
-
-## Pendientes y decisiones aún abiertas
-
-- Rol o roles concretos que pueden aprobar cancelaciones.
-- Quién decide reintento, retorno u otra resolución de una entrega `NO_ENTREGADA`.
-- Alcance organizativo de la expresión histórica “Atención: both”.
-- Duración/expiración del token QR y mecanismo de notificaciones/actualización.
-- Si un intento de `Pago` puede ser parcial o debe cubrir el saldo completo.
-- Almacenamiento local privado, acceso, respaldo y eliminación de comprobantes.
-- Existencias iniciales y permisos/motivos para ajustes y mermas.
-- Catálogo completo y transiciones de estados de `Pedido` y `Pago`.
-- Métricas, tareas, muestra y protocolo de evaluación académica.
-- Decisiones físicas para PostgreSQL/JPA/Flyway: nulabilidad de atributos opcionales, referencia de origen de MovimientoInventario, unicidades pendientes, precisión monetaria y política de borrado.
-- Configurar JDK 25 y Maven Wrapper cuando se autorice iniciar la creación del backend; no instalar ni cambiar dependencias en esta actualización documental.
-- Confirmar la matriz concreta de permisos por rol/sucursal antes de implementar autorización.
-- Confirmar expresamente o rechazar la propuesta de máximo una compensación total por movimiento original; hasta entonces no fijar esa cardinalidad ni sus restricciones.
-
-No son pendientes: autenticación obligatoria del cliente (no se requiere para pedidos externos), aprobación del MER, conteo de entidades, tarifa de domicilio de 2.000 COP ni asignación automática de sede por disponibilidad completa y proximidad.
+No hay decisiones funcionales abiertas para los flujos aprobados en la solicitud del 22-11-2026. Los detalles reales del catálogo/stock y la configuración local son datos de puesta en marcha, no autorización para inventarlos.
 
 ## Cómo actualizar
 

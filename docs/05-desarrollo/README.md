@@ -1,43 +1,48 @@
-# Plan de desarrollo de Amankay
+# Plan y estado de desarrollo de Amankay
 
-## Estado y puerta de inicio
+## Estado actual
 
-El usuario aprobó el MER lógico de 26 entidades y la arquitectura Java el 22-11-2026. La base Next.js y el sitio público están implementados: inicio, catálogo, Panadería/Fritos/Bebidas, sucursales, proceso del pan y bolsa local con cantidades, modalidad, datos básicos y solicitud por WhatsApp. Las dos sedes están habilitadas como opciones de recogida. El pedido aún no está persistido, no valida inventario ni genera seguimiento. PostgreSQL está instalado localmente según el usuario. El backend Java todavía no existe. Prisma permanece instalado, pero no administrará ni modificará las tablas.
+Análisis y diseño concluidos; el MER lógico de 24 entidades de dominio y 2 asociativas está aprobado. El sitio público Next.js está implementado. Se autorizó e implementó una primera entrega integral del backend Java y el esquema físico en `backend/` y `docs/02-modelado/modelo-fisico-postgresql.md`.
 
-La versión objetivo aprobada es JDK 25 LTS para compilación y ejecución, Spring Boot 4.2.0 y Springdoc 3.2.1. La matriz oficial de Springdoc confirma su compatibilidad con Boot 4.2.0. Aunque el equipo tiene JDK 27, el proyecto se configurará para JDK 25; Maven global no está disponible y se usará Maven Wrapper. Flyway usará también `flyway-database-postgresql`. Las dependencias administradas por el BOM de Spring Boot prevalecen sobre versiones fijadas manualmente, salvo justificación. Esta actualización es documental: no se instaló ni configuró nada.
+El backend contiene 26 entidades JPA, migraciones SQL Flyway V1/V2 y módulos iniciales para seguridad, usuarios, catálogo/sucursales, pedidos, mesas/QR/cuentas, pagos, inventario, reposiciones, entregas y reportes. El frontend todavía no está integrado con esta API. PostgreSQL no se ha conectado ni modificado; las migraciones se prepararon pero permanecen sin ejecutar.
 
-## Secuencia propuesta
+Stack: Java 25 objetivo, Spring Boot 4.2.0, Springdoc 3.2.1, Spring Data JPA/Hibernate, PostgreSQL, Flyway, Spring Security y Maven Wrapper. Temurin JDK 25.0.5.1 está instalado y configurado en `JAVA_HOME`; JDK 27 permanece instalado, pero no se usa para el proyecto. No hay Maven global. Prisma sigue instalado y no participa en persistencia.
 
-| Fase | Trabajo | Estado | Dependencias / salida |
-|---|---|---|---|
-| 0. Cierre de preparación | SRS, UML, arquitectura, UI/UX y MER. | **Completada** | MER aprobado el 22-11-2026; decisiones abiertas permanecen registradas por módulo. |
-| 1. Entorno y base de proyecto | PostgreSQL local, Next.js App Router, TypeScript y Tailwind. | **Completada según avance reportado** | Codex debe verificar el estado real del repositorio y la conexión PostgreSQL. |
-| 2. Sistema visual y sitio público | Inicio, catálogo, sucursales, tarjetas y experiencia responsive. | **Implementada como frontend** | Integrar datos persistentes cuando el backend esté listo. |
-| 3. Navegación base | Estructura de navegación pública y rutas iniciales. | **Completada según avance reportado** | No rehacer; ajustar solo si la integración lo requiere. |
-| 4. Persistencia inicial | Resolver trazabilidad y bloqueos físicos; implementar Flyway/JPA y conexión PostgreSQL local. | Pendiente de aprobación de los bloqueos | Conservar las 26 entidades aprobadas. No generar migración hasta cerrar los bloqueos documentados. |
-| 5. Identidad y autorización | Sesión de personal, roles/sucursales y vistas protegidas. | Pendiente | Definir mecanismo concreto de autenticación; no confundirlo con sesión QR. |
-| 6. Catálogo y administración básica | Productos, categorías, precios, sucursales y horarios persistidos. | Pendiente | Persistencia y autorización. |
-| 7. Pedidos y pagos | Pedidos externos/QR, aceptación, inventario transaccional, intentos y comprobantes. | Pendiente | Persistencia, autorización y decisiones de pago pendientes. |
-| 8. Mesas y QR | Sesión temporal, pedidos QR y cuenta. | Pendiente | Identidad del personal; duración técnica del token pendiente. |
-| 9. Inventario y reposiciones | Stock, movimientos, solicitudes, despachos y recepciones. | Pendiente | Resolver origen de movimientos y operaciones transaccionales. |
-| 10. Entregas | Asignación, estados, incidencias y conciliación de recaudo. | Pendiente | Pedidos a domicilio, usuarios y pagos. |
-| 11. Reportes e integración | Reportes aprobados, auditoría y recorridos completos. | Pendiente | Datos persistidos y criterios de aceptación aprobados. |
+## Decisiones funcionales ya cerradas
 
-## Dependencias y trabajo paralelo
+- Pedido web persistido antes de abrir WhatsApp; confirmación manual en 30 minutos; sin API WhatsApp ni reserva de inventario al crear.
+- Atención registra manualmente los pedidos recibidos por WhatsApp mediante una ruta protegida; solo pedidos web vencen a los 30 minutos.
+- Pagos completos por intento, con reintentos conservados, sin sobrepago y reembolso total solamente.
+- Atención autorizada decide cancelaciones antes de preparación. Operaciones autoriza reintentos/resolución de entregas fallidas; el repartidor solo reporta las propias.
+- Ajustes, existencias iniciales y mermas de inventario requieren personal autorizado y motivo.
+- `MovimientoInventario` usa `tipoOrigen`/`idOrigen`, movimientos originales inmutables y una compensación total máxima mediante FK autorreferenciada, sin cadenas.
+- Sesión QR con TTL configurable de ocho horas; cierre manual inmediato, cuenta independiente y sondeo REST.
+- Domicilios con GPS voluntario y persistido con consentimiento para la entrega; sin GPS se exige dirección/barrio y se asigna manualmente. Una sola sucursal debe completar el pedido entero. Falta el límite geográfico de Neiva y geocodificación real para validar cobertura GPS.
+- La gestión formal de devoluciones e inspecciones está fuera del MVP; productos retornados no se reincorporan automáticamente.
 
-- Sistema visual, shell público y shell del panel pueden prepararse en paralelo con prototipos, una vez aprobada la dirección UI/UX.
-- Catálogo y navegación no necesitan autenticación; paneles con datos reales sí dependen de identidad y autorización.
-- Pedidos y pagos dependen del catálogo y persistencia. QR comparte catálogo y lógica de pedido, pero requiere sesión/cuenta.
-- Reposición depende de inventario, sucursales, roles y restricciones de cantidades; implementar el flujo después de estabilizar la capa transaccional.
-- Entregas depende de pedido domicilio y asignación de usuario/repartidor.
-- Reportes dependen de los módulos que producen los datos y deben limitarse a los reportes del SRS.
+## Próximos pasos
 
-## Estrategia de entrega
+| Orden | Trabajo | Estado / condición |
+|---|---|---|
+| 1 | Definir una base o esquema PostgreSQL local de prueba; aportar variables desde el entorno seguro. | Nombre/esquema/credenciales no confirmados; no conectar hasta esa definición. |
+| 2 | Revisar V1/V2 y autorizar su ejecución solo contra el destino aislado. | Flyway está deshabilitado; no se ejecutó DDL/DML. |
+| 3 | Ejecutar integración con PostgreSQL: migraciones, JPA, restricciones y transacciones. | Pendiente de los pasos 1–2. |
+| 4 | Completar datos reales de catálogo, coordenadas/límite de cobertura de sucursales y existencias iniciales. | No inventar recetas, coordenadas, cobertura ni saldos. |
+| 5 | Integrar Next.js con REST, construir panel administrativo y experiencia QR, manteniendo Java como fuente de reglas. | Frontend aún usa sus datos/flujo local. |
+| 6 | Verificar seguridad, accesibilidad, pruebas de extremo a extremo, reportes y OpenAPI desde un arranque autorizado. | En espera de configuración integrada. |
+| 7 | Definir protocolo académico de usabilidad con tareas, muestra y criterios medibles. | Pendiente en P-18; no bloquea construcción técnica. |
 
-Construir rebanadas verticales funcionales: interfaz, validación, caso de uso y persistencia para una tarea completa, con datos de demostración controlados. Priorizar sitio público/catálogo, pedido completo y operación mínima del personal antes de módulos menos centrales. Mantener integraciones externas no esenciales fuera del MVP y ejecución local sin costo obligatorio.
+## Comprobaciones registradas
 
-## Verificación de cada fase
+Las verificaciones separan los siguientes resultados:
 
-Al iniciar desarrollo, definir criterios de aceptación concretos por flujo según SRS. Revisar accesibilidad de teclado/contraste, móvil, manejo de estados de carga/vacío/error/éxito y consistencia en servidor. No considerar terminado un módulo solo por renderizar su interfaz; los flujos críticos necesitan persistencia y autorización verificables.
+- **Dependencias y Maven:** resolución y `mvnw validate` aprobados mediante Maven Wrapper con Temurin JDK 25.0.5.1. Maven informó respuestas 401 al consultar metadatos de dos feeds privados opcionales; las dependencias necesarias se resolvieron y los objetivos finalizaron correctamente.
+- **Compilación y empaquetado:** `mvnw package` aprobó la compilación con `--release 25` y generó el JAR usando JDK 25.0.5.1.
+- **Pruebas automatizadas:** `mvnw test` aprobó 14 pruebas (0 fallos, 0 errores), sin conexión a PostgreSQL. `HealthControllerTest` usa `@WebMvcTest`; no inicializa JPA ni demuestra el arranque integral.
+- **Modelo físico estático:** 26 entidades JPA corresponden a 26 `CREATE TABLE` de V1; no hubo diferencias de nombres. La inspección no encontró instrucciones `DROP`, `TRUNCATE`, `DELETE FROM` ni `CREATE EXTENSION` en las migraciones.
+- **Inicio completo de Spring/JPA:** no ejecutado; falta un destino PostgreSQL identificado y configurado.
+- **Flyway:** dependencias y propiedades revisadas; permanece deshabilitado. V1/V2 no se ejecutaron.
+- **Conexión a PostgreSQL, DDL/DML y migraciones:** no realizadas. Las variables `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` no estaban definidas en el entorno de esta comprobación.
+- **Integración Next.js/API:** no realizada.
 
-El MER lógico está aprobado y el proyecto raíz contiene el frontend Next.js. El estado verificado de Java es JDK 27; Maven global no está disponible. La configuración objetivo exige JDK 25 y Maven Wrapper al crear el backend. Prisma está instalado, pero no se utilizará para la persistencia. PostgreSQL local está instalado según el usuario; la autenticación y conexión de aplicación aún no se han confirmado. La trazabilidad de MovimientoInventario, nulabilidad, estados, unicidades y tipos físicos siguen como bloqueos documentales previos a la migración. No se ha creado el backend ni una migración.
+No se declarará una funcionalidad de extremo a extremo hasta probar su flujo con un PostgreSQL de prueba autorizado.

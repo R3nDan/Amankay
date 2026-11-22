@@ -72,7 +72,7 @@ El cliente puede consultar productos y sus precios, categorías, sucursales, hor
 
 Para la implementación pública, la sede principal tiene dirección confirmada en Calle 4 # 5-55, Centro de Neiva; lunes a viernes de 6:30 a. m. a 6:30 p. m.; sábados de 6:30 a. m. a 1:00 p. m.; cerrada domingos y festivos; teléfono 312 586 4045. La sede secundaria queda habilitada como opción de recogida en Carrera 7 # 19-20, Neiva, con el mismo horario y teléfono de contacto. Las tarjetas no muestran etiquetas de numeración. El modelo de horario aún debe resolver cómo registrar cierres por festivos.
 
-Las categorías iniciales confirmadas por el usuario son **Panadería**, **Fritos** (empanadas y pasteles) y **Bebidas** (avena, sevillana y guarapo). Las papas quedan fuera de la implementación inicial, aunque podrán reconsiderarse después. Son categorías del catálogo existente; no crean entidades ni reglas de pedidos adicionales. Las recetas y la disponibilidad se completan con datos confirmados.
+Las categorías iniciales confirmadas por el usuario son **Panadería**, **Fritos** (empanadas y pasteles) y **Bebidas** (avena, sevillana y guarapo). Las papas quedan fuera de la implementación inicial, aunque podrán reconsiderarse después. Son categorías del catálogo existente; no crean entidades ni reglas de pedidos adicionales. Los productos documentados en el frontend se cargan como catálogo semilla; las existencias empiezan sin saldo y se registran desde inventario autorizado.
 
 El 22-11-2026 el usuario fijó los precios para el catálogo inicial: todos los panes a **2.000 COP**, todos los fritos a **3.500 COP**, Avena y Sevillana a **3.500 COP**, y Guarapo a **3.000 COP**. Las recetas y existencias siguen pendientes.
 
@@ -82,11 +82,11 @@ El cliente selecciona la sucursal de recogida. El sistema valida el carrito comp
 
 ### RF-03 Pedido a domicilio
 
-El cliente proporciona dirección y referencias necesarias. La sucursal de preparación se asigna automáticamente entre las sedes que puedan completar el pedido, considerando la disponibilidad del pedido completo y la proximidad; no se divide un pedido entre sedes. La cobertura inicial de domicilio es Neiva y la tarifa adicional configurable para el prototipo es de 2.000 COP por solicitud de domicilio, según instrucción directa del usuario del 22-11-2026. Este importe reemplaza los 4.000 COP anteriores. Si ninguna sede puede completar el pedido, no se acepta ni se divide: se informa que no hay disponibilidad.
+El cliente puede compartir voluntariamente la ubicación GPS; solo con consentimiento Java escoge entre las sucursales con inventario para el pedido completo, usando la menor distancia geográfica a las coordenadas configuradas de sucursal, y conserva la ubicación para la entrega. Si no comparte GPS, debe proporcionar dirección y barrio; el pedido queda pendiente de asignación y el personal autorizado de operaciones selecciona la sucursal más cercana que pueda completar el pedido. No se divide un pedido. Si ninguna sede tiene disponibilidad para todo el carrito, no se acepta. La cobertura inicial es Neiva y la tarifa adicional configurable es de 2.000 COP por domicilio. Para automatizar su validación falta configurar el límite geográfico de cobertura y las coordenadas reales de las sedes.
 
 ### RF-04 Pedido de mesa
 
-El QR permanente identifica mesa y sucursal. No autoriza por sí mismo a pedir. Personal habilitado abre la sesión y el sistema genera un token temporal seguro. Al cerrar la sesión, se invalida el token. Solo una sesión activa y una cuenta abierta por mesa. No se permite abrir otra sesión mientras exista una cuenta abierta. Cada pedido se acepta/rechaza por separado; los pedidos aceptados se agregan a la misma cuenta. Cada sesión tiene exactamente una cuenta y cada cuenta corresponde a una sesión; se crean juntas en una operación atómica, pero se cierran independientemente. La cuenta puede permanecer abierta después de cerrar la sesión para completar el cobro.
+El QR permanente identifica mesa y sucursal. No autoriza por sí mismo a pedir. Personal habilitado abre la sesión y el sistema genera un token temporal seguro con expiración configurable de 8 horas. Al cerrar la sesión, se invalida inmediatamente. La expiración no cierra la cuenta. Solo una sesión activa y una cuenta abierta por mesa. No se permite abrir otra sesión mientras exista una cuenta abierta. Cada pedido se acepta/rechaza por separado; los pedidos aceptados se agregan a la misma cuenta. Cada sesión tiene exactamente una cuenta y cada cuenta corresponde a una sesión; se crean juntas en una operación atómica, pero se cierran independientemente. La cuenta puede permanecer abierta después de cerrar la sesión para completar el cobro. El cliente consulta cambios mediante sondeo REST periódico.
 
 Una cuenta puede contener varios pedidos; cada pedido QR pertenece a una cuenta y los pedidos externos no se vinculan a ninguna. Por ello, `Pedido.cuentaMesaId` es obligatorio para pedidos QR y nulo para pedidos externos.
 
@@ -96,15 +96,15 @@ El cliente escribe al canal de contacto del negocio. El personal recopila produc
 
 ### RF-06 Confirmación y expiración
 
-Los pedidos web que esperan que el cliente complete la confirmación por WhatsApp tienen vigencia de 30 minutos y luego expiran. No apartan unidades mientras están pendientes. La disponibilidad se vuelve a comprobar al aceptar.
+La API guarda el pedido web y sus precios históricos antes de abrir WhatsApp. Queda pendiente de confirmación manual del personal y vence a los 30 minutos si no se confirma. No aparta unidades mientras está pendiente; la disponibilidad se vuelve a comprobar al aceptar. No se integra la API de WhatsApp: el cliente abre la conversación fuera del sistema y el personal confirma desde el panel cuando recibe la solicitud.
 
 ### RF-07 Aceptación y cola
 
-El personal acepta o rechaza y registra un motivo en caso de rechazo. Mostrar los pedidos por llegada; avisar visual y sonoramente. Tres minutos es el tiempo recomendado para responder, no una regla confirmada de expiración. Al superar ese lapso, el pedido pasa a atención prioritaria y el trabajador puede tomar el siguiente. No rechazar automáticamente pedidos demorados ni bloquear la cola.
+El personal autorizado acepta o rechaza y registra un motivo en caso de rechazo. Mostrar los pedidos por llegada; avisar visual y sonoramente. Tres minutos es el tiempo recomendado para responder, no una regla de expiración. Al superar ese lapso, el pedido pasa a atención prioritaria y el trabajador puede tomar el siguiente. No rechazar automáticamente pedidos demorados ni bloquear la cola. Los estados del pedido son PENDIENTE_CONFIRMACION, ACEPTADO, EN_PREPARACION, LISTO, COMPLETADO, RECHAZADO, CANCELACION_SOLICITADA, CANCELADO y VENCIDO; Java limita las transiciones a las permitidas para canal y modalidad.
 
 ### RF-08 Inventario de pedidos
 
-Se controlan productos terminados, no materias primas, según la decisión “Inventario: finished” que el asistente interpretó como inventario de productos terminados. La existencia se descuenta cuando el trabajador acepta el pedido, como afirmó el usuario en una decisión previa y como se repitió en el diagrama consolidado. La operación es atómica para que dos aceptaciones no consuman las mismas unidades. Si se cancela un pedido cuyas unidades no se consumieron, el flujo debe restaurarlas.
+Se controlan productos terminados, no materias primas. Personal autorizado de inventario puede registrar saldos iniciales, ajustes y mermas; todo ajuste exige motivo obligatorio. No se inventan cantidades iniciales. La existencia se descuenta al aceptar el pedido en una operación atómica; dos aceptaciones concurrentes no pueden consumir las mismas unidades. Una cancelación aprobada antes de preparación restaura las unidades recuperables.
 
 ### RF-09 Seguimiento
 
@@ -112,7 +112,7 @@ Mostrar un código difícil de adivinar, estado actual e historial, sucursal, pr
 
 ### RF-10 Cancelaciones
 
-El cliente puede solicitar cancelar antes de que comience la preparación. La solicitud requiere aprobación de personal autorizado; no es una cancelación automática. La asignación de este permiso a un rol concreto (atención, encargado u otro rol existente) permanece pendiente y se registra en la matriz de decisiones. No ofrecer solicitud por el flujo de cliente después de iniciada la preparación.
+El cliente puede solicitar cancelar antes de que comience la preparación. La solicitud requiere aprobación de personal autorizado de atención; no es automática. No ofrecerla después de iniciada la preparación.
 
 Si se autoriza, restaurar inventario solo si había sido descontado y las unidades son recuperables; registrar reembolso manual solo si el pedido ya se pagó.
 
@@ -121,7 +121,8 @@ Si se autoriza, restaurar inventario solo si había sido descontado y las unidad
 - Medios documentados: efectivo y transferencia; sin pasarela automática acordada.
 - La transferencia se verifica manualmente antes de preparación.
 - Permitir intentos múltiples; pagos rechazados no cuentan como dinero recibido. Cada intento es un registro `Pago` y admite como máximo un comprobante; un nuevo intento crea otro `Pago`.
-- No confirmar pagos por encima del saldo pendiente.
+- Cada intento aprobado cubre el saldo pendiente completo; no se permiten pagos parciales ni sobrepagos. Se permiten nuevos intentos después de un rechazo.
+- Estados del pago: PENDIENTE, PENDIENTE_VERIFICACION, CONFIRMADO, RECHAZADO y REEMBOLSADO. La transferencia exige comprobante y revisión manual; el efectivo se confirma al registrar su recepción.
 - Cada `Pago` tiene un origen exclusivo: pedido externo o cuenta de mesa.
 - Si corresponde, permitir un reembolso manual total de un pago confirmado; no existen reembolsos parciales. La fecha, motivo, estado y responsable se registran en el mismo `Pago`.
 - Si el pago se rechaza definitivamente, borrar el archivo del comprobante; conservar estado, fecha, motivo y registro del intento. El usuario consideró innecesario conservar el archivo rechazado, no la trazabilidad.
@@ -129,9 +130,9 @@ Si se autoriza, restaurar inventario solo si había sido descontado y las unidad
 
 ### RF-12 Repartos
 
-La asignación es manual por el trabajador de atención. Un pedido a domicilio puede tener cero o una entrega; cada entrega pertenece exactamente a un pedido. El repartidor solo ve sus entregas asignadas y los datos necesarios: información del pedido, productos, cantidades, observaciones, nombre/dirección/teléfono y referencias requeridas para entregar. Registra recogida, entrega o incidencia; no puede asignarse pedidos a sí mismo. La transición a entregado no puede saltarse la recogida. Pedido y entrega mantienen estados separados.
+La asignación es manual por el trabajador de atención. Un pedido a domicilio puede tener cero o una entrega; cada entrega pertenece exactamente a un pedido. El repartidor solo ve sus entregas asignadas y los datos necesarios: información del pedido, productos, cantidades, observaciones, nombre/dirección/teléfono y referencias requeridas para entregar. Si el cliente dio consentimiento GPS, también ve esas coordenadas. Registra recogida, entrega o incidencia; no puede asignarse pedidos a sí mismo. La transición a entregado no puede saltarse la recogida. Pedido y entrega mantienen estados separados.
 
-Las incidencias se registran de forma simple en la propia `Entrega`, mediante su estado y observaciones; no se crea una entidad independiente `Incidencia` en el MVP. La decisión sobre quién autoriza un reintento, retorno u otra resolución después de una entrega no realizada permanece pendiente. Los estados de entrega aprobados son `PENDIENTE_ASIGNACION`, `ASIGNADA`, `RECOGIDA`, `EN_CAMINO`, `ENTREGADA` y `NO_ENTREGADA`.
+Las incidencias se registran de forma simple en la propia `Entrega`, mediante su estado y observaciones; no se crea una entidad independiente `Incidencia` en el MVP. El repartidor registra estados e incidencias de sus entregas asignadas; personal autorizado de operaciones decide reintentos y resolución. Los estados de entrega son `PENDIENTE_ASIGNACION`, `ASIGNADA`, `RECOGIDA`, `EN_CAMINO`, `ENTREGADA` y `NO_ENTREGADA`.
 
 Si una entrega falla, la incidencia se registra en la propia `Entrega` mediante su estado y observaciones. La gestión formal de devoluciones, las inspecciones y la reincorporación de productos quedan fuera del MVP. Los productos que regresen físicamente no se reincorporan automáticamente al inventario disponible. Esta decisión del 22-11-2026 sustituye la regla anterior de inspección obligatoria.
 
@@ -180,18 +181,14 @@ El anteproyecto propone pruebas de acceso QR, consulta de información/productos
 
 ## 9. Decisiones pendientes y precisiones por módulo
 
-Las siguientes cuestiones no reabren el MER aprobado. Se resolverán antes de implementar el módulo al que afectan; las que condicionan la estructura física de la base de datos se deben cerrar antes de generar la migración inicial.
+Las decisiones funcionales de pedidos web, pagos, permisos, GPS opcional, expiración QR y compensaciones se aprobaron el 22-11-2026 y se incorporaron en los requisitos y el MER. No reabren ni cambian las 26 entidades aprobadas.
 
-1. **Permiso de cancelación:** está aprobado que el cliente solicite antes de preparación y que personal autorizado apruebe o rechace. Falta asignar el permiso a uno o varios roles existentes.
-2. **Incidencias de entrega:** el registro mediante estado y observaciones en `Entrega` está definido. Falta decidir quién autoriza reintento, retorno u otra resolución.
-3. **Atención: both:** falta aclarar el alcance organizativo exacto de esa expresión histórica; no crear actores o roles nuevos a partir de ella.
-4. **Sesión QR:** falta fijar duración/expiración del token temporal y mecanismo de actualización/notificación. El cierre manual de sesión invalida el token.
-5. **Pagos parciales:** está aprobado permitir varios intentos y no sobrepasar el saldo pendiente. Falta decidir si un intento puede cubrir solo una parte del saldo. Los reembolsos parciales están descartados: el reembolso es manual y total.
-6. **Comprobantes:** el archivo de un intento rechazado definitivamente se elimina y se conservan sus metadatos. Falta definir almacenamiento local privado, política de respaldo y acceso antes de implementar carga/consulta.
-7. **Inventario inicial y ajustes:** falta definir existencias iniciales, quién puede hacer ajustes/mermas y los motivos exigidos. Se mantienen las reglas aprobadas de no stock negativo y trazabilidad de movimientos.
-8. **Estados y transiciones:** falta consolidar el catálogo completo de estados y transiciones de `Pedido` y `Pago`. Los estados de `Entrega` y `SolicitudReposicion` se documentan en sus respectivos apartados/modelo; no inventar estados adicionales.
-9. **Evaluación:** faltan criterios cuantificables, tareas, muestra, escala y método académico de evaluación de aceptación/usabilidad.
-10. **Detalles técnicos del esquema:** nulabilidad de atributos marcados como opcionales/provisionales y origen trazable de `MovimientoInventario` deben cerrarse en la conciliación técnica antes de la migración inicial.
+1. **Datos reales de catálogo e inventario:** nombres, descripciones, fotografías, recetas y cantidades iniciales deben proceder del negocio. No se inventan existencias; inventario las registra con personal autorizado y motivo.
+2. **Festivos:** rige el cierre aprobado de domingos y festivos; el MVP no administra un calendario editable de excepciones.
+3. **Evaluación académica:** faltan criterios cuantificables, tareas, muestra, escala y método de evaluación de aceptación/usabilidad (P-18).
+4. **Configuración local:** definir JDK 25 y una base/esquema de prueba PostgreSQL conocidos antes de iniciar Spring/JPA o autorizar Flyway. Las credenciales deben residir en el entorno del proceso.
+
+El modelo físico, incluidos tipos, nulabilidad, índices y restricciones, está documentado en `../02-modelado/modelo-fisico-postgresql.md`. Las migraciones Flyway están preparadas, pero no ejecutadas. La conexión real con PostgreSQL y la integración del frontend son verificaciones/etapas posteriores, no decisiones funcionales pendientes.
 
 ## 10. Trazabilidad histórica
 

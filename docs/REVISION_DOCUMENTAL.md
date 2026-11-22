@@ -1,44 +1,53 @@
-# Revisión documental para implementación
+# Estado documental y técnico de Amankay
 
-**Revisión de la carpeta `docs/` recibida el 22-11-2026.** Este documento orienta la lectura del conjunto; no sustituye al SRS, UML ni MER y no autoriza a modificar decisiones aprobadas.
+**Actualizado el 22-11-2026 después de aprobar las decisiones funcionales finales y preparar la base física/backend inicial.** Este índice identifica el dueño de cada decisión y distingue lo implementado de lo que aún no se ha verificado.
 
-## Fuentes de verdad por tema
+## Documentos fuente
 
-- Requisitos y reglas funcionales: `01-requisitos/SRS.md`.
-- Entidades, atributos conceptuales, relaciones y restricciones: `02-modelado/MER.md`.
-- Actores, casos de uso y representación conceptual: `02-modelado/UML.md`.
-- Arquitectura y decisiones técnicas: `03-arquitectura/arquitectura-general.md` y `stack-tecnologico.md`.
-- Decisiones, procedencia y conciliación histórica: `03-arquitectura/decisiones-tecnicas.md`.
-- Lista operativa de pendientes: `03-arquitectura/pendientes-y-decisiones.md`.
-- Criterios observables propuestos: `05-desarrollo/criterios-aceptacion.md`.
+- Requisitos: `01-requisitos/SRS.md`.
+- Entidades, atributos y cardinalidades: `02-modelado/MER.md`.
+- Diseño físico PostgreSQL y nulabilidad: `02-modelado/modelo-fisico-postgresql.md`.
+- Actores/casos de uso/clases: `02-modelado/UML.md`.
+- Stack y arquitectura: `03-arquitectura/stack-tecnologico.md` y `arquitectura-general.md`.
+- Procedencia de decisiones: `03-arquitectura/decisiones-tecnicas.md`.
+- Estado de los pendientes: `03-arquitectura/pendientes-y-decisiones.md`.
+- Plan de desarrollo y verificaciones: `05-desarrollo/README.md`.
+- Configuración y uso del backend: `../backend/README.md`.
 
-Si dos documentos parecen discrepar, no escoger una versión silenciosamente: aplicar la decisión posterior explícita registrada en `decisiones-tecnicas.md` y documentar la corrección en el archivo dueño.
+## Dirección vigente aprobada
 
-## Estado confirmado
+Frontend Next.js/React/TypeScript; backend Java 25, Spring Boot 4.2.0, Springdoc 3.2.1, Spring Security, Spring Data JPA/Hibernate como único ORM, PostgreSQL, Flyway con `flyway-database-postgresql`, Maven Wrapper y API REST `/api/v1`. Prisma permanece en el frontend y no administra las tablas. Temurin JDK 25.0.5.1 está instalado y configurado en `JAVA_HOME`; JDK 27 permanece en el equipo, pero el proyecto se verifica con JDK 25. No hay Maven global.
 
-- El usuario aprobó el MER lógico el 22-11-2026: 24 entidades de dominio y 2 asociativas (`UsuarioRol`, `UsuarioSucursal`), total 26.
-- El usuario autorizó avanzar a la fase de implementación y aprobó la arquitectura Java en la solicitud del 22-11-2026. Esta actualización solo autoriza cambios documentales; crear código o modificar la base de datos requiere una autorización posterior. No se debe volver a solicitar aprobación del MER ni rediseñar entidades/cardinalidades.
-- Arquitectura aprobada y actualizada el 22-11-2026: Next.js/React/TypeScript como frontend; backend Java 25 con Spring Boot 4.2.0; API REST /api/v1; PostgreSQL local; Spring Data JPA/Hibernate como único ORM; Flyway con `flyway-database-postgresql`; Maven Wrapper; Spring Security; JavaDocs y Springdoc/OpenAPI 3.2.1 con Swagger UI. Prisma permanece instalado, pero no escribirá ni administrará las tablas de PostgreSQL.
-- La matriz oficial de Springdoc confirma la compatibilidad de Springdoc 3.2.1 con Spring Boot 4.2.0. Java 25 es la versión objetivo de compilación y ejecución aunque el equipo tenga JDK 27. Maven global no está disponible; se usará Maven Wrapper. Las versiones administradas por el BOM de Boot prevalecen salvo excepción justificada.
-- La decisión inicial del mismo día por Boot 3.5.16/Springdoc 2.10.1 fue sustituida posteriormente por Boot 4.2.0/Springdoc 3.2.1; se conserva en `decisiones-tecnicas.md` únicamente como historial.
-- Las devoluciones formales de entregas fallidas están fuera del MVP. Los productos que regresen físicamente no se incorporan automáticamente al stock disponible.
-- PostgreSQL local, la aplicación Next.js, la página principal y la navegación base constan como completados según el avance reportado por el usuario. Codex debe diagnosticar el repositorio antes de actuar.
-- La tarifa inicial configurable de domicilio es 2.000 COP y la cobertura del prototipo es Neiva.
-- La asignación de sede para domicilio considera disponibilidad del pedido completo y proximidad; no se divide el carrito.
-- Los intentos de pago son registros separados; máximo un comprobante por intento; el reembolso manual es exclusivamente total.
-- Las reposiciones admiten múltiples despachos y recepciones parciales; las correcciones conservan originales y se hacen por anulación completa más evento nuevo cuando sea seguro.
-- La sesión QR y la cuenta de mesa se crean juntas y se cierran independientemente.
+El MER conserva 24 entidades de dominio y 2 asociativas: 26 entidades/tablas. No se agregaron entidades al modelo físico.
 
-## Bloqueos que deben resolverse antes de la migración inicial
+## Decisiones funcionales incorporadas
 
-1. **Nulabilidad:** cerrar el significado físico de cada atributo opcional/provisional (`?`) del MER. Codex no debe decidirlo por conveniencia.
-2. **Origen de `MovimientoInventario`:** mantener pendiente el diseño de trazabilidad y su aprobación. Evaluar registros de origen específicos y compensaciones sin agregar relaciones, atributos o cardinalidades al MER por cuenta propia; no duplicar FKs de producto/sucursal ni usar referencias polimórficas como solución sin aprobación.
-3. **Estados de `Pedido` y `Pago`:** consolidar valores y transiciones antes de crear enums físicos.
-4. **Unicidades pendientes:** definir unicidad de identificadores/QR de mesa, nombres de categorías/productos y la estrategia de configuración de domicilio.
-5. **Tipos físicos:** acordar precisión monetaria, longitudes, defaults y política de borrado/desactivación.
+- Pedido web guardado desde Java antes de abrir WhatsApp; confirmación manual y vencimiento de 30 minutos; no se integra la API WhatsApp.
+- El personal puede registrar manualmente pedidos recibidos por WhatsApp en la cola común; no aplica vencimiento de pedido web.
+- Intentos de pago por el saldo completo, sin parcialidad ni sobrepago; reembolsos exclusivamente totales.
+- Atención autorizada resuelve cancelaciones antes de preparación. El repartidor gestiona solo sus asignaciones; operaciones decide reintentos y resolución.
+- Inventario autorizado registra altas iniciales, ajustes y mermas con motivo obligatorio.
+- Movimiento de inventario trazable con `tipoOrigen` + `idOrigen`; originales inmutables y máximo una compensación total con FK autorreferenciada, sin cadenas.
+- QR temporal de ocho horas configurable, cierre manual inmediato, cuenta independiente y sondeo REST.
+- GPS para domicilios es opcional/consentido, se conserva para la entrega y aparece solo en vista protegida; sin GPS, dirección y barrio habilitan asignación manual. Una sola sucursal atiende el carrito completo; si no puede, no se acepta. Falta configurar coordenadas reales y un límite geográfico de Neiva para validar cobertura automáticamente.
+- Devoluciones formales e inspección por entrega fallida quedan aplazadas; retornos físicos no ingresan automáticamente al stock.
 
-Los detalles de rol para cancelaciones, resolución de incidencias, parcialidad de cada intento de pago, duración del token QR y almacenamiento de comprobantes pueden resolverse antes de implementar sus módulos, siempre que no se introduzcan columnas/enums que los presupongan en la migración inicial.
+Las versiones iniciales de Boot 3.5/Springdoc 2, la propuesta de Prisma como backend, y la inspección obligatoria de devoluciones se conservan solo como historia donde corresponda. La última decisión explícita prevalece.
 
-## Instrucción de trabajo para Codex
+## Implementación y verificación
 
-La dirección Java/Spring está aprobada, pero la creación de código y los cambios de base requieren la autorización correspondiente. No generar ni ejecutar una migración inicial hasta que los cinco bloqueos de esquema anteriores estén resueltos y reflejados en `MER.md`. No inventar entidades, estados, atributos, nulabilidad, relaciones ni reglas de negocio. Prisma no es el ORM del backend ni debe escribir en las tablas de la aplicación.
+El directorio `backend/` tiene modelo JPA de 26 entidades, migraciones SQL V1/V2 y módulos REST de personal/seguridad, catálogo, pedidos, QR/mesas/cuentas, pagos, inventario, reposiciones, entregas y reportes. Flyway continúa deshabilitado por defecto. Hibernate no genera esquema. No se conocen los parámetros finales de PostgreSQL y no se ejecutaron migraciones ni DDL/DML.
+
+Maven Wrapper resolvió dependencias; `validate`, `test` (14 pruebas aprobadas) y `package` se ejecutaron con Temurin JDK 25.0.5.1. No se inició el contexto completo que inicializa JPA, no hubo conexión PostgreSQL y no se probaron V1/V2 en una base real. El frontend todavía no consume la API. Ver `05-desarrollo/README.md` para estado detallado.
+
+## Pendientes reales
+
+1. Instalar/seleccionar JDK 25 y repetir la verificación con esa versión.
+2. Elegir expresamente una base/esquema PostgreSQL de prueba; configurar variables de entorno sin versionar secretos.
+3. Revisar V1/V2 y autorizar su ejecución solamente contra ese destino aislado.
+4. Ejecutar integración con PostgreSQL, comprobar mapeos JPA, constraints, transacciones, seguridad y OpenAPI.
+5. Configurar comprobantes privados, coordenadas/límite de cobertura y saldos reales cuando existan los datos operativos.
+6. Integrar Next.js, construir panel y experiencia QR, y probar sus flujos con la API.
+7. Completar el protocolo académico de usabilidad (P-18); no bloquea la implementación técnica.
+
+Los nombres de base, esquema, contraseñas, coordenadas reales y existencias iniciales no se suponen ni aparecen en ejemplos. Las decisiones funcionales anteriores no se reabren.

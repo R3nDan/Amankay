@@ -28,7 +28,7 @@ Combinación aprobada por el usuario el 22-11-2026 y verificada en la documentac
 
 | Componente | Objetivo | Compatibilidad / condición |
 | --- | --- | --- |
-| Java | JDK 25 LTS | Versión objetivo tanto de compilación como de ejecución. Aunque el equipo tenga JDK 27, el proyecto se compilará y ejecutará con JDK 25. |
+| Java | JDK 25 LTS | Versión objetivo tanto de compilación como de ejecución. Temurin 25.0.5.1 está instalado y configurado en `JAVA_HOME`; JDK 27 permanece instalado, pero no se usa para este proyecto. |
 | Spring Boot | 4.2.0 | Versión aprobada; Java 25 está dentro del rango compatible oficial de Java 17 a 27. |
 | Springdoc/OpenAPI | 3.2.1 | Compatible con Spring Boot 4.2.0 según la matriz oficial de Springdoc. |
 | Persistencia | Spring Data JPA + Hibernate | Único ORM; usar las versiones administradas por el BOM de Spring Boot. |
