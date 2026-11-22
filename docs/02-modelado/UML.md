@@ -2,7 +2,7 @@
 
 ## Estado y alcance
 
-Este documento consolida actores, casos de uso y clases conceptuales del MVP. Las decisiones listadas aquí fueron aprobadas conjuntamente; no implica aprobación final del MER ni autorización para programar o crear la base de datos. La descripción de entidades y cardinalidades se mantiene alineada con [MER.md](MER.md).
+Este documento consolida actores, casos de uso y clases conceptuales del MVP. El usuario aprobó el MER lógico alineado a este UML y autorizó avanzar al desarrollo el 22-11-2026. Las decisiones funcionales aún pendientes se conservan en el SRS y no se asumen por la aprobación del modelo.
 
 ## Actores
 
@@ -10,10 +10,9 @@ Este documento consolida actores, casos de uso y clases conceptuales del MVP. La
 - **Atención/caja:** gestiona mesas y pedidos, verifica pagos, registra pagos y recibe/coordina pedidos externos.
 - **Encargado de inventario:** opera inventario y reposiciones según su asociación a la sucursal solicitante o proveedora.
 - **Repartidor:** usuario con rol asignado; realiza entregas y declara el recaudo entregado a sucursal.
-- **Empleado autorizado de sucursal:** registra el monto recibido del repartidor.
 - **Administrador:** gestiona configuración y usuarios; interviene en anulaciones excepcionales. No obtiene permisos operativos automáticamente.
 
-Los permisos se determinan por rol y sucursal con `UsuarioRol` y `UsuarioSucursal`. No existen permisos individuales ni doble autorización obligatoria por defecto. Una misma persona puede registrar y autorizar operaciones ordinarias.
+El registro del monto recibido del repartidor lo realiza un trabajador autorizado de la sucursal mediante sus permisos existentes; no se crea un actor, rol ni entidad independiente para el receptor. Los permisos se determinan por rol y sucursal con `UsuarioRol` y `UsuarioSucursal`. No existen permisos individuales ni doble autorización obligatoria por defecto. Una misma persona puede registrar y autorizar operaciones ordinarias.
 
 ## Casos de uso por módulo
 
@@ -37,7 +36,6 @@ actor Cliente
 actor "Atención / Caja" as Atencion
 actor "Encargado de inventario" as Inventario
 actor Repartidor
-actor "Empleado receptor" as Receptor
 actor Administrador
 rectangle Amankay {
   usecase "Consultar catálogo y sucursales" as UC1
@@ -63,7 +61,7 @@ Inventario -- UC7
 Inventario -- UC8
 Repartidor -- UC9
 Repartidor -- UC10
-Receptor -- UC11
+Atencion -- UC11 : si tiene permiso en la sucursal
 Administrador -- UC12
 Administrador -- UC9 : anulaciones excepcionales
 @enduml

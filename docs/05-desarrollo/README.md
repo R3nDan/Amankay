@@ -2,24 +2,24 @@
 
 ## Estado y puerta de inicio
 
-El usuario confirmó el 22-11-2026 que análisis y diseño ya concluyeron y autorizó desarrollar el apartado público de pedidos. La base Next.js y el sitio público ya están implementados: inicio, catálogo, Panadería/Fritos/Bebidas, sucursales dentro de Inicio y en su propia ruta, tarjeta de fotos del proceso con transición temporizada y video del pan en bucle sin controles. «Pide» abre una bolsa local con selección, cantidades, modalidad y datos básicos; prepara una solicitud por WhatsApp. Las fotografías recibidas se integran en las tres categorías. La sede principal tiene dirección, horario y teléfono confirmados; la segunda sede se muestra con datos de demostración porque aún no existe. Los precios del catálogo fueron indicados por el usuario. La disponibilidad, persistencia y reglas operativas permanecen pendientes de integración; el envío a WhatsApp no equivale a un pedido registrado o aceptado en Amankay.
+El usuario confirmó el 22-11-2026 que análisis y diseño concluyeron, aprobó el MER lógico y autorizó desarrollar el ecosistema. La base Next.js y el sitio público están implementados: inicio, catálogo, Panadería/Fritos/Bebidas, sucursales, proceso del pan y bolsa local con cantidades, modalidad, datos básicos y solicitud por WhatsApp. Las dos sedes están habilitadas como opciones de recogida conforme a la decisión más reciente del usuario. El catálogo usa los precios indicados por el usuario. El pedido sigue siendo una solicitud externa: no está persistido, no valida inventario ni genera seguimiento. PostgreSQL está instalado localmente según el usuario. La instalación y versión de Prisma ORM, Prisma Client y el adaptador PostgreSQL deben verificarse en el repositorio antes de instalar o actualizar paquetes; aún falta validar la conexión y crear el esquema/migración.
 
 ## Secuencia propuesta
 
-| Fase | Trabajo | Dependencias / salida |
-|---|---|---|
-| 0. Cierre de preparación | Aprobación de MER; validar pendientes funcionales que bloqueen rutas/estados; confirmar autenticación, archivos y responsables de operación. | Requisitos/modelos consolidados. No requiere código. |
-| 1. Arquitectura y base de proyecto | Elegir versiones compatibles; crear Next.js App Router con TypeScript/Tailwind; configurar lint/format, variables locales y scripts; definir layout y gestión de errores. | Aprobación de arquitectura y autorización para iniciar implementación. |
-| 2. Sistema visual y cimientos UI | Tokens, tipografía, botones, campos, tarjetas, diálogo, badges, navegación y patrones de carga/vacío/error/éxito. | Diseño UI/UX; se puede avanzar en paralelo a preparar modelos visuales sin base conectada. |
-| 3. Sitio público y catálogo | Inicio, menú, sucursales, navegación responsive y componentes de producto; conectar datos de catálogo cuando persistencia esté lista. | Componentes visuales; categorías/productos. |
-| 4. Identidad y autorización | Sesión de usuario, roles/sucursales en servidor y layouts protegidos; controles de acceso por módulo. | Modelo de usuarios/roles y decisión del mecanismo de autenticación. Bloquea panel operativo real. |
-| 5. Pedidos públicos | Carrito, recogida/domicilio, validaciones, creación y seguimiento con código seguro. | Catálogo, persistencia, reglas de selección/sucursal y pagos del SRS. |
-| 6. Operación de pedidos y pagos | Cola, detalle, aceptar/rechazar/preparar, intents de pago, comprobante, verificación y reembolso total. | Autorización, modelo pedido/pago e inventario transaccional. |
-| 7. Mesas y QR | Apertura conjunta de sesión/cuenta, token temporal, pedidos QR, cierre independiente y bloqueo por cuenta abierta. | Pedidos, cuenta/pago, autenticación del trabajador y reglas de sesión. Puede avanzar con UI paralela a catálogo público. |
-| 8. Inventario y reposiciones | Existencias/movimientos; solicitud, revisión, despachos, recepciones parciales, cierres/reversas por línea y anulaciones seguras. | Persistencia, roles por sucursal y reglas aprobadas del MER; transacciones antes de usar datos reales. |
-| 9. Entregas | Asignación de repartidor, cambios de estado, incidencia, recaudo/conciliación. | Pedidos domicilio, usuarios y pagos. |
-| 10. Administración y reportes | Productos/categorías, horarios/sucursales/configuración, usuarios y reportes/auditoría del MVP. | Autorización y datos operativos de los módulos relacionados. |
-| 11. Integración y verificación | Recorridos completos, límites de permisos, concurrencia de inventario/pagos, errores, responsive y accesibilidad. | Funcionalidades integradas; criterios de aceptación SRS. |
+| Fase | Trabajo | Estado | Dependencias / salida |
+|---|---|---|---|
+| 0. Cierre de preparación | SRS, UML, arquitectura, UI/UX y MER. | **Completada** | MER aprobado el 22-11-2026; decisiones abiertas permanecen registradas por módulo. |
+| 1. Entorno y base de proyecto | PostgreSQL local, Next.js App Router, TypeScript y Tailwind. | **Completada según avance reportado** | Codex debe verificar el estado real del repositorio y la conexión PostgreSQL. |
+| 2. Sistema visual y sitio público | Inicio, catálogo, sucursales, tarjetas y experiencia responsive. | **Implementada como frontend** | Integrar datos persistentes cuando el backend esté listo. |
+| 3. Navegación base | Estructura de navegación pública y rutas iniciales. | **Completada según avance reportado** | No rehacer; ajustar solo si la integración lo requiere. |
+| 4. Persistencia inicial | Verificar Prisma/Prisma Client/adaptador, modelar esquema, migración inicial y conexión. | **Siguiente fase** | Cerrar los bloqueos técnicos enumerados en MER y decisiones técnicas antes de migrar. |
+| 5. Identidad y autorización | Sesión de personal, roles/sucursales y vistas protegidas. | Pendiente | Definir mecanismo concreto de autenticación; no confundirlo con sesión QR. |
+| 6. Catálogo y administración básica | Productos, categorías, precios, sucursales y horarios persistidos. | Pendiente | Persistencia y autorización. |
+| 7. Pedidos y pagos | Pedidos externos/QR, aceptación, inventario transaccional, intentos y comprobantes. | Pendiente | Persistencia, autorización y decisiones de pago pendientes. |
+| 8. Mesas y QR | Sesión temporal, pedidos QR y cuenta. | Pendiente | Identidad del personal; duración técnica del token pendiente. |
+| 9. Inventario y reposiciones | Stock, movimientos, solicitudes, despachos y recepciones. | Pendiente | Resolver origen de movimientos y operaciones transaccionales. |
+| 10. Entregas | Asignación, estados, incidencias y conciliación de recaudo. | Pendiente | Pedidos a domicilio, usuarios y pagos. |
+| 11. Reportes e integración | Reportes aprobados, auditoría y recorridos completos. | Pendiente | Datos persistidos y criterios de aceptación aprobados. |
 
 ## Dependencias y trabajo paralelo
 
@@ -38,4 +38,4 @@ Construir rebanadas verticales funcionales: interfaz, validación, caso de uso y
 
 Al iniciar desarrollo, definir criterios de aceptación concretos por flujo según SRS. Revisar accesibilidad de teclado/contraste, móvil, manejo de estados de carga/vacío/error/éxito y consistencia en servidor. No considerar terminado un módulo solo por renderizar su interfaz; los flujos críticos necesitan persistencia y autorización verificables.
 
-La aplicación Next.js está creada. Prisma ORM 7, Prisma Client y el adaptador PostgreSQL están instalados; todavía no se ha configurado el cliente, creado el esquema o generado migraciones, ni creado/conectado una base de datos. El MER continúa pendiente de aprobación.
+La base del proyecto está creada y el MER lógico está aprobado. El estado real de Prisma, Prisma Client, el adaptador, el esquema y las migraciones debe verificarse con Codex en el repositorio. No reinstalar paquetes a ciegas. PostgreSQL local está instalado según el usuario; falta confirmar conexión efectiva. El usuario reporta completadas las etapas de entorno, aplicación Next.js, página principal y navegación básica.

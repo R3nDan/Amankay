@@ -2,7 +2,7 @@
 
 ## Estado
 
-Arquitectura de referencia del MVP. El usuario autorizó iniciar la primera implementación visual y el repositorio ya contiene la aplicación Next.js, el catálogo público y recursos gráficos. Esta entrega no configura persistencia, Prisma, base de datos ni migraciones; los módulos operativos continúan planificados.
+Arquitectura de referencia del MVP. El usuario confirmó el 22-11-2026 que análisis y diseño concluyeron, aprobó el MER lógico y autorizó avanzar con el desarrollo del ecosistema. La aplicación pública y la navegación base están implementadas según el avance reportado. PostgreSQL está instalado localmente según el usuario. La presencia y versiones reales de Prisma, Prisma Client y el adaptador deben verificarse en el repositorio antes de instalar o actualizar paquetes; backend, esquema y conexión local son el siguiente trabajo.
 
 ## Producto
 
@@ -12,7 +12,7 @@ Amankay será una sola aplicación web integral para operar un negocio de comida
 2. **Interfaz QR:** experiencia móvil que usa la mesa y su sesión activa para consultar catálogo, pedir y consultar estados.
 3. **Panel administrativo y operativo:** pedidos, mesas/cuentas, pagos, inventario/reposiciones, entregas y administración.
 
-No es solo un sitio informativo ni una aplicación móvil nativa. No se automatiza WhatsApp; los pedidos recibidos por ese medio se registran desde el panel. El nombre comercial definitivo y su relación con Amankay siguen pendientes según SRS.
+No es solo un sitio informativo ni una aplicación móvil nativa. No se automatiza WhatsApp; los pedidos recibidos por ese medio se registran desde el panel. El usuario confirmó Amankay como nombre comercial.
 
 ## Dirección tecnológica
 
@@ -22,7 +22,7 @@ No es solo un sitio informativo ni una aplicación móvil nativa. No se automati
 | Estilos y componentes | Tailwind CSS, shadcn/ui | Sistema responsive y componentes reutilizables. |
 | Iconos y movimiento | Lucide React, Motion, GSAP | Iconografía, transiciones UI y secuencias puntuales. |
 | Formularios/validación | React Hook Form cuando aporte valor, Zod | Formularios del cliente y panel; validación en servidor. |
-| Persistencia | PostgreSQL local y Prisma | Base relacional; se incorpora después de aprobar modelo y autorizar implementación. |
+| Persistencia | PostgreSQL local y Prisma ORM | Modelo lógico aprobado e implementación autorizada; verificar paquetes/versiones en el repositorio y configurar esquema, cliente y conexión local. |
 
 Three.js/React Three Fiber/Drei están instalados para escenas promocionales 3D concretas, con carga diferida y alternativa estática si el rendimiento se afecta. PixiJS queda disponible para visuales 2D interactivos. Se mantienen fuera de los paneles operativos y de flujos críticos. No añadir Express separado, microservicios, Redis, colas o infraestructura pagada para el MVP.
 

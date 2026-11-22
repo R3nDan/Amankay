@@ -82,7 +82,7 @@ El cliente selecciona la sucursal de recogida. El sistema valida el carrito comp
 
 ### RF-03 Pedido a domicilio
 
-El cliente proporciona dirección y referencias necesarias. La sucursal de preparación se asigna automáticamente según disponibilidad del pedido completo y proximidad; no se divide un pedido entre sedes. La cobertura de domicilio disponible para el prototipo es Neiva y la tarifa adicional es de 2.000 COP por solicitud de domicilio, según instrucción directa del usuario del 22-11-2026. Esta tarifa reemplaza el valor reportado anteriormente de 4.000 COP. La asignación automática de sede sigue registrada como decisión reportada en la matriz de conciliación.
+El cliente proporciona dirección y referencias necesarias. La sucursal de preparación se asigna automáticamente entre las sedes que puedan completar el pedido, considerando la disponibilidad del pedido completo y la proximidad; no se divide un pedido entre sedes. La cobertura inicial de domicilio es Neiva y la tarifa adicional configurable para el prototipo es de 2.000 COP por solicitud de domicilio, según instrucción directa del usuario del 22-11-2026. Este importe reemplaza los 4.000 COP anteriores. Si ninguna sede puede completar el pedido, no se acepta ni se divide: se informa que no hay disponibilidad.
 
 ### RF-04 Pedido de mesa
 
@@ -112,7 +112,7 @@ Mostrar un código difícil de adivinar, estado actual e historial, sucursal, pr
 
 ### RF-10 Cancelaciones
 
-El cliente puede solicitar cancelar antes de que comience la preparación y la solicitud la aprueba el personal encargado. La ventana está en los once chats; la aprobación por personal se reporta como decisión previa en el resumen que el usuario compartió el 21-11-2026, aunque no queda inequívocamente confirmada en los once enlaces. No ofrecer solicitud por el flujo de cliente después de iniciada la preparación. Registrar la procedencia secundaria en la matriz de conciliación.
+El cliente puede solicitar cancelar antes de que comience la preparación. La solicitud requiere aprobación de personal autorizado; no es una cancelación automática. La asignación de este permiso a un rol concreto (atención, encargado u otro rol existente) permanece pendiente y se registra en la matriz de decisiones. No ofrecer solicitud por el flujo de cliente después de iniciada la preparación.
 
 Si se autoriza, restaurar inventario solo si había sido descontado y las unidades son recuperables; registrar reembolso manual solo si el pedido ya se pagó.
 
@@ -131,7 +131,7 @@ Si se autoriza, restaurar inventario solo si había sido descontado y las unidad
 
 La asignación es manual por el trabajador de atención. Un pedido a domicilio puede tener cero o una entrega; cada entrega pertenece exactamente a un pedido. El repartidor solo ve sus entregas asignadas y los datos necesarios: información del pedido, productos, cantidades, observaciones, nombre/dirección/teléfono y referencias requeridas para entregar. Registra recogida, entrega o incidencia; no puede asignarse pedidos a sí mismo. La transición a entregado no puede saltarse la recogida. Pedido y entrega mantienen estados separados.
 
-Las incidencias se manejan con estados y observaciones simples; no se crea una entidad independiente de incidencias en el MVP. Esto fue reportado en el resumen de ChatGPT compartido por el usuario el 21-11-2026 y no estaba en los once enlaces originales. Se conserva como decisión reportada; el estado y observación requeridos se definirán dentro del flujo de entrega.
+Las incidencias se registran de forma simple en la propia `Entrega`, mediante su estado y observaciones; no se crea una entidad independiente `Incidencia` en el MVP. La decisión sobre quién autoriza un reintento, retorno u otra resolución después de una entrega no realizada permanece pendiente. Los estados de entrega aprobados son `PENDIENTE_ASIGNACION`, `ASIGNADA`, `RECOGIDA`, `EN_CAMINO`, `ENTREGADA` y `NO_ENTREGADA`.
 
 Si una entrega falla y regresan productos, estos quedan **Pendientes de inspección**, separados de las existencias disponibles. Un trabajador autorizado registra responsable, fecha, cantidad y observaciones. Las unidades aptas vuelven al inventario; las no aptas se registran como pérdida con motivo. Un mismo pedido puede tener unidades aptas y dañadas. Ninguna unidad vuelve a la venta sin inspección.
 
@@ -178,19 +178,20 @@ Registrar con `RegistroAuditoria` solo acciones administrativas importantes, inc
 
 El anteproyecto propone pruebas de acceso QR, consulta de información/productos y creación de pedidos; revisión del flujo de abastecimiento entre sedes; y opinión de clientes y personal sobre facilidad de uso. Métricas, método de muestreo y criterios de aceptación aún no están definidos.
 
-## 9. Decisiones pendientes
+## 9. Decisiones pendientes y precisiones por módulo
 
-1. Registro, compra invitada y autenticación de clientes: no asumir que el cliente inicia sesión.
-2. Permiso de cancelación: aprobación automática o revisión/decisión de trabajador.
-3. Flujo de incidencias de entrega y quién decide el siguiente paso.
-4. Definición exacta de “Atención: both” y parámetros administrativos de reportes.
-5. Duración de sesión de mesa; quedó como detalle técnico pendiente.
-6. Tecnología de notificaciones al cliente; no definida.
-7. Proceso exacto para reversar stock según unidades consumidas, dañadas o devueltas.
-8. Qué inventario de productos terminados se cargará al iniciar y quién puede hacer ajustes/mermas.
-9. Estados y permisos de pedido, pago y entrega; los estados de solicitud de reposición aprobados son `PENDIENTE_REVISION`, `RECHAZADA`, `EN_PROCESO` y `COMPLETADA`. `BORRADOR` solo se incorpora si el flujo necesita guardar solicitudes sin enviar. Los permisos operativos se aplican por rol y sucursal mediante asociaciones existentes, sin permisos individuales ni doble autorización por defecto.
-11. Criterios cuantificables y método de evaluación de aceptación/usabilidad.
-13. Reconciliar el conteo de 22 entidades citado en el resumen nuevo con las clases base y refinamientos documentados, antes de aprobar UML/MER.
+Las siguientes cuestiones no reabren el MER aprobado. Se resolverán antes de implementar el módulo al que afectan; las que condicionan la estructura física de la base de datos se deben cerrar antes de generar la migración inicial.
+
+1. **Permiso de cancelación:** está aprobado que el cliente solicite antes de preparación y que personal autorizado apruebe o rechace. Falta asignar el permiso a uno o varios roles existentes.
+2. **Incidencias de entrega:** el registro mediante estado y observaciones en `Entrega` está definido. Falta decidir quién autoriza reintento, retorno u otra resolución.
+3. **Atención: both:** falta aclarar el alcance organizativo exacto de esa expresión histórica; no crear actores o roles nuevos a partir de ella.
+4. **Sesión QR:** falta fijar duración/expiración del token temporal y mecanismo de actualización/notificación. El cierre manual de sesión invalida el token.
+5. **Pagos parciales:** está aprobado permitir varios intentos y no sobrepasar el saldo pendiente. Falta decidir si un intento puede cubrir solo una parte del saldo. Los reembolsos parciales están descartados: el reembolso es manual y total.
+6. **Comprobantes:** el archivo de un intento rechazado definitivamente se elimina y se conservan sus metadatos. Falta definir almacenamiento local privado, política de respaldo y acceso antes de implementar carga/consulta.
+7. **Inventario inicial y ajustes:** falta definir existencias iniciales, quién puede hacer ajustes/mermas y los motivos exigidos. Se mantienen las reglas aprobadas de no stock negativo y trazabilidad de movimientos.
+8. **Estados y transiciones:** falta consolidar el catálogo completo de estados y transiciones de `Pedido` y `Pago`. Los estados de `Entrega` y `SolicitudReposicion` se documentan en sus respectivos apartados/modelo; no inventar estados adicionales.
+9. **Evaluación:** faltan criterios cuantificables, tareas, muestra, escala y método académico de evaluación de aceptación/usabilidad.
+10. **Detalles técnicos del esquema:** nulabilidad de atributos marcados como opcionales/provisionales y origen trazable de `MovimientoInventario` deben cerrarse en la conciliación técnica antes de la migración inicial.
 
 ## 10. Trazabilidad histórica
 

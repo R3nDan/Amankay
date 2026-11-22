@@ -2,9 +2,9 @@
 
 ## Estado
 
-El MER está en fase de análisis. Se trabajaron identificación de entidades, atributos/identificadores y relaciones/cardinalidades en bloques; el usuario aprobó el bloque de relaciones/cardinalidades para avanzar a entidades asociativas, claves foráneas y estructura lógica. La creación de tablas o base de datos no está autorizada todavía.
+El usuario confirmó el 22-11-2026 que el análisis y diseño concluyeron y aprobó el MER lógico consolidado de este documento. Se autoriza avanzar a implementación. La aprobación no resuelve las decisiones funcionales que el SRS y la matriz de pendientes mantienen abiertas; estas deben tratarse al implementar cada módulo, sin reabrir el modelo aprobado.
 
-El inventario descrito aquí es el modelo lógico consolidado para revisión y aprobación. La cuenta histórica de 31 relaciones precede a refinamientos posteriores y no se usa como conteo actual.
+El inventario descrito aquí es el modelo lógico aprobado. La cuenta histórica de 31 relaciones precede a refinamientos posteriores y no se usa como conteo actual.
 
 ## Grupos de entidades
 
@@ -17,11 +17,11 @@ El inventario descrito aquí es el modelo lógico consolidado para revisión y a
 7. Reposición: `SolicitudReposicion`, `DetalleSolicitudReposicion`, `DespachoReposicion`, `DetalleDespachoReposicion`, `RecepcionReposicion`, `DetalleRecepcionReposicion`.
 8. Administración y trazabilidad: `HorarioSucursal`, `ConfiguracionDomicilio`, `RegistroAuditoria`.
 
-La lista es un inventario de trabajo, no un MER aprobado completo. No se incorpora `CierreFaltanteReposicion` al MVP; el cierre final se registra en la línea de solicitud o despacho correspondiente. Las correcciones de despachos y recepciones se realizan anulando el evento completo cuando sea seguro y registrando uno nuevo.
+La lista resume los grupos del MER lógico aprobado. No se incorpora `CierreFaltanteReposicion` al MVP; el cierre final se registra en la línea de solicitud o despacho correspondiente. Las correcciones de despachos y recepciones se realizan anulando el evento completo cuando sea seguro y registrando uno nuevo.
 
 ## Inventario técnico entidad por entidad
 
-El inventario previo a esta revisión contiene **27 candidatas**: 20 clases del UML base, 4 clases de pagos y 3 clases de reposición añadidas después. Esta cifra no representa el total de tablas propuesto tras resolver fusiones y asociaciones. La propuesta conciliada y su desglose aparecen al final de este documento. Ninguna cifra equivale a aprobación del esquema físico. Los tipos son conceptuales; `id UUID` sigue la convención UML y requiere confirmación en el modelo lógico. El UML base nombra atributos, pero en general no define nulabilidad: sin `?` significa que el atributo aparece en la fuente, no que ya se haya aprobado `NOT NULL`.
+El inventario histórico de 27 candidatas corresponde a una etapa anterior y no representa el modelo vigente. El modelo lógico aprobado contiene 24 entidades de dominio y 2 asociativas, total 26. La aprobación cubre entidades, relaciones y reglas conceptuales; los detalles físicos de Prisma/PostgreSQL deben concretarse sin alterar el modelo. Los vacíos que no puedan resolverse con requisitos aprobados se registran como bloqueos, no se completan por suposición.
 
 | Entidad | Propósito y atributos documentados (tipo conceptual; `?` = opcional/provisional) | PK y FKs candidatas | Relaciones / cardinalidad candidata | Prioridad y estado |
 | --- | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ El inventario previo a esta revisión contiene **27 candidatas**: 20 clases del 
 | `Categoria` | Clasifica productos: `id UUID`, `nombre String`, `descripcion String?`, `activa Boolean`. | PK `id`. | 1:N `Producto`; unicidad de nombre y ámbito global/sucursal pendientes. | Esencial; UML base. |
 | `Producto` | Catálogo global: `id UUID`, `nombre String`, `descripcion String?`, `imagen String?`, `precio Decimal`, `activo Boolean`, `fechaCreacion DateTime`, `fechaActualizacion DateTime`. | PK `id`; FK `categoriaId`. | M:1 `Categoria`; 1:N a inventarios, detalles de pedido y detalle de solicitud. Unicidad/variantes pendientes. | Esencial; UML base. |
 | `InventarioSucursal` | Saldo disponible de producto terminado por sede: `id UUID`, `stockDisponible Integer`, `fechaActualizacion DateTime`. | PK `id`; FKs `sucursalId`, `productoId`. | M:1 a cada una; única pareja `(sucursalId, productoId)`. | Esencial; UML base. |
-| `MovimientoInventario` | Historial de entradas/salidas/ajustes: `id UUID`, `tipo TipoMovimiento`, `cantidad Integer`, `stockAnterior Integer`, `stockResultante Integer`, `fechaHora DateTime`, `motivo String`. | PK `id`; FK a inventario/producto/sucursal; `usuarioId?`; referencia al origen de reposición/pedido por definir. | M:1 a inventario y actor humano o sistema; una operación de negocio puede originar movimientos. | Esencial; origen FK y motivos obligatorios por tipo por definir. |
+| `MovimientoInventario` | Historial de entradas/salidas/ajustes: `id UUID`, `tipo TipoMovimiento`, `cantidad Integer`, `stockAnterior Integer`, `stockResultante Integer`, `fechaHora DateTime`, `motivo String`. | PK `id`; FK requerida a `InventarioSucursal`; `usuarioId?` según movimiento. No duplicar FKs a producto y sucursal porque se derivan de `InventarioSucursal`. La referencia al evento de origen sigue sin decisión. | M:1 a `InventarioSucursal`; M:1 opcional a usuario responsable. | Esencial; la referencia al origen es bloqueo técnico previo a la migración. |
 | `Pedido` | Pedido externo o QR: `id UUID`, `codigoSeguimiento String`, `tipo TipoPedido`, `canalOrigen CanalOrigen`, `estado EstadoPedido`, `fechaCreacion DateTime`, `total Decimal`, `costoDomicilioHistorico Decimal?`, `nombreCliente String?`, `telefonoCliente String?`, `direccionEntrega String?`, `barrio String?`, `referenciaDireccion String?`, `nombreDestinatario String?`, `telefonoDestinatario String?`. | PK `id`; FKs `sucursalId`, `cuentaMesaId?`; cliente sin login, no asumir FK a usuario. | 1:N `DetallePedido`; externo pertenece a una sucursal responsable; QR pertenece obligatoriamente a una cuenta de mesa. Solo pedidos externos tienen `cuentaMesaId = NULL`. Pedido domicilio: 0..1 `Entrega`. | Esencial; validar coherencia del tipo con FK opcional. |
 | `DetallePedido` | Línea e importe histórico: `id UUID`, `cantidad Integer`, `precioUnitarioHistorico Decimal`, `nombreProductoHistorico String`. | PK `id`; FKs `pedidoId`, `productoId`. | M:1 pedido y producto; no existe `DetalleCuenta`; la cuenta se deriva de pedidos aceptados. | Esencial; UML base. |
 | `Mesa` | Mesa identificada por sucursal: `id UUID`, `identificador String`, `identificadorQR String`, `activa Boolean`. | PK `id`; FK `sucursalId`. | M:1 sucursal; 1:N sesiones históricas. Unicidad de identificador/QR por sede por definir. | Esencial; UML base. |
@@ -42,8 +42,8 @@ El inventario previo a esta revisión contiene **27 candidatas**: 20 clases del 
 | `MovimientoBancario` | Elemento del inventario previo para verificación manual, sin atributos fuente ni integración bancaria. | No se propone PK/FK en el MVP. | Resultado y datos mínimos de verificación se registran en `Pago`. | Se propone retirar por redundancia; reevaluar solo si aparece conciliación bancaria real. |
 | `Reembolso` | Fusionado en `Pago`; sin entidad separada. Si procede, se registra un reembolso manual total con fecha, motivo, actor y estado. | Sin PK/FK propia; datos dentro de `Pago`. | No hay reembolso parcial ni relación 1:N. | Fusionado en `Pago`; decisión funcional vigente. |
 | `ConciliacionEfectivo` | Registro simple de entrega de recaudo: `id UUID`, `montoDeclarado Decimal`, `montoRecibido Decimal`, `fechaConciliacion DateTime`, `motivoDiferencia String?`. | PK `id`; FK `entregaId NOT NULL UNIQUE`, `declaradoPor -> Usuario` (repartidor) y `recibidoPor -> Usuario` (empleado autorizado). | Cero o una conciliación por entrega en efectivo. El repartidor declara y el empleado de la sucursal registra lo recibido; diferencia requiere motivo. Rectificaciones excepcionales se documentan en `RegistroAuditoria`. | Esencial; decisión aprobada. |
-| `Entrega` | Seguimiento del domicilio: `id UUID`, `estado EstadoEntrega`, `fechaCreacion DateTime`, `fechaRecogida DateTime?`, `fechaSalida DateTime?`, `fechaEntrega DateTime?`, `observaciones String?`. | PK `id`; FK `pedidoId NOT NULL UNIQUE`, `repartidorId?`. | Un pedido de domicilio tiene 0..1 entregas; una entrega pertenece a exactamente un pedido domicilio. Sucursal responsable deriva de `Pedido.sucursalId`; repartidor es `Usuario` opcional. | Esencial; sin FK redundante a sucursal. |
-| `ConfiguracionDomicilio` | Parámetros generales: `id UUID`, `tarifa Decimal`, `activo Boolean`, `fechaActualizacion DateTime`; tarifa actual indicada para el prototipo: 2.000 COP, cobertura inicial Neiva. | PK `id`; no tiene FK a sucursal según propuesta UML. | Configuración general del negocio, posiblemente historial versionado si cambia precio: decisión pendiente. | Esencial; alcance reportado, historial de tarifa por definir. |
+| `Entrega` | Seguimiento del domicilio: `id UUID`, `estado EstadoEntrega`, `fechaCreacion DateTime`, `fechaRecogida DateTime?`, `fechaSalida DateTime?`, `fechaEntrega DateTime?`, `observaciones String?`. Estados: `PENDIENTE_ASIGNACION`, `ASIGNADA`, `RECOGIDA`, `EN_CAMINO`, `ENTREGADA`, `NO_ENTREGADA`. | PK `id`; FK `pedidoId NOT NULL UNIQUE`, `repartidorId?`. | Un pedido de domicilio tiene 0..1 entregas; una entrega pertenece a exactamente un pedido domicilio. Sucursal responsable deriva de `Pedido.sucursalId`; repartidor es `Usuario` opcional. | Esencial; sin FK redundante a sucursal. |
+| `ConfiguracionDomicilio` | Parámetros generales: `id UUID`, `tarifa Decimal`, `activo Boolean`, `fechaActualizacion DateTime`; tarifa inicial configurable de 2.000 COP y cobertura inicial Neiva. | PK `id`; no tiene FK a sucursal; configuración general del negocio. | No se ha aprobado historial/versionado de tarifas para el MVP; mantener configuración vigente sin agregar entidad histórica. | Esencial; sin historial de versiones en el MVP. |
 | `SolicitudReposicion` | Encabezado: `id UUID`, `estado EstadoSolicitudReposicion`, `fechaSolicitud DateTime`, `fechaRevision DateTime?`, `observaciones String?`, `motivoRechazo String?`. | PK `id`; FKs `sucursalSolicitanteId`, `sucursalProveedoraId`, `solicitadaPor`, `revisadaPor?`. | 1:N detalles; 1:N despachos. Estados: `PENDIENTE_REVISION`, `RECHAZADA`, `EN_PROCESO`, `COMPLETADA`; `BORRADOR` solo si el flujo requiere guardar sin enviar. | Esencial; estados aprobados. |
 | `DetalleSolicitudReposicion` | `cantidadSolicitada Integer`, `cantidadAprobada Integer?`; cierre previo opcional: `cantidadFaltanteCerrada Integer?`, `motivoCierre String?`, `fechaCierre DateTime?`, `cerradoPor UUID?`; reversa total opcional: `fechaReversa DateTime?`, `revertidoPor UUID?`, `motivoReversa String?`. | PK `id`; FKs `solicitudId`, `productoId`, `cerradoPor?`, `revertidoPor?`; `UNIQUE(solicitudId, productoId)`. | M:1 solicitud/producto; 1:N detalles de despacho. Un cierre máximo y reversa total máxima. | Esencial; cierre previo al despacho. |
 | `DespachoReposicion` | Evento: `id UUID`, fecha, responsable, observación y datos de anulación opcionales (`anuladoEn?`, `anuladoPor?`, `motivoAnulacion?`). | PK `id`; FK `solicitudId`, `despachadoPor`, `anuladoPor?`. | M:1 solicitud; 1:N detalles. Si puede anularse con seguridad, se conserva el evento y se registra el despacho correcto como nuevo. La anulación documental no cambia inventario automáticamente. | Esencial; anulación completa aprobada. |
@@ -67,14 +67,14 @@ El inventario previo a esta revisión contiene **27 candidatas**: 20 clases del 
 
 ## Relaciones y cardinalidades que deben reflejarse
 
-- `Sucursal` 1:N `InventarioSucursal`; clave única por `(sucursal, producto)`.
+- `Sucursal` 1:N `InventarioSucursal`; clave única por `(sucursal, producto)`. `MovimientoInventario` referencia a `InventarioSucursal`, sin duplicar FKs a producto y sucursal.
 - `Producto` 1:N `InventarioSucursal` y 1:N `DetallePedido`.
 - `Pedido` 1:N `DetallePedido`; detalle con precio y nombre históricos del producto.
 - `Usuario` M:N `Rol` mediante `UsuarioRol`; `Usuario` M:N `Sucursal` mediante `UsuarioSucursal`. Permisos concretos por rol/sucursal aún requieren matriz funcional.
 - `Sucursal` 1:N `Mesa`; cada `Mesa` puede tener historial de sesiones, con a lo sumo una sesión activa y una cuenta abierta a la vez.
 - `SesionMesa` y `CuentaMesa` se vinculan obligatoriamente 1:1; `CuentaMesa.sesionMesaId` es `NOT NULL UNIQUE`. Cada pedido QR apunta a una cuenta y varios pedidos aceptados pueden acumularse en ella.
 - `Pago` tiene exactamente uno de los dos vínculos: un pedido externo o una cuenta de mesa; nunca ambos ni ninguno. La referencia a `Pedido` no puede apuntar a un pedido QR.
-- `Entrega` aplica solo a un pedido a domicilio; puede estar inicialmente sin repartidor. Una `Usuario` repartidora puede tener varias entregas.
+- `Entrega` aplica solo a un pedido a domicilio; puede estar inicialmente sin repartidor. Una `Usuario` repartidora puede tener varias entregas. Estados aprobados: `PENDIENTE_ASIGNACION`, `ASIGNADA`, `RECOGIDA`, `EN_CAMINO`, `ENTREGADA`, `NO_ENTREGADA`.
 - `SolicitudReposicion` registra dos vínculos distintos a `Sucursal`: solicitante secundaria y proveedora principal. Un usuario solicita y un usuario autorizado revisa.
 - `SolicitudReposicion` contiene detalles y puede generar múltiples `DespachoReposicion` (1:N).
 - Cada despacho contiene `DetalleDespachoReposicion` con las cantidades realmente enviadas por producto solicitado.
@@ -101,15 +101,13 @@ El inventario previo a esta revisión contiene **27 candidatas**: 20 clases del 
 - La cantidad recibida acumulada por detalle de despacho no puede superar la cantidad enviada.
 - Los movimientos compensatorios son nuevos registros independientes de `MovimientoInventario`; los movimientos pendientes no afectan existencia disponible.
 
-## Secuencia de cierre del MER
+## Transición a la implementación
 
-1. Actualizar UML con clases, atributos y flujos aprobados.
-2. Resolver la decisión pendiente de cancelación y la condición exacta de incidencias de entrega, si afectan el modelo.
-3. Confirmar claves primarias, claves foráneas, cardinalidades, opcionalidad y tablas asociativas.
-4. Normalizar los datos históricos de pedido, pago, inventario, despacho y recepción.
-5. Definir restricciones y estados coherentes con los flujos.
-6. Revisar el modelo completo con ejemplos de pedido/cancelación, mesa, transferencia/reembolso, reposición parcial y entrega fallida.
-7. Obtener aprobación expresa antes de pasar a arquitectura física o base de datos.
+1. El MER lógico consolidado fue aprobado el 22-11-2026. No reabrir entidades ni cardinalidades sin decisión expresa.
+2. Antes de la migración inicial, cerrar nulabilidad de atributos provisionales, catálogo de estados de `Pedido`/`Pago`, unicidades pendientes y referencia de origen de `MovimientoInventario`.
+3. Pasar las entidades, relaciones, cardinalidades y restricciones aprobadas al esquema Prisma.
+4. Mantener las decisiones funcionales pendientes en su matriz; no inventar comportamientos para módulos aún no implementados.
+5. Crear y verificar migraciones en PostgreSQL local una vez cerrados los bloqueos del esquema.
 
 ## Fuente
 
@@ -154,31 +152,33 @@ La anulación documental no altera automáticamente `InventarioSucursal`. Todo m
 
 ## Informe de inconsistencias y decisiones pendientes
 
-### Inconsistencias detectadas y resolución propuesta
+### Inconsistencias históricas y resolución incorporada al MER aprobado
 
-1. **Conteos históricos 22 y 27:** son inventarios de etapas anteriores y no equivalen al modelo vigente. El conteo actual se detalla al final; no se agrega entidad de cierre.
+1. **Conteos históricos 22 y 27:** son inventarios de etapas anteriores y no equivalen al modelo vigente. El conteo aprobado se detalla al final; no se agrega entidad de cierre.
 2. **Reposición de una recepción vs. parcial:** decisión anterior de una recepción máxima queda descartada por confirmación explícita de múltiples despachos/recepciones. Este MER ya refleja 1:N.
 3. **`RecepcionReposicion` sin detalle previo:** no se puede rastrear por producto qué parte de un despacho llegó dañada o apta. `DetalleRecepcionReposicion` debe relacionarse con `DetalleDespachoReposicion`, no solo con producto/solicitud.
 4. **Contadores de envío/recepción duplicados en detalle solicitado:** deben quitarse de `DetalleSolicitudReposicion`; los acumulados se derivan de los detalles históricos.
 5. **`fechaEnvio` en encabezado de solicitud:** ambiguo para envíos múltiples. Retirar o reemplazar por fechas derivadas de cada despacho.
 6. **Pagos y reembolsos duplicados:** comprobante (máximo uno por intento) y datos del reembolso manual total residen en `Pago`; no hay `ComprobantePago` ni `Reembolso` separados.
 7. **Auditoría genérica vs. operacional:** `RegistroAuditoria` se limita a acciones administrativas importantes; Pago, MovimientoInventario, despachos, recepciones y cierres conservan su propio historial operacional.
-8. **Asignación de usuario a roles/sucursales:** el usuario confirmó directamente M:N para ambas relaciones en la instrucción actual; se proponen `UsuarioRol` y `UsuarioSucursal` con PK compuestas por sus FK.
+8. **Asignación de usuario a roles/sucursales:** el usuario confirmó directamente M:N para ambas relaciones; `UsuarioRol` y `UsuarioSucursal` usan PK compuestas por sus FK en el modelo aprobado.
 
-### Pendientes que impiden cerrar el MER
+### Detalles por concretar durante la implementación
 
-- Mantener el desglose conciliado de los 27 candidatos previos; la cifra histórica de 22 no se puede mapear hasta que aparezca su desglose.
-- Definir nulabilidad y obligatoriedad de todos los atributos; nombrar PK/FK definitivas.
-- Precisar si al cerrar una sesión QR la cuenta relacionada puede permanecer abierta para pago o si ambas deben cerrar juntas; apertura crea ambas en una transacción.
-- Cerrar política de eliminación/desactivación de entidades ya referenciadas y permisos concretos por rol/sucursal.
-- Aún debe precisarse el detalle técnico de aplicación de movimientos pendientes sin que afecten stock disponible; la regla funcional aprobada prohíbe existencias negativas y remite productos consumidos a revisión administrativa.
-- Completar modelos de estados/transiciones de pedido, pago, entrega, reposición, recepción, conciliación simple de efectivo y cuenta.
+- Definir tipos SQL, nulabilidad y nombres físicos de PK/FK al trasladar el MER aprobado a Prisma; mantener las cardinalidades y restricciones ya consolidadas.
+- Cerrar la nulabilidad de los atributos marcados `?`: el signo indica opcionalidad conceptual/provisional y no autoriza a Codex a decidir sin criterio de negocio.
+- Definir cómo `MovimientoInventario` referencia el evento que lo origina. Su relación requerida con `InventarioSucursal` está definida; no duplicar FKs a producto/sucursal ni introducir referencias polimórficas sin aprobación.
+- Consolidar valores y transiciones de `EstadoPedido` y `EstadoPago`; no inventar enums.
+- Resolver unicidades pendientes (identificador/QR de mesa, nombres de catálogo y configuración de domicilio) antes de fijar índices únicos.
+- Aplicar desactivación en vez de borrar registros ya referenciados, y mapear las operaciones a roles y sucursales documentados.
+- Resolver en cada flujo los detalles técnicos de transacciones, concurrencia, auditoría y aplicación de movimientos de inventario; conservar las reglas aprobadas de no saldo negativo y revisión administrativa para producto consumido.
+- Mantener los estados y decisiones funcionales aún pendientes en `docs/03-arquitectura/pendientes-y-decisiones.md`; estos no invalidan la aprobación del modelo lógico.
 
-Esta propuesta se entrega para revisión conjunta; no constituye aprobación del MER ni autoriza crear una base de datos.
+Esta revisión lógica fue aprobada por el usuario el 22-11-2026. Las versiones históricas de este documento que la describían como propuesta quedan sustituidas por esta aprobación.
 
 ## Conciliación técnica de las 27 candidatas
 
-El catálogo de 27 de la sección anterior se conserva como fotografía del inventario previo a esta revisión. Aplicando decisiones funcionales y eliminando duplicación sin perder capacidades, la propuesta revisada queda así:
+El catálogo de 27 de la sección anterior se conserva como fotografía del inventario previo a esta revisión. Aplicando decisiones funcionales y eliminando duplicación sin perder capacidades, el modelo lógico aprobado queda así:
 
 | Grupo | Entidades | Resultado |
 | --- | --- | --- |
@@ -242,7 +242,7 @@ Se recomienda **fusionar `ComprobantePago` en `Pago` para el MVP**. Cada fila `P
 
 **Lógica de aplicación/autorización:** rol y sucursal del actor; administrador para anulaciones excepcionales; validar tipo de pedido para `Entrega` y `Pago`, reglas de estado, sesión QR, pertenencia de líneas a encabezados y sucursal; exigir un solo cierre y como máximo una reversa total por detalle; no permitir reversa si no hay cierre vigente. No confiar solo en validaciones de interfaz.
 
-## Estado para aprobación
+## Aprobación vigente
 
 Las decisiones aprobadas conjuntamente el 21-11-2026 prevalecen sobre propuestas anteriores de este documento:
 
@@ -255,4 +255,4 @@ Las decisiones aprobadas conjuntamente el 21-11-2026 prevalecen sobre propuestas
 - Estados de solicitud: `PENDIENTE_REVISION`, `RECHAZADA`, `EN_PROCESO`, `COMPLETADA`; `BORRADOR` solo si el flujo realmente requiere guardar sin enviar. Los pendientes se calculan desde las cantidades registradas.
 - Permisos por rol y sucursal con asociaciones existentes; no hay permisos individuales ni doble autorización por defecto. Personal autorizado de inventario gestiona reposiciones; administrador interviene en anulaciones excepcionales. Una persona puede registrar y autorizar operaciones ordinarias.
 
-Las decisiones de alcance aquí descritas están consolidadas. El MER queda listo para aprobación conjunta: no se declara aprobado hasta que el usuario confirme esa revisión. La arquitectura, UI/UX y desarrollo pueden comenzar después de esa aprobación conforme al orden del proyecto.
+El usuario aprobó el MER lógico consolidado el 22-11-2026 y confirmó que las etapas previas al desarrollo concluyeron. El esquema Prisma y el backend pueden construirse desde este modelo. Los detalles SQL de implementación y las decisiones funcionales todavía abiertas se registrarán sin reabrir ni alterar el modelo aprobado; cualquier cambio futuro de cardinalidades o entidades requerirá una decisión explícita y trazabilidad.

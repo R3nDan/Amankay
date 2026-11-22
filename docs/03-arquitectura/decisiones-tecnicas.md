@@ -19,7 +19,7 @@ Fuente: instrucciones directas del usuario en este chat, posteriores a la planif
 
 | Tema | Decisión vigente y justificación | Estado |
 |---|---|---|
-| Desarrollo | El usuario autorizó la primera aplicación Next.js y su portada visual. Posteriormente pidió instalar Prisma ORM para TypeScript/PostgreSQL; están aprobados sus paquetes y el adaptador de PostgreSQL. La instalación no autoriza por sí sola a crear el esquema, migraciones o base de datos; el MER sigue pendiente de aprobación. Sustituye la espera general de autorización para programar el frontend. | Aprobada; persistencia pendiente |
+| Desarrollo | El usuario confirmó que análisis y diseño concluyeron, aprobó el MER lógico consolidado y autorizó continuar con el desarrollo del ecosistema. PostgreSQL está instalado localmente según el usuario; la instalación/versiones de Prisma ORM, Prisma Client y el adaptador deben verificarse en el repositorio antes de modificar dependencias. Los pendientes funcionales existentes se resuelven dentro de sus módulos sin reabrir las etapas completadas. | Aprobada, 22-11-2026 |
 | Catálogo | Panadería, Fritos y Bebidas. Para la implementación inicial, Fritos comprende empanadas y pasteles; las papas quedan aplazadas por petición posterior del usuario. Bebidas comprende avena y sevillana. Amplía el contenido visual más allá de panes, usando las categorías existentes. | Aprobada; papas futuras |
 | Cabecera | SVG centrado, sin texto Amankay adicional, navegación inferior INICIO / PANADERÍA / FRITOS / BEBIDAS. Referencia de jerarquía: MASA. | Aprobada |
 | Título y nombre | Amankay es el nombre confirmado por el usuario para el negocio y el título de pestaña de las páginas públicas. Sustituye la duda anterior sobre el nombre comercial del anteproyecto. | Aprobada, 22-11-2026 |
@@ -30,6 +30,12 @@ Fuente: instrucciones directas del usuario en este chat, posteriores a la planif
 | Accesibilidad del clip | Movimiento reducido inicia con controles manuales; se puede activar scroll expresamente o saltar el recorrido. Seeks secuenciales, sin capturar desplazamiento; el clip se mantiene independiente de Motion. | Elección técnica dentro de la implementación autorizada |
 | Recursos | Originales conservados; fotografías WebP para web, MP4 en carpeta de videos. No reutilizar imágenes de MASA. | Elección técnica dentro de la implementación autorizada |
 | Datos comerciales | Fotos de Fritos/Bebidas, precios, recetas y disponibilidad siguen por confirmar. No inferirlos de la referencia. | Pendiente |
+
+### Aprobación del MER e inicio del backend (22-11-2026)
+
+- **MER:** el usuario confirmó que el modelo lógico consolidado de `docs/02-modelado/MER.md` está aprobado. Se sustituye su estado anterior de «pendiente de aprobación»; no se repiten las etapas de análisis y diseño.
+- **Desarrollo:** el usuario confirmó que las etapas previas concluyeron y autorizó avanzar con el ecosistema. El backend y la base local todavía no existen; se recomienda iniciar ahora con Prisma/PostgreSQL y entregar primero un flujo vertical de pedidos.
+- **Límites:** las decisiones funcionales aún listadas en el SRS y en la matriz de pendientes siguen abiertas; no se inventan ni se consideran bloqueos para implementar módulos cuyo comportamiento ya está definido.
 
 ## Desarrollo del pedido público (22-11-2026)
 
@@ -81,23 +87,75 @@ El anteproyecto `AnteProyecto_PW.docx` también se revisó. Contiene datos perso
 10. **Stack:** el usuario pidió revisar las dependencias de SpacesApps_2, usar Next.js y TypeScript, comparar MySQL/PostgreSQL y evitar gastos. La idea de migración a Render + Neon aparece como texto redactado en el cuadro de entrada, no como mensaje enviado/decisión adoptada.
 11. **Arquitectura/costos:** la respuesta final recomienda Next.js + Route Handlers, Prisma, PostgreSQL local, validación y componentes, y desarrollo/demo local sin costo obligatorio. El usuario pidió continuar con el trabajo. Ningún despliegue público pagado queda como requisito.
 
-## Matriz de conciliación del texto de revisión más reciente
+## Matriz de conciliación vigente
 
-El usuario aportó un segundo resumen de ChatGPT sobre el proyecto. Se usa como indicio de decisiones que pueden haberse acordado en conversaciones no incluidas entre los once enlaces. Como el texto no incluye enlaces ni fechas de esos acuerdos, se registra su procedencia y se contrasta con el historial disponible; no se presenta como corroborado por los once chats.
+El resumen de ChatGPT compartido por el usuario el 21-11-2026 se contrastó con los once enlaces y con las decisiones posteriores expresas del proyecto. La siguiente tabla refleja el estado consolidado vigente; no debe leerse como que cada frase aparece literalmente en los once chats.
 
-| Tema | Estado según el texto nuevo | Cotejo con los once chats y documentación | Acción documental |
+| Tema | Estado vigente | Regla consolidada | Pendiente real |
 | --- | --- | --- | --- |
-| Cancelación | Definida: cliente solicita antes de preparación; personal encargado aprueba. | Los once chats respaldan la ventana antes de preparación. La aprobación por personal aparece en el flujo UML general, pero la autorización específica se había marcado ambigua. El resumen nuevo la reporta como acuerdo. | Actualizar SRS como decisión reportada por el usuario; anotar la procedencia y mantenerla verificable contra el chat original si luego se aporta. |
-| Incidencias de entrega | Definidas: estados y observaciones simples; sin entidad nueva. | Los chats respaldan registrar incidencias, pero no permiten confirmar esa decisión de modelado simple. | Adoptar la regla funcional reportada; no crear clase Incidencia en la propuesta de MVP. Revisar representación en UML/MER. |
-| Sucursal para domicilio | Automática según disponibilidad del pedido completo y proximidad; no dividir pedidos. | El historial original deja asignación por inventario/proximidad como propuesta, no decisión explícita. El texto nuevo la reporta como ya decidida. | Incorporar como decisión reportada y regla a reflejar; documentar “pedido completo, sin división”. |
-| Tarifa domicilio | 2.000 COP adicionales por solicitud de domicilio; cobertura disponible en Neiva para el prototipo. | Instrucción directa del usuario del 22-11-2026, que reemplaza el importe anterior de 4.000 COP. | Actualizar el cálculo y la comunicación al cliente; la disponibilidad se confirma al atender la solicitud. |
-| Cobertura | Inicialmente Neiva. | No aparece en los once chats revisados. | Incorporar como alcance geográfico inicial reportado. |
-| Nombre del negocio | Amankay, confirmado por el usuario el 22-11-2026. | El Alambique queda como nombre histórico del anteproyecto. | Resuelto; actualizar referencias públicas y documentación. |
-| Conteo de entidades | Los inventarios históricos de 22 y 27 eran de etapas distintas. | Modelo vigente: 24 entidades de dominio + 2 asociativas = 26. No hay entidad independiente de cierre. | Conteo actual consolidado para revisión del MER. |
-| UML, MER, arquitectura y UI/UX | Mantener revisión y orden de fases; sin base de datos todavía. | Coincide con la indicación explícita del usuario y con el historial. | Conservar la puerta de aprobación antes de desarrollo. |
-| Criterios de aceptación | Deben definirse para pedidos, inventario, reposiciones, pagos, mesa/QR y usabilidad. | No estaban cerrados en las once conversaciones; coincide con el vacío del SRS. | Crear sección de criterios de aceptación pendiente, sin inventar umbrales. |
+| Cancelación | Definida | El cliente solicita antes de iniciar preparación; personal autorizado aprueba o rechaza. | Asignar el permiso a roles existentes y definir efecto por estado de stock/pago. |
+| Incidencias de entrega | Definida parcialmente | Estado y observaciones dentro de `Entrega`; no entidad `Incidencia`. | Quién autoriza reintento, retorno u otra resolución. |
+| Sucursal para domicilio | Definida | Asignación automática por disponibilidad del pedido completo y proximidad; no dividir. | Método técnico de distancia y desempate. |
+| Sin sede con pedido completo | Regla mínima definida | No aceptar ni dividir el pedido si ninguna sede puede completarlo. | Presentación UX de alternativas, si aporta valor. |
+| Cobertura y tarifa | Definidas para el prototipo | Neiva; 2.000 COP adicionales por domicilio, configurables. | Validación de dirección/cobertura en el flujo real. |
+| Nombre comercial | Resuelto | Amankay; El Alambique queda como nombre histórico del anteproyecto. | Ninguno. |
+| Entidades | Aprobado | 24 entidades de dominio + `UsuarioRol` y `UsuarioSucursal` = 26. | Ningún cambio de entidades/cardinalidades sin aprobación expresa. |
+| Cliente | Definido | No requiere iniciar sesión para consultar o realizar pedidos externos; QR requiere sesión temporal de mesa. | Ninguno para el esquema base. |
+| Pagos | Definido parcialmente | Intentos múltiples; máximo un comprobante por intento; reembolso manual total; no sobrepagar. | Si cada intento puede ser parcial; almacenamiento privado del comprobante. |
+| Criterios de aceptación | Pendientes de aprobación | Criterios observables redactados en `criterios-aceptacion.md`. | Aprobar métricas, tareas y protocolo académico de usabilidad. |
+| Dependencias técnicas | Por verificar | Next.js/TypeScript, PostgreSQL y Prisma son la dirección técnica. | Confirmar paquetes y versiones reales en el repositorio, no asumir que están instalados. |
 
-El resumen más reciente se toma como nueva información aportada por el usuario, pero no como evidencia de que todas esas frases aparezcan literalmente en los once enlaces. La aclaración posterior del usuario sobre reposiciones sí fija directamente la decisión definitiva para el proyecto. Si se comparte el chat de origen, completar la referencia histórica.
+## Decisiones consolidadas
+
+| Tema | Decisión y fundamento | Estado |
+| --- | --- | --- |
+| Producto almacenado | Inventario de productos terminados, no ingredientes. | Aprobada |
+| Momento de descuento | Al aceptar el pedido; la aceptación y el descuento son atómicos. | Aprobada |
+| Personalización | Sin modificaciones de productos en el MVP. | Aprobada |
+| Cliente | No necesita cuenta para pedidos externos ni consulta pública; el acceso QR se habilita mediante sesión temporal iniciada por personal. | Aprobada |
+| Mesa | Varios pedidos aceptados se acumulan en una cuenta por sesión; cada pedido conserva su revisión individual. | Aprobada |
+| Cancelación | El cliente solicita antes de preparación; personal autorizado aprueba/rechaza. | Aprobada; rol exacto pendiente |
+| WhatsApp | Pedido recibido por WhatsApp lo registra manualmente el trabajador en el panel. Sin API. | Aprobada |
+| Recogida | Cliente elige sede; validar el carrito completo y recomendar una sede que pueda completarlo. | Aprobada |
+| Domicilio | Asignación automática según disponibilidad del pedido completo y proximidad; no dividir el carrito. | Aprobada |
+| Sin sede disponible | No aceptar ni dividir el pedido si ninguna sede puede completarlo. | Regla mínima consolidada |
+| Repartidores | Asignación manual por atención; el repartidor solo consulta/actualiza sus entregas asignadas. | Aprobada |
+| Horarios | Configurables por sucursal; horario actual compartido documentado en SRS/UI-UX. | Aprobada |
+| Sesión QR | QR permanente identifica mesa/sucursal, no autoriza. Personal abre sesión y se genera token temporal; cerrar sesión invalida token. | Aprobada; duración técnica pendiente |
+| Cola | FIFO de presentación; 3 minutos es prioridad visual sugerida, no expiración ni rechazo automático. | Regla de UX documentada |
+| Reposición | Secundaria solicita/recibe; principal revisa, aprueba, prepara y despacha. Múltiples despachos y recepciones parciales. | Aprobada |
+| Devolución domiciliaria | Inspección obligatoria; solo unidades aptas vuelven a stock disponible. | Aprobada |
+| Pagos | Intentos múltiples, máximo un comprobante por intento, verificación manual y sin sobrepago. | Aprobada |
+| Reembolsos | Manuales, exclusivamente totales y registrados dentro de `Pago`; no entidad separada. | Aprobada |
+| Efectivo de entregas | Una conciliación simple por entrega; repartidor declara y trabajador autorizado registra lo recibido; diferencia requiere motivo. | Aprobada |
+| Auditoría genérica | `RegistroAuditoria` solo para acciones administrativas importantes; eventos operativos conservan sus registros propios. | Aprobada |
+| Sesión y cuenta de mesa | Relación obligatoria 1:1; se crean juntas y se cierran independientemente. Una cuenta abierta bloquea nueva sesión. | Aprobada |
+| Entrega y sucursal | `Entrega` no duplica `sucursalId`; deriva desde el pedido. | Decisión técnica incorporada al MER |
+| Reportes | Ventas por sede/periodo, historial/estados de pedidos, inventario/movimientos y reposiciones. Excluir productos más vendidos. | Aprobada |
+| Costos | Desarrollo y demostración local sin servicio obligatorio pagado. | Aprobada |
+| Fases | Análisis y diseño concluidos; MER aprobado; continuar implementación por etapas. | Aprobada |
+
+## Diferencias entre decisiones y recomendaciones
+
+1. **Permisos de cancelación:** está aprobado que personal autorizado decida la solicitud; falta asignar el permiso a roles existentes. No inferir una jerarquía.
+2. **Atención: both:** se conserva como expresión histórica sin interpretación organizativa concluyente. No crear actores/roles nuevos por esa frase.
+3. **Incidencias:** está definido el registro simple en `Entrega`; sigue pendiente quién decide reintento/retorno.
+4. **Pago parcial:** varios intentos no equivalen a un intento parcial. Falta decidir si un intento puede cubrir menos del saldo. El reembolso parcial sí está descartado.
+5. **Despliegue:** Render + Neon no quedó aprobado; el objetivo inicial es ejecución local.
+6. **Conteos:** 20 clases y 22/27 candidatas pertenecen a etapas históricas. El conteo vigente aprobado es 24 entidades de dominio + 2 asociativas = 26.
+7. **Prisma:** la dirección tecnológica está aprobada, pero la instalación real y las versiones deben verificarse en el repositorio. No asumir la instalación por menciones documentales.
+
+## Bloqueos técnicos antes de la migración inicial
+
+El MER lógico está aprobado, pero estos detalles no deben ser inventados por Codex:
+
+- **Nulabilidad:** revisar cada atributo marcado `?` en `MER.md` y asignar `NOT NULL` o nullable según la regla funcional documentada. Si no puede determinarse, registrar la pregunta en vez de escoger arbitrariamente.
+- **Origen de `MovimientoInventario`:** está definido que cada movimiento afecta un `InventarioSucursal`, pero no se ha cerrado cómo referenciar sin ambigüedad el evento que lo origina (aceptación/cancelación de pedido, recepción, devolución inspeccionada, ajuste o compensación). No añadir varias FK redundantes ni una referencia polimórfica sin decisión.
+- **Estados de `Pedido` y `Pago`:** sus enums aparecen como atributos, pero el catálogo completo de valores y transiciones no está consolidado en un único lugar. No inventar valores.
+- **Unicidades pendientes:** identificador/QR de mesa, nombres de categoría/producto y configuración singleton requieren decisión o regla explícita antes de fijar índices.
+- **Tipos físicos:** precisión/escala monetaria, longitudes, defaults, nombres SQL y política de borrado deben documentarse de manera consistente al pasar a Prisma.
+
+Los demás detalles funcionales que no afectan las tablas iniciales pueden resolverse al implementar el módulo correspondiente, manteniendo la matriz de pendientes.
 
 ## Decisión definitiva de reposiciones parciales
 
@@ -154,18 +212,21 @@ Las fórmulas y claves exactas son propuesta para el modelo lógico y quedan suj
 6. **Despliegue:** el pedido de migrar a Render + Neon aparece como texto no enviado en el cuadro de entrada del chat de stack. La última respuesta recomienda operar localmente y no depender de un plan gratis. Render/Neon no es decisión aprobada.
 7. **UML/MER:** las 20 clases y 31 relaciones corresponden a una base previa a refinamientos. Añadir las clases aprobadas en fases posteriores y revisar cardinalidades; no fijar estos conteos como definitivos.
 
-## Contradicciones, vacíos y pendientes
+## Pendientes y decisiones aún abiertas
 
-- Cliente sin autenticación: una nota del diagrama general dice que no necesita iniciar sesión; confirmar si se mantiene como comportamiento aprobado para el SRS.
-- Cancelación antes de preparación confirmada, pero aprobación automática vs. manual sin decisión inequívoca.
-- Significado organizacional de “Atención: both”.
-- Asignación de sede para domicilio y algoritmo de distancia/cobertura.
-- Tarifas, cobertura, ubicación/dirección, y política de sede para pedidos a domicilio.
-- Qué significa exactamente “incidencia” para estado de Entrega y quién puede reabrir/reintentar.
-- Duración de sesión, notificación en tiempo real, procesos de carga inicial de inventario, niveles de autorización para ajustes/mermas/cierre de faltantes.
-- Métricas y criterios de evaluación del anteproyecto.
-- El UML final debe absorber recepción repetida/parcial y las nuevas clases; no usar la primera regla “máximo una recepción”.
-- Stack actual de SpacesApps_2 fue leído desde archivos compartidos en el chat; la carpeta Amankay no contiene aún esos archivos. Versiones requieren verificación cuando se inicie desarrollo.
+- Rol o roles concretos que pueden aprobar cancelaciones.
+- Quién decide reintento, retorno u otra resolución de una entrega `NO_ENTREGADA`.
+- Alcance organizativo de la expresión histórica “Atención: both”.
+- Duración/expiración del token QR y mecanismo de notificaciones/actualización.
+- Si un intento de `Pago` puede ser parcial o debe cubrir el saldo completo.
+- Almacenamiento local privado, acceso, respaldo y eliminación de comprobantes.
+- Existencias iniciales y permisos/motivos para ajustes y mermas.
+- Catálogo completo y transiciones de estados de `Pedido` y `Pago`.
+- Métricas, tareas, muestra y protocolo de evaluación académica.
+- Decisiones físicas para Prisma: nulabilidad de atributos opcionales, referencia de origen de `MovimientoInventario`, unicidades pendientes, precisión monetaria y política de borrado.
+- Confirmar en el repositorio las versiones y presencia real de Prisma/Prisma Client/adaptador PostgreSQL antes de instalar o actualizar dependencias.
+
+No son pendientes: autenticación obligatoria del cliente (no se requiere para pedidos externos), aprobación del MER, conteo de entidades, tarifa de domicilio de 2.000 COP ni asignación automática de sede por disponibilidad completa y proximidad.
 
 ## Cómo actualizar
 
