@@ -4,13 +4,13 @@ Esta lista complementa la matriz de conciliación en [decisiones técnicas](deci
 
 ## Decisiones visuales del prototipo
 
-El 21-11-2026 el usuario aprobó tres categorías iniciales del catálogo, el logo centrado, navegación superior con INICIO/PANADERÍA/FRITOS/BEBIDAS, el título de pestaña «Amankay», los colores cálidos del logo sin verde y el clip del pan vinculado al scroll. Son decisiones de presentación del prototipo; el nombre comercial sigue pendiente y esto no aprueba el MER. La matriz detallada está en [Diseño UI/UX](../04-diseno-ui-ux/README.md#ajuste-visual-e-implementacion-inicial--21-11-2026).
+El 21-11-2026 el usuario aprobó tres categorías iniciales del catálogo, el logo centrado, navegación superior con INICIO/PANADERÍA/FRITOS/BEBIDAS, el título de pestaña «Amankay», los colores cálidos del logo sin verde y el clip del pan vinculado al scroll. El 22-11-2026 confirmó Amankay como nombre del negocio. Esto no aprueba el MER. La matriz detallada está en [Diseño UI/UX](../04-diseno-ui-ux/README.md#ajuste-visual-e-implementacion-inicial--21-11-2026).
 
 Pendiente para completar catálogo real: confirmar nombres finales, descripciones, fotografías, precios y disponibilidad de todos los productos; las imágenes y precios todavía ausentes no se simulan como definitivos.
 
 | ID | Tema | Estado | Definición actual | Procedencia / evidencia | Siguiente paso |
 | --- | --- | --- | --- | --- | --- |
-| P-01 | Nombre comercial | Pendiente | Confirmar si el negocio es El Alambique. | Anteproyecto menciona El Alambique; chats nombran Amankay. | Confirmación del usuario. |
+| P-01 | Nombre comercial | Resuelto | El negocio se llama Amankay. | Confirmación directa del usuario, 22-11-2026; El Alambique es el nombre histórico del anteproyecto. | Usar Amankay en el sitio público. |
 | P-02 | Cancelación | Por verificar | Solicitud de cliente antes de preparación; aprobada por personal según resumen reciente. | Ventana: chat 1; aprobación: resumen pegado, no corroborada en enlaces. | Identificar roles con permiso; registrar comportamiento si stock/pago cambió. |
 | P-03 | Roles en cancelación | Pendiente | No se especifica si trabajador de atención, encargado o ambos pueden aprobar. | No inferir jerarquía de permisos. | Recomendar personal de atención de la sede responsable, con escalamiento; aprobación del usuario pendiente. |
 | P-04 | Entrega fallida | Por verificar | Incidencia usa estado y observaciones, sin entidad separada según resumen reciente. | Enlaces sí incluyen casos de incidencia; el modelado simple viene del resumen pegado. | Definir dato mínimo, estados y quién decide reintento/retorno/cancelación. |

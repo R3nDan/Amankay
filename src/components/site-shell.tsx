@@ -1,36 +1,48 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, MapPin, Phone } from "lucide-react";
 import { CategoryNav } from "@/components/category-nav";
-import { RoyalWheatOrnament, WheatScrollConnector } from "@/components/ui/royal-wheat-ornament";
+import { HeaderCornerFrame } from "@/components/ui/header-corner-frame";
+import { HomeLogoLink } from "@/components/home-logo-link";
+import { branches } from "@/data/branches";
 
 export function Header() {
   return <header className="masthead">
     <div className="wrap masthead-top">
-      <RoyalWheatOrnament side="left" />
-      <Link className="signature" href="/" aria-label="Amankay, inicio">
-        <Image src="/imagenes/marca/amankay.svg" alt="" width={84} height={88} preload />
-      </Link>
-      <RoyalWheatOrnament side="right" />
-      <div className="masthead-ornament-extensions" aria-hidden="true">
-        <WheatScrollConnector side="left" />
-        <WheatScrollConnector side="right" />
+      <div className="masthead-corners" aria-hidden="true">
+        <HeaderCornerFrame side="left" />
+        <HeaderCornerFrame side="right" />
       </div>
+      <HomeLogoLink />
     </div>
     <CategoryNav />
   </header>;
 }
 
 export function Footer() {
-  return <footer className="site-footer"><div className="wrap footer-main">
-    <Link className="footer-signature" href="/" aria-label="Amankay, inicio">
-      <Image src="/imagenes/marca/amankay.svg" alt="" width={58} height={62} />
-      <span className="footer-signature-copy"><span className="footer-wordmark">Amankay</span><span className="footer-tagline">Los buenos momentos<br /><em>se comparten.</em></span></span>
-    </Link>
-    <nav className="footer-navigation" aria-label="Enlaces del pie de página">
-      <Link href="/menu"><span className="footer-link-index">01</span><span>Catálogo</span><ArrowUpRight size={15} aria-hidden /></Link>
-      <Link href="/sucursales"><span className="footer-link-index">02</span><span>Sucursales</span><ArrowUpRight size={15} aria-hidden /></Link>
-      <Link href="/#proceso"><span className="footer-link-index">03</span><span>El oficio del pan</span><ArrowUpRight size={15} aria-hidden /></Link>
-    </nav>
-  </div><div className="wrap footer-bottom"><span>Amankay</span><span className="footer-bottom-rule" aria-hidden="true" /><span>Panadería · Fritos · Bebidas</span></div></footer>;
+  const principal = branches[0];
+  return <footer className="site-footer" id="pie">
+    <div className="wrap footer-main">
+      <div className="footer-brand">
+        <Link className="footer-signature" href="/#inicio" aria-label="Amankay, volver al inicio">
+          <Image src="/imagenes/marca/amankay.svg" alt="" width={66} height={72} />
+          <span className="footer-signature-copy"><span className="footer-wordmark">Amankay</span><span className="footer-tagline">Los buenos momentos<br /><em>se comparten.</em></span></span>
+        </Link>
+        <p>Panadería, fritos y bebidas en Neiva.</p>
+      </div>
+      <nav className="footer-navigation" aria-label="Explorar Amankay">
+        <h2>Explora</h2>
+        <Link href="/menu">Catálogo <ArrowUpRight size={16} aria-hidden="true" /></Link>
+        <Link href="/#acerca">Acerca de nosotros <ArrowUpRight size={16} aria-hidden="true" /></Link>
+        <Link href="/#proceso">El oficio del pan <ArrowUpRight size={16} aria-hidden="true" /></Link>
+      </nav>
+      <div className="footer-visit">
+        <h2>Visítanos</h2>
+        <Link href="/#contacto"><MapPin size={17} aria-hidden="true" /><span>{principal?.address}</span></Link>
+        <a href={`tel:${principal?.phone.replace(/[^+\d]/g, "")}`}><Phone size={17} aria-hidden="true" /><span>{principal?.phone}</span></a>
+        <p>Lun–vie {principal?.weekdays}<br />Sáb {principal?.saturday}<br />Domingos y festivos · Cerrado</p>
+      </div>
+    </div>
+    <div className="wrap footer-bottom"><span>© {new Date().getFullYear()} Amankay</span><span>Neiva, Huila</span><Link href="/#inicio">Volver arriba ↑</Link></div>
+  </footer>;
 }

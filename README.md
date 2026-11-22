@@ -6,7 +6,7 @@ Amankay es el sistema web para atender pedidos y organizar la operación de un n
 
 Primera aplicación visual implementada con Next.js App Router, React, TypeScript, Tailwind CSS y Lucide React, tras autorización expresa del usuario. Incluye inicio público, catálogo y sus tres categorías (Panadería, Fritos, Bebidas), acceso a sucursales y una galería temporizada de imágenes del proceso del pan. El clip de proceso se reproduce silenciado en bucle y sin controles.
 
-Los datos comerciales aún requieren confirmación. Esta entrega no conecta una base de datos ni implementa pedidos, pagos o inventario. La documentación de `docs/` conserva las reglas del proyecto.
+La sede principal tiene dirección, horario y teléfono confirmados; la segunda sede usa datos claramente marcados como demostración porque aún no existe. Los demás datos comerciales requieren confirmación. Esta entrega no conecta una base de datos ni implementa pedidos, pagos o inventario. La documentación de `docs/` conserva las reglas del proyecto.
 
 ### Ejecución local
 
@@ -47,7 +47,7 @@ Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 310
 ## Archivos recibidos
 
 - `assets/originales/marca/Amankay_Logo.svg` y `assets/originales/marca/Amankay_Logo.png`: archivos originales del logo proporcionado.
-- `AnteProyecto_PW.docx`: anteproyecto que describe un aplicativo para El Alambique, pedidos mediante QR, información de sedes y coordinación de productos entre sucursales. La relación entre el nombre del negocio y el nombre Amankay se deja pendiente de confirmación. Los datos personales del formato no se reproducen en la documentación.
+- `AnteProyecto_PW.docx`: anteproyecto que describe pedidos mediante QR, información de sedes y coordinación de productos entre sucursales. Su nombre El Alambique es histórico; el usuario confirmó Amankay como nombre del negocio. Los datos personales del formato no se reproducen en la documentación.
 
 ## Recursos visuales de la aplicación
 

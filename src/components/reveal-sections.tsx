@@ -17,7 +17,7 @@ export function RevealSections() {
         observer.unobserve(entry.target);
       }
     }, { threshold: 0.12 });
-    document.querySelectorAll(".selection article, .category-index > a, .branch-call").forEach(el => observer.observe(el));
+    document.querySelectorAll(".branch-card, .category-index > a, .branch-call").forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, [reduced]);
   return null;

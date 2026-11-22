@@ -22,8 +22,10 @@ Fuente: instrucciones directas del usuario en este chat, posteriores a la planif
 | Desarrollo | El usuario autorizó la primera aplicación Next.js y su portada visual. Continúan excluidos Prisma, PostgreSQL, migraciones y reglas de negocio en esta entrega. Sustituye la espera general de autorización para programar el frontend. | Aprobada |
 | Catálogo | Panadería, Fritos y Bebidas. Para la implementación inicial, Fritos comprende empanadas y pasteles; las papas quedan aplazadas por petición posterior del usuario. Bebidas comprende avena y sevillana. Amplía el contenido visual más allá de panes, usando las categorías existentes. | Aprobada; papas futuras |
 | Cabecera | SVG centrado, sin texto Amankay adicional, navegación inferior INICIO / PANADERÍA / FRITOS / BEBIDAS. Referencia de jerarquía: MASA. | Aprobada |
-| Título | Todas las páginas públicas de esta entrega usan únicamente «Amankay» como título de pestaña; reemplaza «Panadería \| Amankay». No fija nombre comercial definitivo. | Aprobada |
+| Título y nombre | Amankay es el nombre confirmado por el usuario para el negocio y el título de pestaña de las páginas públicas. Sustituye la duda anterior sobre el nombre comercial del anteproyecto. | Aprobada, 22-11-2026 |
 | Paleta | Retirar verde y usar cacao, crema, trigo, durazno y cobre del logo, conservando marfil. Contrastes y usos en UI/UX. Sustituye verde hoja/terracota/mostaza como dirección estética. | Aprobada |
+| Accesos públicos | «Contáctanos» conduce a las sucursales dentro de Inicio, en el lugar antes ocupado por «Del horno». «Pide» queda a la derecha de la navbar como acceso al catálogo y, después, al flujo de pedidos. | Aprobada, 22-11-2026 |
+| Datos de sucursales | Sede principal real: Calle 4 # 5-55, Centro de Neiva; lunes a viernes 6:30 a. m.–6:30 p. m., sábados 6:30 a. m.–1:00 p. m.; cerrada domingos y festivos; teléfono 312 586 4045. La segunda sede aún no existe: para el prototipo local se usa una dirección de prueba en Neiva, el mismo horario y el teléfono general, siempre rotulados como demostración. Sustituir estos datos antes de presentar una segunda sede como operativa. | Principal aprobada por el usuario; segunda provisional para MVP, 22-11-2026 |
 | Proceso | Video proporcionado, con avance y retroceso mediante scroll. Sustituye las cuatro fotografías seleccionables. | Aprobada |
 | Accesibilidad del clip | Movimiento reducido inicia con controles manuales; se puede activar scroll expresamente o saltar el recorrido. Seeks secuenciales, sin capturar desplazamiento; el clip se mantiene independiente de Motion. | Elección técnica dentro de la implementación autorizada |
 | Recursos | Originales conservados; fotografías WebP para web, MP4 en carpeta de videos. No reutilizar imágenes de MASA. | Elección técnica dentro de la implementación autorizada |
@@ -82,7 +84,7 @@ El usuario aportó un segundo resumen de ChatGPT sobre el proyecto. Se usa como 
 | Sucursal para domicilio | Automática según disponibilidad del pedido completo y proximidad; no dividir pedidos. | El historial original deja asignación por inventario/proximidad como propuesta, no decisión explícita. El texto nuevo la reporta como ya decidida. | Incorporar como decisión reportada y regla a reflejar; documentar “pedido completo, sin división”. |
 | Tarifa domicilio | 4.000 COP, configurable desde administración. | No aparece en los once chats revisados. | Incorporar como decisión reportada; falta precisar unidad, alcance (por pedido/zona) y si aplica a todas las sedes. |
 | Cobertura | Inicialmente Neiva. | No aparece en los once chats revisados. | Incorporar como alcance geográfico inicial reportado. |
-| Nombre del negocio | Confirmar El Alambique. | El anteproyecto lo menciona; chats usan Amankay como nombre del sistema. | Pendiente de confirmación del usuario. |
+| Nombre del negocio | Amankay, confirmado por el usuario el 22-11-2026. | El Alambique queda como nombre histórico del anteproyecto. | Resuelto; actualizar referencias públicas y documentación. |
 | Conteo de entidades | Los inventarios históricos de 22 y 27 eran de etapas distintas. | Modelo vigente: 24 entidades de dominio + 2 asociativas = 26. No hay entidad independiente de cierre. | Conteo actual consolidado para revisión del MER. |
 | UML, MER, arquitectura y UI/UX | Mantener revisión y orden de fases; sin base de datos todavía. | Coincide con la indicación explícita del usuario y con el historial. | Conservar la puerta de aprobación antes de desarrollo. |
 | Criterios de aceptación | Deben definirse para pedidos, inventario, reposiciones, pagos, mesa/QR y usabilidad. | No estaban cerrados en las once conversaciones; coincide con el vacío del SRS. | Crear sección de criterios de aceptación pendiente, sin inventar umbrales. |
@@ -146,7 +148,6 @@ Las fórmulas y claves exactas son propuesta para el modelo lógico y quedan suj
 
 ## Contradicciones, vacíos y pendientes
 
-- Nombre del negocio vs. nombre del sistema: anteproyecto dice El Alambique; chats llaman Amankay.
 - Cliente sin autenticación: una nota del diagrama general dice que no necesita iniciar sesión; confirmar si se mantiene como comportamiento aprobado para el SRS.
 - Cancelación antes de preparación confirmada, pero aprobación automática vs. manual sin decisión inequívoca.
 - Significado organizacional de “Atención: both”.

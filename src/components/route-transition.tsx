@@ -14,6 +14,7 @@ export function RouteTransition({ children, panels }: { children: ReactNode; pan
   const reduced = useSiteReducedMotion();
   const departureScroll = useRef(0);
   const [journey, setJourney] = useState({ pathname, from: routes.indexOf(pathname), to: routes.indexOf(pathname), running: false });
+  const [verticalReturn, setVerticalReturn] = useState<number | null>(null);
   if (journey.pathname !== pathname) {
     const to = routes.indexOf(pathname);
     setJourney({ pathname, from: journey.to, to, running: journey.to >= 0 && to >= 0 && journey.to !== to });
@@ -39,9 +40,25 @@ export function RouteTransition({ children, panels }: { children: ReactNode; pan
     };
   }, []);
 
+  useEffect(() => {
+    const returnHome = () => {
+      const from = window.scrollY;
+      if (from < 2) return;
+      setVerticalReturn(from);
+      window.scrollTo({ top: 0, behavior: "instant" });
+    };
+    window.addEventListener("amankay:return-home", returnHome);
+    return () => window.removeEventListener("amankay:return-home", returnHome);
+  }, []);
+
   const active = journey.pathname === pathname && journey.running;
   useLayoutEffect(() => {
-    if (active && !window.location.hash) window.scrollTo({ top: 0, behavior: "instant" });
+    if (active) {
+      if (!window.location.hash) window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+    const hash = window.location.hash.slice(1);
+    if (hash) document.getElementById(decodeURIComponent(hash))?.scrollIntoView({ behavior: "instant", block: "start" });
   }, [active, pathname]);
 
   const first = Math.min(journey.from, journey.to);
@@ -60,6 +77,12 @@ export function RouteTransition({ children, panels }: { children: ReactNode; pan
           <DeckPanel departure={first + index === journey.from} scroll={departureScroll}>{panel}</DeckPanel>
         </div>)}
       </motion.div>
+    </div>}
+    {verticalReturn !== null && pathname === "/" && <div className="page-deck page-deck-vertical" aria-hidden="true" inert data-deck-preview>
+      <motion.div className="page-deck-vertical-panel"
+        initial={{ y: -verticalReturn }} animate={{ y: 0 }}
+        transition={{ duration: reduced ? 0.15 : Math.min(1.25, 0.65 + verticalReturn / 3800), ease: [0.65, 0, 0.25, 1] }}
+        onAnimationComplete={() => setVerticalReturn(null)}>{panels[0]}</motion.div>
     </div>}
   </>;
 }

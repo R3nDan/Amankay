@@ -35,7 +35,7 @@ export function BreadProcess({ preview = false }: { preview?: boolean }) {
   return <section ref={sectionRef} className="process" id="proceso" aria-labelledby="process-title">
     <div className="process-sticky">
       <div className="wrap process-heading">
-        <h2 id="process-title">Así toma<br /><em>forma<br />el pan.</em></h2>
+        <h2 id="process-title"><span className="process-title-line">Así toma</span><em className="process-title-line">forma</em><em className="process-title-line">el pan.</em></h2>
       </div>
       <div className="wrap process-film">
         <div className="film-perspective">

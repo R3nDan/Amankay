@@ -14,7 +14,6 @@ const categoryVisuals = [
 export function CategoryIndex() {
   return <section className="category-showcase wrap" aria-labelledby="category-title">
     <div className="category-showcase-head">
-      <div className="category-frame-corners" aria-hidden="true"><span /><span /></div>
       <div className="category-heading-art" aria-hidden><BakerySymbolSet /></div>
       <h2 id="category-title">¿Qué se te <em>antoja hoy?</em></h2></div>
     <nav className="category-index" aria-label="Explorar categorías">
@@ -31,7 +30,6 @@ export function CategoryIndex() {
       })}
     </nav>
     <div className="category-showcase-cta">
-      <div className="category-frame-cta-corners" aria-hidden="true"><span /><span /></div>
       <span className="category-cta-rule" aria-hidden="true" />
       <ActionLink subtle arrow={false} href="/menu">Ver catálogo completo</ActionLink>
       <span className="category-cta-rule" aria-hidden="true" />

@@ -4,7 +4,7 @@
 
 Amankay centraliza la consulta del negocio, su catálogo, la recepción de pedidos y la operación de varias sucursales. Debe servir a clientes y al personal que atiende pedidos, administra mesas, controla inventario, coordina reposiciones y realiza entregas.
 
-El anteproyecto describe una panadería con una sede principal y una segunda sede, pedidos por QR y coordinación del surtido de productos elaborados desde la sede principal. El nombre comercial indicado allí es El Alambique. La relación entre El Alambique y Amankay está pendiente: no asumir que son el mismo nombre ni cambiar el branding sin confirmación.
+El anteproyecto describe una panadería con una sede principal y una segunda sede, pedidos por QR y coordinación del surtido de productos elaborados desde la sede principal. Allí aparece el nombre histórico El Alambique; el usuario confirmó posteriormente que el nombre del negocio para este proyecto es Amankay. Se conservan los requisitos operativos del anteproyecto sin adoptar su nombre anterior.
 
 ## 2. Fuentes y criterio de autoridad
 
@@ -69,6 +69,8 @@ El modelo de clases registra repartidores como `Usuario` con un rol, no como una
 ### RF-01 Catálogo e información pública
 
 El cliente puede consultar productos y sus precios, categorías, sucursales, horarios y datos informativos del negocio.
+
+Para el prototipo público, el usuario confirmó los datos de Amankay Sede_Principal: Calle 4 # 5-55, Centro de Neiva; lunes a viernes de 6:30 a. m. a 6:30 p. m.; sábados de 6:30 a. m. a 1:00 p. m.; cerrado domingos y festivos; teléfono 312 586 4045. La segunda sede aún no existe. El usuario autorizó datos de demostración para ella durante el MVP; su dirección y horario de prueba no son datos comerciales aprobados ni deben presentarse como una sede operativa. El modelo de horario aún debe resolver cómo registrar cierres por festivos.
 
 Las categorías iniciales confirmadas por el usuario son **Panadería**, **Fritos** (empanadas y pasteles) y **Bebidas** (avena y sevillana). Las papas quedan fuera de la implementación inicial, aunque podrán reconsiderarse después. Son categorías del catálogo existente; no crean entidades ni reglas de pedidos adicionales. Las variedades, recetas, precios y disponibilidad se completan con datos confirmados.
 
@@ -176,18 +178,17 @@ El anteproyecto propone pruebas de acceso QR, consulta de información/productos
 
 ## 9. Decisiones pendientes
 
-1. Relación entre la marca Amankay y el comercio El Alambique.
-2. Registro, compra invitada y autenticación de clientes: no asumir que el cliente inicia sesión.
-3. Permiso de cancelación: aprobación automática o revisión/decisión de trabajador.
-4. Flujo de incidencias de entrega y quién decide el siguiente paso.
-5. Definición exacta de “Atención: both” y parámetros administrativos de reportes.
-6. Alcance de los 4.000 COP (por pedido, zona u otra unidad) y confirmación de tarifa igual para todas las sedes.
-7. Duración de sesión de mesa; quedó como detalle técnico pendiente.
-8. Tecnología de notificaciones al cliente; no definida.
-9. Proceso exacto para reversar stock según unidades consumidas, dañadas o devueltas.
-10. Qué inventario de productos terminados se cargará al iniciar y quién puede hacer ajustes/mermas.
-11. Estados y permisos de pedido, pago y entrega; los estados de solicitud de reposición aprobados son `PENDIENTE_REVISION`, `RECHAZADA`, `EN_PROCESO` y `COMPLETADA`. `BORRADOR` solo se incorpora si el flujo necesita guardar solicitudes sin enviar. Los permisos operativos se aplican por rol y sucursal mediante asociaciones existentes, sin permisos individuales ni doble autorización por defecto.
-12. Criterios cuantificables y método de evaluación de aceptación/usabilidad.
+1. Registro, compra invitada y autenticación de clientes: no asumir que el cliente inicia sesión.
+2. Permiso de cancelación: aprobación automática o revisión/decisión de trabajador.
+3. Flujo de incidencias de entrega y quién decide el siguiente paso.
+4. Definición exacta de “Atención: both” y parámetros administrativos de reportes.
+5. Alcance de los 4.000 COP (por pedido, zona u otra unidad) y confirmación de tarifa igual para todas las sedes.
+6. Duración de sesión de mesa; quedó como detalle técnico pendiente.
+7. Tecnología de notificaciones al cliente; no definida.
+8. Proceso exacto para reversar stock según unidades consumidas, dañadas o devueltas.
+9. Qué inventario de productos terminados se cargará al iniciar y quién puede hacer ajustes/mermas.
+10. Estados y permisos de pedido, pago y entrega; los estados de solicitud de reposición aprobados son `PENDIENTE_REVISION`, `RECHAZADA`, `EN_PROCESO` y `COMPLETADA`. `BORRADOR` solo se incorpora si el flujo necesita guardar solicitudes sin enviar. Los permisos operativos se aplican por rol y sucursal mediante asociaciones existentes, sin permisos individuales ni doble autorización por defecto.
+11. Criterios cuantificables y método de evaluación de aceptación/usabilidad.
 13. Reconciliar el conteo de 22 entidades citado en el resumen nuevo con las clases base y refinamientos documentados, antes de aprobar UML/MER.
 
 ## 10. Trazabilidad histórica

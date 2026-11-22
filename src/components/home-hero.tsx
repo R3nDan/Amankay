@@ -15,6 +15,13 @@ const frames = [
   { src: "/imagenes/portada/proceso/listo.webp", alt: "Panes recién horneados listos para compartir" },
 ];
 
+function HeroActions({ mobile = false }: { mobile?: boolean }) {
+  return <div className={`hero-actions ${mobile ? "hero-actions-mobile" : "hero-actions-desktop"}`}>
+    <a className="process-button" href="#proceso">Ver el proceso <ArrowDown size={17} aria-hidden /></a>
+    <ActionLink href="/menu">Ver el menú</ActionLink>
+  </div>;
+}
+
 export function HomeHero() {
   const [activeFrame, setActiveFrame] = useState(0);
   const reduceMotion = useSiteReducedMotion();
@@ -25,17 +32,14 @@ export function HomeHero() {
     return () => window.clearInterval(timer);
   }, [reduceMotion]);
 
-  return <section className="hero-story" aria-label="Inicio">
+  return <section className="hero-story" id="inicio" aria-label="Inicio">
     <div className="hero-sticky">
       <div className="hero">
         <BakerySymbolPattern />
         <div className="hero-paper-grain" aria-hidden />
         <div className="hero-copy">
           <h1 id="portada">Pan del día.<br /><em>Y algo más.</em></h1>
-          <div className="hero-actions">
-            <a className="process-button" href="#proceso">Ver el proceso <ArrowDown size={17} aria-hidden /></a>
-            <ActionLink href="/menu">Ver el menú</ActionLink>
-          </div>
+          <HeroActions />
         </div>
         <div className="hero-art">
           <figure className="hero-photo-mat">
@@ -54,6 +58,7 @@ export function HomeHero() {
             <figcaption className="photo-caption" aria-hidden="true"><i /></figcaption>
           </figure>
         </div>
+        <HeroActions mobile />
       </div>
     </div>
   </section>;
