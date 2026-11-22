@@ -4,7 +4,7 @@ Amankay es el sistema web para atender pedidos y organizar la operación de un n
 
 ## Estado
 
-Primera aplicación visual implementada con Next.js App Router, React, TypeScript, Tailwind CSS y Lucide React, tras autorización expresa del usuario. Incluye inicio público, catálogo y sus tres categorías (Panadería, Fritos, Bebidas), acceso a sucursales y un clip del proceso del pan controlado por scroll.
+Primera aplicación visual implementada con Next.js App Router, React, TypeScript, Tailwind CSS y Lucide React, tras autorización expresa del usuario. Incluye inicio público, catálogo y sus tres categorías (Panadería, Fritos, Bebidas), acceso a sucursales y una galería temporizada de imágenes del proceso del pan. El clip de proceso se reproduce silenciado en bucle y sin controles.
 
 Los datos comerciales aún requieren confirmación. Esta entrega no conecta una base de datos ni implementa pedidos, pagos o inventario. La documentación de `docs/` conserva las reglas del proyecto.
 
@@ -20,7 +20,7 @@ Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 310
 ### Código
 
 - `src/app/`: rutas y estilos globales.
-- `src/components/`: cabecera, navegación, tarjetas, recorrido del pan y componentes de interfaz.
+- `src/components/`: cabecera, navegación, tarjetas, ilustraciones SVG originales, recorrido del pan y componentes de interfaz.
 - `src/data/`: catálogo visual tipado; precios y disponibilidad por confirmar.
 - `src/lib/`: utilidades compartidas.
 
@@ -54,9 +54,9 @@ Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 310
 - `assets/originales/`: conserva los archivos recibidos sin optimizar. Los nuevos recursos originales se ubican aquí según su tipo y procedencia.
 - `public/imagenes/marca/`: identidad visual que se muestra en la web.
 - `public/imagenes/portada/`: imágenes principales de las páginas.
-- `public/imagenes/productos/panaderia/` y `fritos/`: fotografías WebP optimizadas de las dos categorías recibidas. Las futuras fotografías de bebidas se ubicarán en `public/imagenes/productos/bebidas/`.
+- `public/imagenes/productos/panaderia/` y `fritos/`: fotografías de producto optimizadas. Avena, Sevillana y Guarapo se sirven desde `public/imagenes/productos/Bebidas/`.
 - `assets/originales/productos/panaderia/` y `fritos/`: fotografías originales recibidas, conservadas sin modificar.
-- `public/videos/proceso/`: video utilizado en el recorrido con scroll.
+- `public/videos/proceso/`: video del proceso del pan.
 - `assets/originales/proceso/`: clip original recibido.
 
 La aplicación utiliza versiones web de las imágenes desde `public/`. Las fotografías de referencia que se compartan para orientar el diseño se conservan en `assets/originales/referencias/` cuando se incorporen al repositorio; no se publican como fotografías de productos.

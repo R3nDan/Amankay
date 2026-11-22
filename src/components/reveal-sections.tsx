@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { useSiteReducedMotion } from "@/components/ui/motion-preference";
 
 export function RevealSections() {
+  const reduced = useSiteReducedMotion();
   useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (reduced) return;
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
@@ -17,6 +19,6 @@ export function RevealSections() {
     }, { threshold: 0.12 });
     document.querySelectorAll(".selection article, .category-index > a, .branch-call").forEach(el => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [reduced]);
   return null;
 }

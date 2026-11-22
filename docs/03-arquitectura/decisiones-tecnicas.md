@@ -12,15 +12,20 @@
 
 Fuente: instrucciones directas del usuario en este chat, posteriores a la planificación UI/UX. No modifica las decisiones de modelado.
 
+- **Herramientas visuales (21-11-2026):** a petición del usuario, se instalan GSAP, PixiJS/@pixi/react, Three.js/@react-three/fiber/@react-three/drei y shadcn CLI, además de Motion ya existente. Se usan solo donde aporten al sitio público. El adorno actual se implementa como SVG, el plano inclinado del clip con CSS 3D. Evitar cargar motores canvas/3D en toda ruta; dividir bajo demanda. `npm audit` reporta cuatro hallazgos moderados en la cadena de desarrollo de shadcn (sin vulnerabilidades en dependencias de producción).
+
+- **Transiciones de navegación (21-11-2026):** Motion, aceptado en el stack, instalado y aplicado al indicador deslizante de categoría, la respuesta al toque y las transiciones de rutas públicas. El usuario pide una transición tipo tarjeta que se desliza y revela el apartado siguiente, con profundidad y dirección según el orden de la categoría. prefers-reduced-motion reduce la animación. No se altera el comportamiento del video scrub.
+- **Portada y ornamentación (21-11-2026):** el usuario pidió un rediseño integral del Inicio con detalle 2D original, vídeo del proceso inclinado y bordado parcialmente con espigas, y menor cantidad de frases. La ilustración es SVG artesanal; perspectiva en CSS; sin inventar precios, horarios o afirmaciones comerciales.
+
 | Tema | Decisión vigente y justificación | Estado |
 |---|---|---|
 | Desarrollo | El usuario autorizó la primera aplicación Next.js y su portada visual. Continúan excluidos Prisma, PostgreSQL, migraciones y reglas de negocio en esta entrega. Sustituye la espera general de autorización para programar el frontend. | Aprobada |
-| Catálogo | Panadería, Fritos y Bebidas. Fritos comprende empanadas, pasteles y papas; Bebidas, avena y sevillana. Amplía el contenido del catálogo visual más allá de panes, usando las categorías existentes. | Aprobada |
+| Catálogo | Panadería, Fritos y Bebidas. Para la implementación inicial, Fritos comprende empanadas y pasteles; las papas quedan aplazadas por petición posterior del usuario. Bebidas comprende avena y sevillana. Amplía el contenido visual más allá de panes, usando las categorías existentes. | Aprobada; papas futuras |
 | Cabecera | SVG centrado, sin texto Amankay adicional, navegación inferior INICIO / PANADERÍA / FRITOS / BEBIDAS. Referencia de jerarquía: MASA. | Aprobada |
 | Título | Todas las páginas públicas de esta entrega usan únicamente «Amankay» como título de pestaña; reemplaza «Panadería \| Amankay». No fija nombre comercial definitivo. | Aprobada |
 | Paleta | Retirar verde y usar cacao, crema, trigo, durazno y cobre del logo, conservando marfil. Contrastes y usos en UI/UX. Sustituye verde hoja/terracota/mostaza como dirección estética. | Aprobada |
 | Proceso | Video proporcionado, con avance y retroceso mediante scroll. Sustituye las cuatro fotografías seleccionables. | Aprobada |
-| Accesibilidad del clip | Movimiento reducido inicia con controles manuales; se puede activar scroll expresamente o saltar el recorrido. Seeks secuenciales, sin capturar desplazamiento ni añadir dependencias de animación. | Elección técnica dentro de la implementación autorizada |
+| Accesibilidad del clip | Movimiento reducido inicia con controles manuales; se puede activar scroll expresamente o saltar el recorrido. Seeks secuenciales, sin capturar desplazamiento; el clip se mantiene independiente de Motion. | Elección técnica dentro de la implementación autorizada |
 | Recursos | Originales conservados; fotografías WebP para web, MP4 en carpeta de videos. No reutilizar imágenes de MASA. | Elección técnica dentro de la implementación autorizada |
 | Datos comerciales | Fotos de Fritos/Bebidas, precios, recetas y disponibilidad siguen por confirmar. No inferirlos de la referencia. | Pendiente |
 

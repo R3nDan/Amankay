@@ -2,7 +2,7 @@
 
 ## Estado y puerta de inicio
 
-El usuario autorizó iniciar la primera entrega visual. La base Next.js y el sitio público ya están implementados: inicio, catálogo, Panadería/Fritos/Bebidas, acceso a sucursales y video del pan vinculado al scroll. Las fotografías de panadería recibidas se integran como recursos optimizados. Precios, disponibilidad, fotografías de las otras categorías y datos de sucursales siguen pendientes. No se ha conectado persistencia ni implementado reglas operativas.
+El usuario autorizó iniciar la primera entrega visual. La base Next.js y el sitio público ya están implementados: inicio, catálogo, Panadería/Fritos/Bebidas, acceso a sucursales, tarjeta de fotos del proceso con transición temporizada y video del pan en bucle sin controles. Las fotografías de panadería recibidas se integran como recursos optimizados. Precios, disponibilidad, fotografías de las otras categorías y datos de sucursales siguen pendientes. No se ha conectado persistencia ni implementado reglas operativas.
 
 ## Secuencia propuesta
 

@@ -61,7 +61,7 @@ El modelo de clases registra repartidores como `Usuario` con un rol, no como una
 - Automatización de asignación de repartidores: no; asignación manual.
 - Publicación web permanente en hosting de terceros: no es requisito ni se garantiza gratis para siempre; valorar solo en una fase posterior.
 - Servicios y herramientas de pago, suscripciones o costos obligatorios: excluidos.
-- Redis, Docker, microservicios, servidor Express independiente, GSAP, PixiJS, Rive: no incorporar de entrada.
+- Redis, Docker, microservicios, servidor Express independiente y Rive quedan fuera del MVP. El usuario autorizó el 21-11-2026 instalar GSAP, PixiJS, Three.js, React Three Fiber y Drei para la experiencia visual pública; su uso se limita a escenas puntuales y no forma parte del funcionamiento transaccional.
 - “Productos más vendidos” en reportes: el usuario sugirió quitarlo por no ser necesario inicialmente y luego aprobó el resto tras una revisión completa. Excluirlo del MVP.
 
 ## 5. Requisitos funcionales
@@ -70,7 +70,7 @@ El modelo de clases registra repartidores como `Usuario` con un rol, no como una
 
 El cliente puede consultar productos y sus precios, categorías, sucursales, horarios y datos informativos del negocio.
 
-Las categorías iniciales confirmadas por el usuario son **Panadería**, **Fritos** (empanadas, pasteles y papas) y **Bebidas** (avena y sevillana). Son categorías del catálogo existente; no crean entidades ni reglas de pedidos adicionales. Las variedades, recetas, precios y disponibilidad se completan con datos confirmados.
+Las categorías iniciales confirmadas por el usuario son **Panadería**, **Fritos** (empanadas y pasteles) y **Bebidas** (avena y sevillana). Las papas quedan fuera de la implementación inicial, aunque podrán reconsiderarse después. Son categorías del catálogo existente; no crean entidades ni reglas de pedidos adicionales. Las variedades, recetas, precios y disponibilidad se completan con datos confirmados.
 
 ### RF-02 Pedido para recoger
 

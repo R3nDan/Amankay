@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Footer, Header } from "@/components/site-shell";
+import { RouteTransition } from "@/components/route-transition";
+import { HomeContent } from "@/components/home-content";
+import { CategoryContent } from "@/components/category-content";
+import { categories } from "@/data/bakery";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,8 +14,13 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return <html lang="es-CO"><body>
+  return <html lang="es-CO" data-motion="full"><body>
     <a href="#contenido" className="skip">Saltar al contenido</a>
-    <Header />{children}<Footer />
+    <Header />
+    <RouteTransition panels={[
+      <HomeContent key="inicio" preview />,
+      ...categories.map(category => <CategoryContent key={category.slug} slug={category.slug} />),
+    ]}>{children}</RouteTransition>
+    <Footer />
   </body></html>;
 }

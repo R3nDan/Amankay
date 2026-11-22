@@ -20,11 +20,11 @@ No es solo un sitio informativo ni una aplicación móvil nativa. No se automati
 |---|---|---|
 | Aplicación web | Next.js App Router, React, TypeScript | Rutas, vistas públicas y privadas, endpoints del servidor. |
 | Estilos y componentes | Tailwind CSS, shadcn/ui | Sistema responsive y componentes reutilizables. |
-| Iconos y movimiento | Lucide React, Motion | Iconografía y animaciones puntuales. |
+| Iconos y movimiento | Lucide React, Motion, GSAP | Iconografía, transiciones UI y secuencias puntuales. |
 | Formularios/validación | React Hook Form cuando aporte valor, Zod | Formularios del cliente y panel; validación en servidor. |
 | Persistencia | PostgreSQL local y Prisma | Base relacional; se incorpora después de aprobar modelo y autorizar implementación. |
 
-Three.js/React Three Fiber/Drei se reservan para una pieza promocional concreta si UI/UX demuestra que aporta valor y no afecta rendimiento. No incluirlos en paneles operativos. No añadir Express separado, microservicios, Redis, colas o infraestructura pagada para el MVP.
+Three.js/React Three Fiber/Drei están instalados para escenas promocionales 3D concretas, con carga diferida y alternativa estática si el rendimiento se afecta. PixiJS queda disponible para visuales 2D interactivos. Se mantienen fuera de los paneles operativos y de flujos críticos. No añadir Express separado, microservicios, Redis, colas o infraestructura pagada para el MVP.
 
 ## Arquitectura lógica
 

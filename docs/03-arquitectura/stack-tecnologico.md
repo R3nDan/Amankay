@@ -8,9 +8,9 @@ Stack recomendado en el chat final para el MVP:
 | --- | --- | --- |
 | Web | Next.js, React, TypeScript | Aceptado como dirección técnica |
 | Estilos | Tailwind CSS | Aceptado |
-| Componentes | shadcn/ui | Propuesto como base |
+| Componentes | shadcn/ui | CLI instalada; añadir componentes según necesidad y conservar el diseño de marca. |
 | Iconos | Lucide React | Propuesto/seleccionado |
-| Animación | Motion | Aceptado; usar con moderación |
+| Animación | Motion + GSAP | Instalados. Motion cubre transiciones de interfaz; GSAP queda disponible para secuencias puntuales. |
 | Backend web | Route Handlers de Next.js y capa de servicios | Recomendado |
 | Base de datos | PostgreSQL | Recomendado sobre MySQL; dirección aprobada junto con arquitectura |
 | ORM | Prisma | Propuesto |
@@ -22,7 +22,8 @@ Stack recomendado en el chat final para el MVP:
 - TanStack Table para tablas complejas.
 - Recharts para gráficos de reportes.
 - Sonner para notificaciones visuales.
-- Three.js + React Three Fiber + Drei para piezas 3D puntuales, no paneles de operación.
+- Three.js + React Three Fiber + Drei instalados para piezas 3D puntuales; no se usan en paneles de operación.
+- PixiJS + React bindings instalados para ilustraciones 2D en canvas si una escena interactiva lo requiere; los ornamentos decorativos estáticos se implementan como SVG vectorial accesible y liviano.
 - MapLibre solo si se confirma una necesidad de mapas; no es central en el MVP.
 
 ## Comparación de base de datos
@@ -37,4 +38,4 @@ La idea de Render + Neon se formuló como solicitud dentro del cuadro de texto a
 
 ## No incorporar por defecto
 
-Redis, Docker, microservicios, Express separado, GSAP, PixiJS, Rive o herramientas con suscripción. Cualquier inclusión posterior requiere necesidad concreta y revisión de costo.
+Redis, Docker, microservicios, Express separado y Rive. GSAP, PixiJS y herramientas 3D están instaladas por solicitud expresa del usuario del 21-11-2026; utilizarlas solo en piezas públicas concretas, cargar escenas grandes bajo demanda y mantener los paneles de operación sin 3D.
