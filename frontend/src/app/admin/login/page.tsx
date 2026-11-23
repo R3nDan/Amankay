@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
-import { ArrowRight, LockKeyhole } from "lucide-react";
+import { LockKeyhole } from "lucide-react";
 import { api, login, type Staff } from "@/lib/api";
 import { LanguageSwitch, useI18n } from "@/lib/i18n";
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
         <label htmlFor="admin-password">{t("Contraseña")}</label>
         <input id="admin-password" type="password" autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} required />
         {error && <p role="alert" className="admin-error">{t(error)}</p>}
-        <button className="action" disabled={busy} type="submit">{busy ? t("Entrando…") : t("Entrar al panel")}<ArrowRight size={18} aria-hidden="true" /></button>
+        <button className="action" disabled={busy} type="submit">{busy ? t("Entrando…") : t("Entrar al panel")}</button>
       </form>
       <Link className="admin-back" href="/">{t("Volver al sitio público")}</Link>
     </div>

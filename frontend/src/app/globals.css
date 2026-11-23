@@ -32,14 +32,16 @@
 .language-switch-options { position: absolute; z-index: 4; top: 50%; right: calc(100% + .45rem); display: flex; gap: 2px; padding: 3px; border: 1px solid #6b3f2a55; background: #fffaf2; box-shadow: 3px 4px 0 #6b3f2a14; opacity: 0; visibility: hidden; pointer-events: none; transform: translate(.25rem,-50%); transition: opacity .18s ease, transform .18s ease, visibility .18s ease; }
 .language-switch.is-open .language-switch-options { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(0,-50%); }
 .language-switch button { display: inline-flex; align-items: center; justify-content: center; gap: .25rem; min-height: 44px; padding: .45rem .6rem; border: 0; color: var(--color-cacao); background: transparent; font: 700 .7rem var(--font-sans); letter-spacing: .08em; cursor: pointer; }
-.language-switch .language-switch-tab { min-width: 48px; min-height: 40px; padding-inline: .45rem; border: 1px solid #6b3f2a55; background: #fffaf2; box-shadow: 3px 4px 0 #6b3f2a12; }
+.language-switch .language-switch-tab { min-width: 48px; min-height: 40px; padding-inline: .45rem; border: 1px solid var(--color-cacao); color: var(--color-crema); background: var(--color-cacao); box-shadow: 3px 4px 0 #6b3f2a24; transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease; }
 .language-switch .language-switch-option { min-width: 44px; }
 .language-switch .language-switch-option[aria-pressed="true"] { color: var(--color-crema); background: var(--color-cacao); }
 .language-switch .language-switch-option:hover:not([aria-pressed="true"]) { background: #edd2a577; }
+.language-switch .language-switch-tab:hover { color: var(--color-crema); background: var(--color-tinta); box-shadow: 3px 5px 0 #30231d33; transform: translateY(-1px); }
+.language-switch .language-switch-tab:focus-visible { outline: 3px solid var(--color-trigo); outline-offset: 3px; }
 .language-switch button:focus-visible { position: relative; z-index: 1; outline: 3px solid var(--color-cobre); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .language-switch-options { transition: none; } }
 html[data-motion="reduced"] .language-switch-options { transition: none; }
-.masthead-language { position: absolute; z-index: 3; right: clamp(1rem,4vw,4rem); top: 50%; transform: translateY(-50%); }
+.masthead-language { position: absolute; z-index: 3; right: clamp(.8rem,2vw,1.75rem); top: .65rem; transform: none; }
 .masthead { position: sticky; top: 0; z-index: 30; background: var(--color-marfil); border-top: 4px solid var(--color-cacao); }
 .masthead-top { position: relative; display: grid; grid-template-columns: 1fr; justify-items: center; align-items: center; min-height: 114px; }
 .signature { display: block; padding: .6rem; }

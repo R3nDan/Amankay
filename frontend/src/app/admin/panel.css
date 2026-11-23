@@ -211,3 +211,5 @@
   width: max-content;
   margin-left: auto;
 }
+
+.admin-login form > .action { justify-content: center; }
