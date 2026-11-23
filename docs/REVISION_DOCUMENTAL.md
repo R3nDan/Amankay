@@ -42,13 +42,12 @@ El backend incluye 26 entidades JPA, scripts Flyway V1/V2 y módulos REST de seg
 
 El sitio público, panel administrativo y experiencia QR Next.js consumen la API bajo `/api/v1`. El flujo público persiste la solicitud antes de abrir WhatsApp; la confirmación permanece manual. El estado detallado y las limitaciones de las verificaciones están en `05-desarrollo/README.md`; se registran lint/build del frontend y 14 pruebas Java aprobadas en la entrega anterior, junto con integración PostgreSQL comprobada en la base de prueba.
 
-El frontend y la API están desplegados en Render; `amankay_render` es su base exclusiva y permanece separada de `amankay_test`. El endpoint de salud respondió `UP`, y los logs confirmaron Spring/JPA y Flyway V1/V2. La pantalla de acceso carga, pero el último intento reportado devolvió 403. La existencia y el estado de una cuenta administrativa en `amankay_render` deben confirmarse antes de la prueba completa de sesión y QR.
+El frontend y la API están desplegados en Render; `amankay_render` es su base exclusiva y permanece separada de `amankay_test`. El endpoint de salud respondió `UP`, y los logs confirmaron Spring/JPA y Flyway V1/V2. Después de un 403 inicial, el usuario confirmó que pudo entrar al panel. Esta prueba acredita un inicio de sesión inicial, pero no sustituye verificaciones independientes de persistencia, salida y autorización por rol/sucursal. En pgAdmin observó V1/V2 registradas con éxito y 27 tablas físicas: 26 tablas de aplicación y `flyway_schema_history`.
 
 ## Pendientes para la demostración
 
-1. Completar las pruebas manuales del login administrativo, sesión, permisos y QR en Render.
-2. Confirmar la cuenta administrativa disponible en la base remota y usar el bootstrap seguro solo si aún hace falta crearla.
-3. Probar manualmente en navegador los flujos de pedidos, pagos, QR/cuentas, inventario, reposiciones, entregas, permisos y reportes.
+1. Confirmar persistencia de la sesión, cierre y permisos por rol/sucursal en Render; el inicio de sesión inicial ya fue confirmado por el usuario.
+2. Probar manualmente en navegador y teléfono los flujos completos de pedidos, QR/cuentas, inventario, reposiciones, pagos, entregas y reportes.
 4. Resolver almacenamiento privado persistente para comprobantes si se deben conservar durante la demo.
 5. Cargar datos operativos reales autorizados: coordenadas/límite de cobertura y existencias iniciales.
 6. Definir y ejecutar el protocolo académico de usabilidad (P-18).

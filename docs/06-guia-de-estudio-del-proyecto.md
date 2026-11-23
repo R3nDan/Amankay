@@ -83,7 +83,47 @@ Next.js presenta la interfaz y realiza solicitudes HTTP. El archivo `frontend/ne
 
 Java conserva las reglas transaccionales y la autorización; el navegador no decide saldos, permisos, precios finales ni transiciones válidas. Los repositorios JPA leen y persisten entidades. PostgreSQL conserva datos y restricciones. Flyway versiona cambios de esquema; Hibernate utiliza el esquema y tiene `ddl-auto=none`, por lo que no crea tablas automáticamente.
 
-## 7. Frontend: rutas y archivos clave
+## 7. Frontend: las tres experiencias, rutas y archivos clave
+
+Amankay comparte identidad visual y componentes, pero atiende tres contextos de uso distintos. El sitio público prioriza exploración y pedido; el panel requiere sesión de personal y prioriza operaciones; la experiencia QR parte de una sesión de mesa activa y está diseñada primero para teléfono. Las rutas son vistas de Next.js: las reglas y escrituras siguen en la API Java.
+
+### 7.1 Sitio público
+
+- `/`: portada editorial con acceso al catálogo, presentación del proceso del pan e información de sucursales.
+- `/menu` y `/menu/[categoria]`: catálogo de Panadería, Fritos y Bebidas. La interfaz conserva tarjetas, fotografías y navegación responsive. El contenido visual se obtiene de datos tipados del frontend; al enviar, el backend valida productos, precios vigentes, sucursal y disponibilidad.
+- Bolsa: resumen de cantidades y modalidad de recogida o domicilio. La solicitud se persiste con `POST /api/v1/orders/web` antes de abrir WhatsApp. El cliente continúa la conversación fuera del sistema y el personal confirma manualmente desde Pedidos.
+- `/sucursales`: direcciones, horarios y teléfonos publicados.
+- `/seguimiento/[codigo]`: consulta pública del estado con información limitada para evitar exponer datos privados.
+
+El envío desde la bolsa no equivale a aceptación. El pedido web permanece pendiente de confirmación manual, vence a los 30 minutos si nadie lo atiende y no reserva inventario antes de la aceptación.
+
+### 7.2 Panel administrativo
+
+- `/admin/login`: autentica personal con sesión HTTP del backend; no crea cuentas ni ofrece registro público.
+- `/admin`: presenta accesos y resumen según los permisos recibidos.
+- `/admin/pedidos`: consulta la cola por sucursal, revisa solicitudes web y pedidos registrados manualmente por WhatsApp, permite aceptar/rechazar y ejecutar transiciones autorizadas.
+- `/admin/mesas`: administra mesas, abre/cierra sesiones temporales y presenta el QR que el personal comparte con el cliente. La cuenta de mesa tiene ciclo de cierre independiente.
+- `/admin/inventario` y `/admin/reposiciones`: consulta saldos y movimientos, registra existencias iniciales/ajustes con motivo, y tramita solicitudes, despachos, recepciones y cierres previstos.
+- `/admin/entregas`, `/admin/pagos` y `/admin/conciliaciones`: operaciones de entrega, intentos de pago, revisión manual de transferencias y conciliación del efectivo declarado/recibido.
+- `/admin/catalogo`, `/admin/usuarios`, `/admin/sucursales` y `/admin/reportes`: mantienen datos de catálogo y accesos, consultan sucursales/configuración y generan reportes del MVP.
+
+La navegación puede ocultar opciones que no corresponden al rol, pero esto es solo presentación. Java vuelve a comprobar rol, sucursal y relación del usuario con la entrega u operación solicitada. El rol `ADMINISTRADOR` no implica por sí solo permisos de atención o inventario.
+
+### 7.3 Experiencia de mesa QR
+
+- La ruta de cliente es `/mesa/[codigoMesa]`; abre catálogo, carrito, consulta de pedidos y estados asociados a la mesa.
+- El QR físico permanente identifica mesa/sucursal y no da permiso para pedir. Personal autorizado abre sesión desde el panel; Java emite un QR temporal vinculado a esa sesión y mesa.
+- El token tiene vigencia configurable de ocho horas por defecto. Java almacena su hash; el token original se entrega al personal para mostrar el QR temporal. El cierre manual invalida el acceso; la expiración por tiempo no cierra la cuenta.
+- La página cliente recibe el token en el fragmento de la URL, lo valida con el backend y conserva el token en `sessionStorage` del navegador durante la sesión de esa pestaña. El fragmento se retira de la barra de direcciones después de procesarse. Esto no significa que el token no exista en el navegador: permanece acotado al almacenamiento de sesión y no se persiste en `localStorage`.
+- La API vuelve a validar el token al consultar y enviar pedidos. La aplicación consulta cambios mediante sondeo REST periódico; no utiliza WebSocket.
+
+La experiencia QR es mobile-first, con controles táctiles, resumen de pedidos y estados legibles. La representación visual puede cambiar sin modificar la validación de token ni las reglas transaccionales, que pertenecen al backend.
+
+### 7.4 Internacionalización implementada en JavaScript
+
+`frontend/src/lib/i18n.js` es la implementación activa. Utiliza un contexto React, diccionarios explícitos y las API nativas `Intl` de JavaScript; no depende de una biblioteca de internacionalización externa. Los códigos configurados son `es-CO` (español de Colombia), `en` (inglés) y `pt-BR` (portugués de Brasil). El selector existente cambia el idioma, actualiza `document.documentElement.lang` y guarda la preferencia en `localStorage`.
+
+La cobertura vigente incluye sitio público, navegación compartida, flujo de bolsa/pedido, experiencia QR, acceso y elementos compartidos del inicio administrativo. Las pantallas de operación internas del panel siguen en español. La presentación de precios continúa en COP; algunos componentes operativos usan formato colombiano fijo, por lo que tres idiomas disponibles no significa que todas las vistas y formatos hayan sido traducidos ni probados integralmente en las tres variantes.
 
 ### Rutas públicas
 
@@ -93,11 +133,12 @@ Java conserva las reglas transaccionales y la autorización; el navegador no dec
 - `frontend/src/app/menu/page.tsx`: portada del catálogo.
 - `frontend/src/app/menu/[categoria]/page.tsx`: listado de una categoría.
 - `frontend/src/app/sucursales/page.tsx`: información de sucursales.
-- `frontend/src/app/mesa/[codigoMesa]/page.tsx`: validación de QR temporal, carrito de mesa y envío de pedido.
 
 ### Rutas del panel
 
 `/admin/login`, `/admin`, `/admin/pedidos`, `/admin/mesas`, `/admin/inventario`, `/admin/reposiciones`, `/admin/entregas`, `/admin/pagos`, `/admin/conciliaciones`, `/admin/catalogo`, `/admin/usuarios`, `/admin/sucursales` y `/admin/reportes`.
+
+La vista de cliente QR es `/mesa/[codigoMesa]`, implementada en `frontend/src/app/mesa/[codigoMesa]/page.tsx` y sus estilos en `frontend/src/app/mesa/[codigoMesa]/table.css`.
 
 ### Componentes y utilidades
 
@@ -167,7 +208,7 @@ El modelo aprobado tiene 24 entidades de dominio y dos asociativas. Las asociaci
 5. **Reposición:** `SolicitudReposicion`, `DetalleSolicitudReposicion`, `DespachoReposicion`, `DetalleDespachoReposicion`, `RecepcionReposicion`, `DetalleRecepcionReposicion`.
 6. **Auditoría:** `RegistroAuditoria`.
 
-Relaciones importantes: producto y sucursal determinan un único saldo; pedido tiene varias líneas con precio histórico; sesión y cuenta se relacionan uno a uno; una cuenta agrupa pedidos de mesa aceptados; pago pertenece exactamente a un pedido externo o a una cuenta; entrega corresponde a un pedido de domicilio; recepción referencia el despacho que la originó. El MER y el modelo físico contienen atributos, tipos y restricciones detallados.
+Relaciones importantes: producto y sucursal determinan un único saldo; pedido tiene varias líneas con precio histórico; sesión y cuenta se relacionan uno a uno; una cuenta agrupa pedidos de mesa aceptados; pago pertenece exactamente a un pedido externo o a una cuenta; entrega corresponde a un pedido de domicilio; recepción referencia el despacho que la originó. El MER y el modelo físico contienen atributos, tipos y restricciones detallados. En pgAdmin se observan 27 tablas físicas porque Flyway añade `flyway_schema_history`; las tablas de la aplicación siguen siendo las 26 aprobadas.
 
 ## 11. Tecnologías y dependencias actuales
 
@@ -275,13 +316,13 @@ El estado registrado el 23-11-2026 indica que Render creó `amankay-frontend`, `
 
 La demostración está publicada, pero no equivale a producción de disponibilidad continua. El plan Free tiene límites de descanso/retorno del servicio, duración y capacidad de PostgreSQL, y no conserva archivos locales como almacenamiento privado persistente. El sistema de comprobantes requiere resolver almacenamiento persistente si se desea probar en serio la subida/consulta. No se autorizó plan pago.
 
-El registro más reciente de desarrollo señala que el login remoto cargaba pero una prueba anterior obtuvo 403, sin poder confirmar si faltaba cuenta remota o si las credenciales eran incorrectas. Una cuenta local no aparece automáticamente en Render. Si los usuarios que ya creaste existen en `amankay_render`, verifica su estado, roles y sucursales ahí antes de seguir.
+El usuario informó que pudo entrar al panel remoto con su cuenta. Esto confirma el acceso inicial de esa cuenta en ese momento; no demuestra por sí solo persistencia tras recarga, cierre de sesión, autorización de todos los roles/sucursales ni recorrido completo de pedido/QR. Una cuenta local no aparece automáticamente en Render.
 
 ## 18. Qué está verificado y qué falta
 
-El registro de la entrega local indica `npm run lint`, `npm run build`, 14 pruebas Java aprobadas con JDK 25 y V1/V2 ejecutadas en `amankay_test`. Para Render se registró compilación de Next.js, estado Live de ambos servicios web, respuesta de salud `UP`, conexión Java a PostgreSQL remota, migraciones Flyway y carga de 26 repositorios.
+El registro de la entrega local indica `npm run lint`, `npm run build`, 14 pruebas Java aprobadas con JDK 25 y V1/V2 ejecutadas en `amankay_test`. Para Render se registró compilación de Next.js, estado Live de ambos servicios web, respuesta de salud `UP`, conexión Java a PostgreSQL remota, migraciones Flyway y carga de 26 repositorios. El usuario observó V1 y V2 con éxito en `flyway_schema_history` y 27 tablas físicas en pgAdmin: las 26 tablas de aplicación aprobadas más la tabla técnica de metadatos de Flyway.
 
-Esto demuestra disponibilidad básica e integración técnica inicial. No demuestra todavía todos los recorridos manuales con usuarios y teléfono. Pendiente: verificar cuenta administrativa, roles, flujos reales de pedido y stock, pagos/archivos, QR y cierre de cuenta, reposiciones, entregas, reportes, coordenadas/cobertura y protocolo académico de usabilidad.
+Esto demuestra disponibilidad básica e integración técnica inicial. También quedó confirmado por el usuario que pudo ingresar al panel. No demuestra todos los recorridos manuales con varios roles y teléfono. Pendiente: persistencia/cierre de sesión, permisos por rol y sucursal, pedido público completo, token QR válido/inválido/cerrado, creación y cobro de pedido de mesa, pagos/archivos, inventario real, reposiciones, entregas, reportes, coordenadas/cobertura y protocolo académico de usabilidad.
 
 ## 19. Preguntas para defensa
 
