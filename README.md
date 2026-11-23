@@ -12,8 +12,11 @@ La arquitectura aprobada conserva Next.js, React y TypeScript como frontend, y u
 
 ### Ejecución local
 
+El frontend vive en `frontend/`. Desde la raíz del repositorio:
+
 ```sh
-npm install
+cd frontend
+npm ci
 npm run dev
 ```
 
@@ -21,10 +24,10 @@ Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 310
 
 ### Código
 
-- `src/app/`: rutas y estilos globales.
-- `src/components/`: cabecera, navegación, tarjetas, ilustraciones SVG originales, recorrido del pan y componentes de interfaz.
-- `src/data/`: catálogo visual tipado con los precios indicados; disponibilidad por confirmar.
-- `src/lib/`: utilidades compartidas.
+- `frontend/src/app/`: rutas y estilos globales.
+- `frontend/src/components/`: cabecera, navegación, tarjetas, ilustraciones SVG originales, recorrido del pan y componentes de interfaz.
+- `frontend/src/data/`: catálogo visual tipado con los precios indicados; disponibilidad por confirmar.
+- `frontend/src/lib/`: utilidades compartidas.
 
 ## Orden de trabajo acordado
 
@@ -50,20 +53,20 @@ Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 310
 
 ## Archivos recibidos
 
-- `assets/originales/marca/Amankay_Logo.svg` y `assets/originales/marca/Amankay_Logo.png`: archivos originales del logo proporcionado.
+- `frontend/assets/originales/marca/Amankay_Logo.svg` y `frontend/assets/originales/marca/Amankay_Logo.png`: archivos originales del logo proporcionado.
 - `AnteProyecto_PW.docx`: anteproyecto que describe pedidos mediante QR, información de sedes y coordinación de productos entre sucursales. Su nombre El Alambique es histórico; el usuario confirmó Amankay como nombre del negocio. Los datos personales del formato no se reproducen en la documentación.
 
 ## Recursos visuales de la aplicación
 
-- `assets/originales/`: conserva los archivos recibidos sin optimizar. Los nuevos recursos originales se ubican aquí según su tipo y procedencia.
-- `public/imagenes/marca/`: identidad visual que se muestra en la web.
-- `public/imagenes/portada/`: imágenes principales de las páginas.
-- `public/imagenes/productos/panaderia/` y `fritos/`: fotografías de producto optimizadas. Avena, Sevillana y Guarapo se sirven desde `public/imagenes/productos/Bebidas/`.
-- `assets/originales/productos/panaderia/` y `fritos/`: fotografías originales recibidas, conservadas sin modificar.
-- `public/videos/proceso/`: video del proceso del pan.
-- `assets/originales/proceso/`: clip original recibido.
+- `frontend/assets/originales/`: conserva los archivos recibidos sin optimizar. Los nuevos recursos originales se ubican aquí según su tipo y procedencia.
+- `frontend/public/imagenes/marca/`: identidad visual que se muestra en la web.
+- `frontend/public/imagenes/portada/`: imágenes principales de las páginas.
+- `frontend/public/imagenes/productos/panaderia/` y `fritos/`: fotografías de producto optimizadas. Avena, Sevillana y Guarapo se sirven desde `frontend/public/imagenes/productos/Bebidas/`.
+- `frontend/assets/originales/productos/panaderia/` y `fritos/`: fotografías originales recibidas, conservadas sin modificar.
+- `frontend/public/videos/proceso/`: video del proceso del pan.
+- `frontend/assets/originales/proceso/`: clip original recibido.
 
-La aplicación utiliza versiones web de las imágenes desde `public/`. Las fotografías de referencia que se compartan para orientar el diseño se conservan en `assets/originales/referencias/` cuando se incorporen al repositorio; no se publican como fotografías de productos.
+La aplicación utiliza versiones web de las imágenes desde `frontend/public/`. Las fotografías de referencia que se compartan para orientar el diseño se conservan en `frontend/assets/originales/referencias/` cuando se incorporen al repositorio; no se publican como fotografías de productos.
 
 ## Fuentes históricas
 

@@ -11,7 +11,7 @@ API REST del MVP en Java 25, Spring Boot 4.2.0 y Springdoc 3.2.1. Es un monolito
 - Carga de comprobantes privados fuera de la raíz pública, activada solo al configurar `AMANKAY_PRIVATE_FILES_DIR`.
 - Datos iniciales limitados a roles, sucursales, horarios, catálogo y tarifa aprobados. No se crean usuarios/contraseñas, existencias ni coordenadas inventadas.
 
-El frontend Next.js todavía no consume estos endpoints. La conexión real con PostgreSQL, el arranque completo de Spring y la ejecución de Flyway quedan pendientes hasta configurar JDK 25 y autorizar un destino local de prueba conocido.
+El frontend Next.js se encuentra en `../frontend/` y consume estos endpoints mediante las rutas `/api/v1`. La configuración de PostgreSQL y el estado de Flyway se describen en las secciones siguientes.
 
 ## Requisitos y comandos
 
