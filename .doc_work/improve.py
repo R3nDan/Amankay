@@ -1,5 +1,6 @@
 from pathlib import Path
 from io import BytesIO
+import re
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -77,6 +78,10 @@ figs = {
  'public':graphic('public','Sitio público y pedido', [('Inicio · menú · sucursales',''),('Catálogo','Categorías y productos'),('Pedido','Recogida o domicilio'),('Seguimiento','Código y estado')], 'mock'),
  'qr':graphic('qr','Experiencia de mesa con QR', [('Mesa identificada · sesión activa',''),('Categorías','Catálogo disponible'),('Carrito','Cantidades y total'),('Pedido enviado','Estado por pedido'),('Acceso temporal','Cierre o expiración')], 'mock'),
  'admin':graphic('admin','Panel operativo por rol', [('Sucursal activa · navegación',''),('Pedidos','Cola y decisiones'),('Inventario','Existencias y movimientos'),('Reposiciones','Solicitud y recepción'),('Reportes','Ventas y estados')], 'mock')
+ ,'orders':graphic('orders','Gestión de pedidos', [('Pedidos · sucursal activa',''),('Cola','Llegada y prioridad visual'),('Detalle','Líneas, total y pago'),('Decisión','Aceptar o rechazar'),('Estado','Preparación y entrega')], 'mock')
+ ,'inventory':graphic('inventory','Control de inventario', [('Inventario · sucursal',''),('Existencias','Disponible por producto'),('Movimiento','Tipo, cantidad y motivo'),('Ajuste','Personal autorizado'),('Historial','Origen y compensación')], 'mock')
+ ,'replenish':graphic('replenish','Reposiciones entre sedes', [('Solicitud · estado',''),('Revisión','Aprobación por línea'),('Despacho','Cantidades parciales'),('Recepción','Apto y dañado'),('Cierre','Pendientes y reversa')], 'mock')
+ ,'deliver':graphic('deliver','Entregas y recaudo', [('Entrega · estado',''),('Asignación','Repartidor autorizado'),('Recorrido','Recogida y camino'),('Resultado','Entrega o incidencia'),('Recaudo','Declarado y recibido')], 'mock')
 }
 
 d=Document(SRC)
@@ -123,6 +128,7 @@ replace_figure('Figura A.1.',figs['arch'],'Figura 5. Arquitectura lógica de Ama
 replace_figure('Figura B.1.',figs['roles'],'Figura 6. Actores y funciones principales. Fuente: elaboración propia a partir del UML.')
 replace_figure('Figura C.1.',figs['model'],'Figura 7. Dominios y relaciones principales del modelo de datos. Fuente: elaboración propia a partir del MER aprobado.')
 setp('El sistema se construyó en entregas:', 'El sistema se construyó en entregas: sitio público, backend REST, base de datos, panel administrativo y despliegue de demostración. La Figura 5 resume la arquitectura lógica. Los anexos reúnen modelos, tablas de trazabilidad y esquemas de interfaz que ayudan a comprender el funcionamiento de la aplicación.')
+setp('La solución sigue una arquitectura web cliente-servidor', 'La solución sigue una arquitectura web cliente-servidor de tres capas lógicas. Next.js presenta la interfaz y reenvía solicitudes; Spring Boot concentra reglas, autenticación y API REST; PostgreSQL conserva la información. Los módulos Java separan seguridad, catálogo, pedidos, mesas, pagos, inventario, reposiciones, entregas y reportes. JPA/Hibernate accede a la base y Flyway aplica migraciones versionadas. La Figura 5 representa el recorrido lógico de una solicitud.')
 
 # Fill the original empty phase table.
 t=d.tables[1]
@@ -168,7 +174,44 @@ existing_titles=[
  'Tabla 13. Verificaciones registradas. Fuente: plan de desarrollo.',
  'Tabla 14. Glosario técnico. Fuente: documentación del proyecto.'
 ]
-for t,title in zip(d.tables[2:8],existing_titles):caption_before_table(t,title)
+old_tables=[]
+for t in d.tables:
+    if t.cell(0,0).text.strip() in ('Actor','Grupo','Entidad','Necesidad','Área','Término'):
+        old_tables.append(t)
+for t,title in zip(old_tables,existing_titles):caption_before_table(t,title)
+
+anchor=match('Las figuras de baja fidelidad documentan')
+for key,cap in [
+ ('orders','Figura 8. Gestión de pedidos y cola. Fuente: elaboración propia a partir de los wireframes.'),
+ ('inventory','Figura 9. Consulta de existencias y movimientos. Fuente: elaboración propia a partir de los wireframes.'),
+ ('replenish','Figura 10. Reposiciones entre sucursales. Fuente: elaboración propia a partir de los wireframes.'),
+ ('deliver','Figura 11. Entregas y recaudo. Fuente: elaboración propia a partir de los wireframes.')]:
+    q=after(anchor,'');q.alignment=WD_ALIGN_PARAGRAPH.CENTER;q.add_run().add_picture(str(figs[key]),width=Inches(6.0));anchor=q
+    anchor=after(anchor,cap,'Caption')
+
+def order_captioned_tables(anchor, titles):
+    node=anchor._p
+    for title in titles:
+        cap=match(title)
+        cap_el=cap._p; table_el=cap_el.getnext()
+        assert table_el.tag==qn('w:tbl'), title
+        cap_el.getparent().remove(cap_el)
+        table_el.getparent().remove(table_el)
+        node.addnext(cap_el);cap_el.addnext(table_el);node=table_el
+
+order_captioned_tables(match('El frontend tiene un sitio público'),[
+ 'Tabla 3. Sitio público', 'Tabla 4. Experiencia de pedidos por QR',
+ 'Tabla 5. Panel administrativo'])
+order_captioned_tables(match('El sitio público y la experiencia QR ofrecen español'),[
+ 'Tabla 7. Paleta cromática', 'Tabla 8. Criterios de experiencia'])
+
+# Keep numbering aligned with the physical reading order after inserting tables.
+for kind in ('Tabla','Figura'):
+    n=0
+    for q in d.paragraphs:
+        if q.style.name=='Caption' and q.text.startswith(kind+' '):
+            n+=1
+            q.text=re.sub(r'^'+kind+r'\s+[A-Z]?\.?\d+\.',f'{kind} {n}.',q.text)
 
 # Replace stale front matter indexes with explicit, numbered entries; page numbers are filled after Word export.
 for p0 in list(d.paragraphs):
