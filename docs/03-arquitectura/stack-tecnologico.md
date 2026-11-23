@@ -8,9 +8,9 @@ Dirección aprobada para el MVP por el usuario el 22-11-2026.
 | --- | --- | --- |
 | Web | Next.js, React, TypeScript | Aceptado como dirección técnica |
 | Estilos | Tailwind CSS | Aceptado |
-| Componentes | shadcn/ui | seleccionado; verificar instalación en el repositorio y añadir componentes según necesidad. |
+| Componentes | Componentes propios de React | Vigente; no se usa un kit de componentes externo. |
 | Iconos | Lucide React | Propuesto/seleccionado |
-| Animación | Motion + GSAP | Seleccionados para usos puntuales; verificar qué paquetes están instalados realmente antes de modificar dependencias. |
+| Animación | Motion | Instalado y utilizado en animaciones de interfaz. GSAP fue retirado al comprobar que no tenía usos. |
 | Backend | Java con Spring Boot, monolito modular | Aprobado |
 | API | Servicios web REST bajo /api/v1 | Aprobada |
 | Base de datos | PostgreSQL; local para desarrollo y una instancia Render separada para la presentación pública | Aprobada como destino de demostración; nunca reutilizar `amankay_test` |
@@ -19,7 +19,7 @@ Dirección aprobada para el MVP por el usuario el 22-11-2026.
 | Construcción | Maven Wrapper; no se requiere Maven global | Aprobada |
 | Documentación API/código | Springdoc/OpenAPI con Swagger UI y JavaDocs | Aprobada |
 | Seguridad | Spring Security | Aprobada |
-| Prisma | Permanece instalado; no se utilizará para administrar ni modificar las tablas PostgreSQL | Aprobado |
+| Persistencia desde frontend | Ninguna; Next.js consume la API Java | Vigente; sin ORM ni driver PostgreSQL de Node. |
 | Validación frontend | Zod | Propuesto |
 
 ## Versiones objetivo aprobadas
@@ -44,20 +44,19 @@ Spring Boot administra versiones compatibles de sus dependencias mediante el BOM
 - TanStack Table para tablas complejas.
 - Recharts para gráficos de reportes.
 - Sonner para notificaciones visuales.
-- Three.js + React Three Fiber + Drei seleccionados para piezas 3D puntuales; verificar instalación en el repositorio. No se usan en paneles de operación.
-- PixiJS + React bindings seleccionados para ilustraciones 2D en canvas si una escena interactiva lo requiere; verificar instalación en el repositorio. los ornamentos decorativos estáticos se implementan como SVG vectorial accesible y liviano.
+- Three.js, React Three Fiber, Drei y PixiJS quedan como opciones futuras, no instaladas: no hay escenas que las utilicen y los adornos actuales son SVG/CSS.
 - MapLibre solo si se confirma una necesidad de mapas; no es central en el MVP.
 
 ## Comparación de base de datos
 
-PostgreSQL se mantiene como base de datos del MVP. El desarrollo local utiliza su instancia local; la presentación pública aprobada se prepara en Render con una base independiente llamada `amankay_render`. Flyway evoluciona el esquema; Hibernate valida y accede a él sin crearlo o cambiarlo automáticamente. Prisma queda excluido de la administración de esas tablas para evitar dos ORM con autoridad de escritura.
+PostgreSQL se mantiene como base de datos del MVP. El desarrollo local utiliza su instancia local; la presentación pública está desplegada en Render con una base independiente llamada `amankay_render`. Flyway evoluciona el esquema; Hibernate valida y accede a él sin crearlo o cambiarlo automáticamente. El frontend no se conecta directamente a PostgreSQL: la persistencia se realiza en Java con JPA/Hibernate.
 
 ## Restricción de costos
 
-El usuario eligió Render para presentar el ecosistema al profesor. La configuración del repositorio usa planes gratuitos para no exigir pagos ni habilitar cargos. Esta aprobación cubre una demostración académica, no un servicio productivo ni la aceptación de un plan de pago. Los límites vigentes son materiales: los servicios web Free se duermen tras 15 minutos sin tráfico y pueden tardar cerca de un minuto en reactivarse; PostgreSQL Free expira 30 días después de crearse, tiene 1 GB y no cuenta con copias de seguridad. Confirmar esos límites en Render antes de crear recursos; no pasar a planes pagos sin nueva autorización.
+El usuario eligió Render para presentar el ecosistema al profesor. La configuración desplegada usa planes gratuitos y no exige pagos. Esta aprobación cubre una demostración académica, no un servicio productivo ni la aceptación de un plan de pago. Los límites materiales que se deben considerar son: los servicios web Free se duermen tras 15 minutos sin tráfico y pueden tardar cerca de un minuto en reactivarse; PostgreSQL Free expira 30 días después de crearse, tiene 1 GB y no cuenta con copias de seguridad. Revisar los límites vigentes antes de prolongar el uso; no pasar a planes pagos sin nueva autorización.
 
-La idea histórica de Render + Neon no quedó aprobada como combinación. La decisión posterior del usuario el 23-11-2026 es preparar Render para frontend, API y una base Render PostgreSQL separada; Neon no forma parte del despliegue vigente. La configuración usa `render.yaml` y debe revisarse si cambian los planes o límites del proveedor.
+La idea histórica de Render + Neon no quedó aprobada como combinación. La decisión posterior del usuario el 23-11-2026 fue desplegar frontend, API y una base PostgreSQL separada en Render; Neon no forma parte del despliegue vigente. La configuración usa `render.yaml` y debe revisarse si cambian los planes o límites del proveedor.
 
 ## No incorporar por defecto
 
-Redis, Docker, microservicios, Express separado, OAuth, JWT, Rive y nuevos servicios pagados. JWT u OAuth se incorporarían solo si una rúbrica o decisión funcional concreta lo exige. GSAP, PixiJS y herramientas 3D fueron seleccionadas para piezas públicas puntuales; cargar escenas grandes bajo demanda y mantener los paneles de operación sin 3D.
+Redis, Docker, microservicios, Express separado, OAuth, JWT, Rive, GSAP, PixiJS, herramientas 3D y nuevos servicios pagados. JWT u OAuth se incorporarían solo si una rúbrica o decisión funcional concreta lo exige. Las librerías visuales adicionales pueden añadirse cuando exista un uso concreto; las animaciones actuales usan Motion y CSS.

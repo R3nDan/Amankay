@@ -2,7 +2,7 @@
 
 ## Estado y alcance
 
-Este diseño implementa el MER aprobado de **24 entidades de dominio y 2 asociativas (26 tablas)**. Las adiciones de atributos descritas aquí no crean entidades. La migración es acumulativa, no elimina tablas ni datos y no se ha ejecutado contra ninguna base de datos.
+Este diseño implementa el MER aprobado de **24 entidades de dominio y 2 asociativas (26 tablas)**. Las adiciones de atributos descritas aquí no crean entidades. Las migraciones son acumulativas y no eliminan tablas ni datos. V1/V2 se ejecutaron en la base de prueba autorizada `amankay_test` y en la base Render independiente `amankay_render`.
 
 PostgreSQL usa UUID, importes NUMERIC(12,2) en COP, fechas-hora TIMESTAMPTZ en UTC, estados VARCHAR restringidos por CHECK y datos administrativos JSONB. JPA usa ddl-auto=none; Flyway es el único mecanismo para evolucionar el esquema y permanece deshabilitado por defecto.
 
@@ -66,7 +66,7 @@ El pedido web se guarda antes de abrir WhatsApp y queda PENDIENTE_CONFIRMACION. 
 
 - V1__create_amankay_schema.sql crea las 26 tablas, restricciones, índices y el trigger de inmutabilidad.
 - V2__seed_confirmed_catalog.sql carga categorías, productos, sucursales, horarios, roles y la tarifa de 2.000 COP ya confirmados por la documentación/frontend. No agrega usuarios, credenciales ni saldos de inventario inventados.
-- Flyway sigue deshabilitado por defecto. La ejecución exige una base local desechable o esquema de prueba expresamente autorizado.
+- Flyway está deshabilitado por defecto en la configuración local. La ejecución local exige un destino de prueba expresamente autorizado; Render lo habilita solo para `amankay_render`, donde V1/V2 ya se registraron.
 
 ## Trazabilidad de MovimientoInventario
 

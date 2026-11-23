@@ -2,7 +2,7 @@
 
 ## Estado
 
-El usuario confirmó el 22-11-2026 que el análisis y diseño concluyeron y aprobó el MER lógico consolidado de este documento. El 22-11-2026 también aprobó las precisiones funcionales para pedidos web, pagos, permisos, QR y compensaciones. Se autoriza implementar manteniendo 24 entidades de dominio y 2 asociativas.
+El usuario confirmó el 22-11-2026 que el análisis y diseño concluyeron y aprobó el MER lógico consolidado de este documento. El 22-11-2026 también aprobó las precisiones funcionales para pedidos web, pagos, permisos, QR y compensaciones. El esquema físico, las migraciones y las entidades JPA se implementaron conservando 24 entidades de dominio y 2 asociativas.
 
 El inventario descrito aquí es el modelo lógico aprobado. La cuenta histórica de 31 relaciones precede a refinamientos posteriores y no se usa como conteo actual.
 
@@ -105,13 +105,13 @@ El inventario histórico de 27 candidatas corresponde a una etapa anterior y no 
 
 1. El MER lógico de 24 entidades de dominio y 2 asociativas fue aprobado el 22-11-2026; no se reabren entidades ni cardinalidades.
 2. El modelo físico, nulabilidad, estados, tipos, unicidades e índices se especifican en [modelo-fisico-postgresql.md](modelo-fisico-postgresql.md).
-3. Las entidades JPA y las migraciones Flyway V1/V2 se prepararon en `backend/`, conservando las 26 entidades. No se han ejecutado contra PostgreSQL.
-4. Flyway y el arranque completo permanecen sin probar hasta definir y autorizar una base/esquema local de prueba aislado. No inventar nombre de base, credenciales, coordenadas ni stock.
-5. El siguiente paso técnico es verificar con JDK 25 y, tras autorización del destino, validar mapeos, restricciones y transacciones con PostgreSQL.
+3. Las entidades JPA y las migraciones Flyway V1/V2 están implementadas en `backend/`, conservando las 26 entidades. V1/V2 se ejecutaron en `amankay_test` y en la base Render independiente `amankay_render`.
+4. Spring Boot, JPA/Hibernate y los repositorios iniciaron correctamente en ambas validaciones registradas; Render confirmó la aplicación de las migraciones en sus logs. No se modifica ni se reutiliza una base distinta a los destinos autorizados.
+5. Las entidades, atributos aprobados y cardinalidades se mantienen. Las pruebas manuales completas de login, permisos y QR en el entorno publicado siguen pendientes.
 
-## Fuente
+## Base documental
 
-[Chats de recepción parcial](https://chatgpt.com/share/6b01d0d0-fd70-83e9-b681-8e1f6b1baf3b) y [refinamiento UML](https://chatgpt.com/share/6b01d0f1-4d10-83e9-a5e7-6e075dedce85), aclaración directa del usuario del 21-11-2026 y [relaciones MER](https://chatgpt.com/share/6b01d114-7e04-83e9-bb40-c135412f6824).
+Este modelo recoge las decisiones aprobadas por el usuario sobre recepción parcial, relaciones y cardinalidades, además de las precisiones posteriores registradas en `decisiones-tecnicas.md`. El SRS contiene las reglas funcionales vigentes; el modelo físico detalla su implementación PostgreSQL.
 
 ## Reglas de cantidades y cierre de faltantes
 

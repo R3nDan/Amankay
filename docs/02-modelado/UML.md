@@ -2,7 +2,7 @@
 
 ## Estado y alcance
 
-Este documento consolida actores, casos de uso y clases conceptuales del MVP. El usuario aprobó el MER lógico alineado a este UML y autorizó avanzar al desarrollo el 22-11-2026. Las decisiones funcionales aún pendientes se conservan en el SRS y no se asumen por la aprobación del modelo.
+Este documento consolida actores, casos de uso y clases conceptuales del MVP. El usuario aprobó el MER lógico alineado a este UML y autorizó avanzar al desarrollo el 22-11-2026. El backend implementa sus módulos principales con Java/Spring Boot y conserva las 26 entidades; los datos de operación que siguen pendientes se listan en el SRS y en `pendientes-y-decisiones.md`.
 
 ## Actores
 
@@ -149,6 +149,6 @@ InventarioSucursal "1" -- "0..*" MovimientoInventario
 
 El diagrama es conceptual: la regla XOR de origen de `Pago`, la obligatoriedad de la cuenta en pedidos QR y otros controles entre entidades requieren restricciones y validación descritas en el MER.
 
-## Fuentes
+## Base documental
 
-Las decisiones consolidadas derivan del SRS y de las once conversaciones enlazadas en su sección de trazabilidad. Este documento y el MER deben actualizarse conjuntamente ante nuevas decisiones.
+Los actores, casos de uso y clases se consolidan a partir del SRS, del MER aprobado y de las decisiones técnicas vigentes. Ante un cambio posterior, se actualizan conjuntamente el documento afectado y la trazabilidad en `decisiones-tecnicas.md`.

@@ -8,7 +8,7 @@ Aplicación web con Next.js App Router, React, TypeScript, Tailwind CSS y Lucide
 
 Las dos sedes están disponibles como opciones para recoger pedidos, con horarios y teléfonos de contacto. El sitio público conserva su experiencia visual existente. El panel administrativo de Next.js ya consume la API Java para autenticación, mesas y QR temporal, pedidos, inventario, reposiciones, entregas, pagos, conciliaciones, catálogo, usuarios, sucursales y reportes. La bolsa pública registra el pedido en Java antes de abrir WhatsApp; la confirmación continúa siendo manual por el personal.
 
-La arquitectura aprobada conserva Next.js, React y TypeScript como frontend, y usa un backend Java 25 LTS con Spring Boot 4.2.0, monolito modular y API REST bajo `/api/v1`. `backend/` contiene entidades JPA para las 26 tablas aprobadas, migraciones Flyway y módulos de seguridad, catálogo, pedidos, mesas/QR, pagos, inventario, reposiciones, entregas y reportes. La base de pruebas autorizada `amankay_test` recibió V1/V2 y permitió validar el arranque de Spring y JPA. Flyway continúa deshabilitado por defecto; las credenciales se introdujeron en una terminal local y no se guardaron en el repositorio. Temurin JDK 25.0.5.1 está instalado y configurado como `JAVA_HOME` del usuario; Java 27 permanece instalado, pero Maven Wrapper se verificó con JDK 25. No hay Maven global; se usa Maven Wrapper. Prisma permanece instalado, pero no administra las tablas de la aplicación.
+La arquitectura aprobada conserva Next.js, React y TypeScript como frontend, y usa un backend Java 25 LTS con Spring Boot 4.2.0, monolito modular y API REST bajo `/api/v1`. `backend/` contiene entidades JPA para las 26 tablas aprobadas, migraciones Flyway y módulos de seguridad, catálogo, pedidos, mesas/QR, pagos, inventario, reposiciones, entregas y reportes. La base de pruebas autorizada `amankay_test` recibió V1/V2 y permitió validar el arranque de Spring y JPA. Flyway continúa deshabilitado por defecto; las credenciales se introdujeron en una terminal local y no se guardaron en el repositorio. Temurin JDK 25.0.5.1 está instalado y configurado como `JAVA_HOME` del usuario; Java 27 permanece instalado, pero Maven Wrapper se verificó con JDK 25. No hay Maven global; se usa Maven Wrapper. El frontend no usa ORM ni driver PostgreSQL; toda persistencia pasa por la API Java.
 
 ### Ejecución local
 
@@ -26,7 +26,7 @@ Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 310
 
 El Blueprint `Amankay` está aplicado y creó tres recursos Free en Ohio: `amankay-frontend`, `amankay-api` y una base PostgreSQL nueva llamada `amankay_render`. La base es independiente de `amankay_test`, que no se modificó. La web pública está disponible en [amankay-frontend.onrender.com](https://amankay-frontend.onrender.com); la API responde `{"status":"UP"}` en `/api/v1/health`, también a través del proxy del frontend.
 
-Render construyó la API con Java 25 y Spring Boot 4.2.0, conectó PostgreSQL por la red interna con SSL, aplicó Flyway V1/V2 e inicializó JPA. El frontend compiló con Node 24.22.1 y Next.js; también carga `/admin/login`. No existe todavía un administrador en la base remota: debe crearse con el bootstrap autorizado, permitiendo temporalmente la IP del equipo en el acceso externo de PostgreSQL y retirándola al terminar. Nunca compartas contraseñas por el chat ni las guardes en el repositorio.
+Render construyó la API con Java 25 y Spring Boot 4.2.0, conectó PostgreSQL por la red interna con SSL, aplicó Flyway V1/V2 e inicializó JPA. El frontend compiló con Node 24.22.1 y Next.js; la pantalla de acceso está en `https://amankay-frontend.onrender.com/admin/login`. `amankay-api.onrender.com` publica la API, no la pantalla de login. El formulario carga, pero el último intento de acceso reportó 403; la existencia y estado de una cuenta administrativa en `amankay_render` deben confirmarse, ya que las migraciones no crean usuarios. Nunca compartas contraseñas en mensajes ni las guardes en el repositorio.
 
 El plan Free es adecuado para la presentación, pero no permanente: los servicios web se suspenden después de 15 minutos sin tráfico y pueden tardar cerca de un minuto en despertar; PostgreSQL Free vence a los 30 días, tiene 1 GB y no ofrece copias de seguridad. El sistema de archivos web es temporal, así que los comprobantes necesitan almacenamiento persistente fuera de este plan. No se configuró un plan pago.
 
@@ -57,6 +57,7 @@ El plan Free es adecuado para la presentación, pero no permanente: los servicio
 - `docs/03-arquitectura/decisiones-tecnicas.md`: acuerdos, justificaciones, cambios y temas abiertos.
 - `docs/04-diseno-ui-ux/README.md`: dirección visual, wireframes y ajustes de la primera implementación.
 - `docs/05-desarrollo/README.md`: estado, verificaciones y próximos pasos de implementación.
+- `06-guia-de-estudio-del-proyecto.md`: repaso integral para estudiar y sustentar el proyecto.
 - `backend/README.md`: configuración, ejecución, API y límites de verificación del backend.
 
 ## Archivos recibidos
@@ -78,4 +79,4 @@ La aplicación utiliza versiones web de las imágenes desde `frontend/public/`. 
 
 ## Fuentes históricas
 
-Los once enlaces consultados y la trazabilidad de sus decisiones se registran en `docs/03-arquitectura/decisiones-tecnicas.md`. Los chats no sustituyen este conjunto documental: las decisiones futuras deben actualizar el documento dueño del tema y, si cambian una regla, registrar qué acuerdo reemplazan.
+La trazabilidad de decisiones se conserva en `docs/03-arquitectura/decisiones-tecnicas.md`. Las decisiones futuras deben actualizar el documento dueño del tema y, si cambian una regla, registrar qué acuerdo reemplazan.

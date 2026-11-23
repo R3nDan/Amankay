@@ -1,11 +1,11 @@
 # Backend Java de Amankay
 
-API REST del MVP en Java 25, Spring Boot 4.2.0 y Springdoc 3.2.1. Es un monolito modular bajo `/api/v1`; Spring Data JPA/Hibernate es el único ORM. PostgreSQL es el almacenamiento objetivo y Flyway versiona el esquema. Prisma permanece en el repositorio frontend sin uso para persistir datos de la aplicación.
+API REST del MVP en Java 25, Spring Boot 4.2.0 y Springdoc 3.2.1. Es un monolito modular bajo `/api/v1`; Spring Data JPA/Hibernate es el único ORM. PostgreSQL es el almacenamiento objetivo y Flyway versiona el esquema. El frontend no incluye ORM ni acceso directo a PostgreSQL; consume la API Java.
 
 ## Estado implementado
 
 - Modelo JPA para las 26 tablas aprobadas (24 entidades de dominio y 2 asociativas).
-- Migraciones acumulativas `V1` y `V2`; se prepararon, pero no se han ejecutado.
+- Migraciones acumulativas `V1` y `V2`; ejecutadas en `amankay_test` y en la base Render independiente `amankay_render`.
 - Seguridad de personal con sesión HTTP, BCrypt, CSRF, roles y alcance por sucursal.
 - Módulos REST para autenticación, catálogo/administración, pedidos externos y de mesa, QR, cuentas, pagos, inventario, reposiciones, entregas y reportes.
 - Carga de comprobantes privados fuera de la raíz pública, activada solo al configurar `AMANKAY_PRIVATE_FILES_DIR`.
@@ -44,18 +44,18 @@ Spring Boot lee variables del entorno del proceso; `.env.example` es solo una pl
 
 No se debe iniciar la aplicación hasta confirmar que las variables de DB apuntan al destino elegido. El servidor escucha por defecto en `127.0.0.1:8081`; solo el despliegue Render fija explícitamente `SERVER_ADDRESS=0.0.0.0` y usa el `PORT` asignado por la plataforma.
 
-## Administrador inicial (comando local de una sola vez)
+## Administrador inicial (comando de una sola vez)
 
 El bootstrap se ejecuta solo con el argumento explícito `--amankay.bootstrap-admin=true`; no hay endpoint de registro ni se aceptan credenciales por variables de entorno. Requiere una terminal interactiva real. Solicita nombre, apellido, teléfono, correo, sucursal activa y contraseña (oculta, con confirmación). La contraseña usa el `PasswordEncoder` BCrypt de Spring Security y no se imprime ni se guarda en archivos. El comando falla si ya hay cualquier usuario asignado al rol `ADMINISTRADOR`, si el correo ya existe, si falta el rol o si no hay sucursales activas. Usuario, relación `UsuarioRol` y relación `UsuarioSucursal` se guardan en una transacción. Flyway sigue desactivado y Hibernate no genera esquema.
 
-Desde PowerShell, en `backend/`, con `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` configuradas únicamente en esa sesión de PowerShell:
+Desde PowerShell, en `backend/`, con las variables `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` configuradas solo para el proceso y dirigidas al destino que el usuario haya autorizado:
 
 ```powershell
 .\mvnw.cmd -DskipTests package
 java -jar .\target\amankay-backend-0.1.0-SNAPSHOT.jar --amankay.bootstrap-admin=true --spring.main.web-application-type=none
 ```
 
-En la segunda orden, introduce los datos solicitados en la terminal. La contraseña del administrador se escribe en modo oculto. No pongas contraseñas en argumentos, variables persistentes, archivos ni mensajes. Ejecuta el bootstrap solo contra la base local autorizada `amankay_test`; no cambia contraseñas ni registros existentes. Si el comando se interrumpe o falla, revisa el mensaje y verifica el estado antes de intentarlo de nuevo.
+En la segunda orden, introduce los datos solicitados en la terminal. La contraseña del administrador se escribe en modo oculto. No pongas contraseñas en argumentos, variables persistentes, archivos ni mensajes. Ejecuta el bootstrap únicamente contra la base explícitamente autorizada para esa operación; nunca cambies las credenciales de la base ni uses `amankay_test` si el destino aprobado es otro. Si el comando se interrumpe o falla, revisa el resultado y verifica el estado antes de intentarlo de nuevo.
 
 Si el bootstrap informa que ya existe `ADMINISTRADOR` y confirmas en pgAdmin que es la cuenta dedicada `integration-admin@…` sin sucursal asignada, puedes convertir esa misma cuenta (conserva su ID y rol) desde PowerShell con `java -jar .\target\amankay-backend-0.1.0-SNAPSHOT.jar --amankay.claim-integration-admin=true --spring.main.web-application-type=none`. El comando pide el correo actual exacto y comprueba que empiece por `integration-admin@`, que tenga rol administrador y que aún no tenga sucursal. Aborta si alguna comprobación no coincide, si el nuevo correo pertenece a otra cuenta o si no hay sucursal activa. Nunca elimina usuarios ni restablece otras cuentas.
 
@@ -63,13 +63,13 @@ Si el bootstrap informa que ya existe `ADMINISTRADOR` y confirmas en pgAdmin que
 
 V1 crea las 26 tablas, restricciones, índices y el trigger append-only de `MovimientoInventario`. V2 carga los datos iniciales confirmados. V1/V2 se ejecutaron en la base local autorizada `amankay_test`. Flyway permanece deshabilitado en `application.yml` y `application-local.yml`; Hibernate usa `ddl-auto=none`, la inicialización SQL está desactivada y `clean` está bloqueado.
 
-Una propiedad externa puede sobrescribir la configuración. Habilitar `spring.flyway.enabled` provoca que Spring Boot ejecute migraciones al arrancar. En Render se activa mediante `SPRING_FLYWAY_ENABLED=true` solo para la base nueva y exclusiva `amankay_render` creada por el Blueprint. No se usa ni modifica `amankay_test` durante el despliegue. En el primer arranque Render deberá registrar V1/V2 en la base remota; inspecciona sus logs y la salud del backend antes de continuar.
+Una propiedad externa puede sobrescribir la configuración. Habilitar `spring.flyway.enabled` provoca que Spring Boot ejecute migraciones al arrancar. En Render se activó mediante `SPRING_FLYWAY_ENABLED=true` solo para la base nueva y exclusiva `amankay_render`; los logs confirmaron V1/V2 en ese destino. `amankay_test` no se usó para el despliegue remoto.
 
 ## Despliegue académico en Render
 
-La definición está en `../render.yaml`. Crea tres recursos en Ohio: `amankay-frontend` (Next.js), `amankay-api` (Java 25 en Docker) y `amankay-postgres` (PostgreSQL). Las referencias del Blueprint llevan las credenciales generadas de la base directamente al proceso API; no hay claves ni contraseñas guardadas en Git. La API usa el host interno de PostgreSQL, TLS requerido y la base bloquea conexiones externas por defecto. El proxy `/api/v1` usa el hostname de la API desde Render; CORS y los QR usan `https://amankay-frontend.onrender.com`. Si Render muestra otro hostname, actualiza la variable de origen correspondiente antes de probar las mesas.
+La definición está en `../render.yaml`. Se desplegaron tres recursos en Ohio: `amankay-frontend` (Next.js), `amankay-api` (Java 25 en Docker) y `amankay-postgres` (PostgreSQL). Las referencias del Blueprint llevan las credenciales generadas de la base directamente al proceso API; no hay claves ni contraseñas guardadas en Git. La API usa el host interno de PostgreSQL y TLS; la base bloquea conexiones externas por defecto. El proxy `/api/v1` usa el hostname de la API desde Render y los QR apuntan a `https://amankay-frontend.onrender.com`.
 
-El administrador no se crea con una cuenta de demostración. Créalo después del despliegue con el comando bootstrap existente, desde una terminal local y contra la base Render. Como el acceso externo de PostgreSQL se bloquea por defecto, permite temporalmente la IP pública de tu equipo en la lista de acceso del servicio de base, utiliza los datos externos solo en variables del proceso y vuelve a bloquear el acceso externo al terminar. No uses los datos de `amankay_test` ni compartas la contraseña en mensajes.
+El administrador no se crea con una cuenta predeterminada. Si aún hace falta crearlo o asignarle una sucursal, utiliza el comando bootstrap existente desde una terminal local y apunta únicamente a la base autorizada para esa operación. Para `amankay_render`, el acceso externo de PostgreSQL está bloqueado por defecto: permite temporalmente solo la IP pública del equipo en la lista de acceso, utiliza los datos externos en variables del proceso y vuelve a bloquear el acceso al terminar. No uses los datos de `amankay_test` para administrar la base remota ni compartas contraseñas en mensajes.
 
 El plan gratuito es solo para demostración: los servicios web se duermen tras 15 minutos sin tráfico; el primer acceso puede tardar cerca de un minuto. PostgreSQL Free expira a los 30 días, queda limitado a 1 GB y no incluye backups. El sistema de comprobantes necesita almacenamiento privado persistente y no está disponible en este plan; no se configuró almacenamiento efímero que pudiera perder archivos.
 
@@ -102,9 +102,8 @@ Todas las rutas están bajo `/api/v1`. La lista completa y los esquemas se publi
 
 ## Límites conocidos
 
-- JDK 25 y un destino PostgreSQL de prueba aún deben configurarse explícitamente.
-- Las migraciones fueron ejecutadas en `amankay_test`; el despliegue Render usa una base independiente donde V1/V2 se ejecutarán al primer arranque.
-- La integración Next.js/API y las vistas de panel/QR ya están implementadas; la validación manual de extremo a extremo y el despliegue Render permanecen pendientes.
+- El frontend y el backend están desplegados; Render confirmó salud de API, JPA y Flyway V1/V2 en `amankay_render`.
+- La disponibilidad de una cuenta administrativa en esa base y la validación manual de extremo a extremo de autenticación, sesión, permisos por sucursal y recorrido QR deben confirmarse antes de considerar cerrado el recorrido remoto.
 - Se debe cargar stock inicial real desde el módulo inventario antes de que una sucursal pueda aceptar pedidos con verificación de disponibilidad.
 - Para domicilios en Neiva se debe configurar el límite geográfico aprobado y las coordenadas reales de sucursales; sin ellos, el backend no puede garantizar la cobertura GPS. Sin ubicación GPS se usa dirección/barrio y asignación manual.
 - JavaDocs, OpenAPI generado en ejecución y seguridad HTTP con el frontend no se han verificado en un arranque integral.

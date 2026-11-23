@@ -68,7 +68,7 @@ El modelo de clases registra repartidores como `Usuario` con un rol, no como una
 - Automatización de asignación de repartidores: no; asignación manual.
 - Publicación web permanente en hosting de terceros: no es requisito ni se garantiza gratis para siempre; valorar solo en una fase posterior.
 - Servicios y herramientas de pago, suscripciones o costos obligatorios: excluidos.
-- Redis, Docker, microservicios, servidor Express independiente y Rive quedan fuera del MVP. El usuario autorizó el 21-11-2026 instalar GSAP, PixiJS, Three.js, React Three Fiber y Drei para la experiencia visual pública; su uso se limita a escenas puntuales y no forma parte del funcionamiento transaccional.
+- Redis, Docker, microservicios, servidor Express independiente y Rive quedan fuera del MVP. GSAP, PixiJS, Three.js, React Three Fiber y Drei se instalaron inicialmente para posibles escenas visuales, pero se retiraron el 23-11-2026 al confirmar que no tenían uso. Solo se volverán a incorporar si una necesidad visual concreta lo justifica; no forman parte del funcionamiento transaccional.
 - “Productos más vendidos” en reportes: el usuario sugirió quitarlo por no ser necesario inicialmente y luego aprobó el resto tras una revisión completa. Excluirlo del MVP.
 
 ## 5. Requisitos funcionales
@@ -195,4 +195,4 @@ Las decisiones funcionales de pedidos web, pagos, permisos, GPS opcional, expira
 3. **Evaluación académica:** faltan criterios cuantificables, tareas, muestra, escala y método de evaluación de aceptación/usabilidad (P-18).
 4. **Configuración local:** definir JDK 25 y una base/esquema de prueba PostgreSQL conocidos antes de iniciar Spring/JPA o autorizar Flyway. Las credenciales deben residir en el entorno del proceso.
 
-El modelo físico, incluidos tipos, nulabilidad, índices y restricciones, está documentado en `../02-modelado/modelo-fisico-postgresql.md`. Las migraciones Flyway están preparadas, pero no ejecutadas. La conexión real con PostgreSQL y la integración del frontend son verificaciones/etapas posteriores, no decisiones funcionales pendientes.
+El modelo físico, incluidos tipos, nulabilidad, índices y restricciones, está documentado en `../02-modelado/modelo-fisico-postgresql.md`. Flyway V1/V2 se aplicaron a `amankay_test` y a la base de demostración independiente `amankay_render`; las credenciales no se incluyen en este documento. La integración del frontend con la API está implementada. Siguen pendientes las pruebas manuales completas de acceso administrativo y recorrido QR en el entorno publicado, además de los datos reales de operación indicados arriba.

@@ -2,9 +2,9 @@
 
 ## Estado vigente
 
-El usuario aprobó la arquitectura Java, el MER de 26 entidades y las precisiones funcionales para continuar con la implementación. El esquema físico y los módulos REST están implementados en `backend/`; Flyway V1/V2 se aplicaron a la base de prueba local autorizada `amankay_test`. El frontend Next.js ya consume la API para el sitio público, panel y experiencia QR. El 23-11-2026 el usuario eligió Render para una presentación pública y se prepara un PostgreSQL remoto distinto, sin crear recursos aún.
+El usuario aprobó la arquitectura Java, el MER de 26 entidades y las precisiones funcionales para continuar con la implementación. El esquema físico y los módulos REST están implementados en `backend/`; Flyway V1/V2 se aplicaron a `amankay_test` y a la base Render independiente `amankay_render`. El frontend Next.js consume la API para el sitio público, panel y experiencia QR. Render publica el frontend y la API para la demostración académica.
 
-La web Next.js consume la API Java mediante rutas `/api/v1`; la URL se conserva localmente como `127.0.0.1:8081` y se hace configurable para Render. Temurin JDK 25.0.5.1 está instalado y configurado en `JAVA_HOME`; JDK 27 permanece disponible, pero el proyecto se ejecuta con JDK 25. No hay Maven global; se usa Maven Wrapper. Prisma permanece instalado y fuera del camino de persistencia.
+La web Next.js consume la API Java mediante rutas `/api/v1`; la URL se conserva localmente como `127.0.0.1:8081` y se hace configurable para Render. Temurin JDK 25.0.5.1 está instalado y configurado en `JAVA_HOME`; JDK 27 permanece disponible, pero el proyecto se ejecuta con JDK 25. No hay Maven global; se usa Maven Wrapper. El frontend no contiene ORM ni driver PostgreSQL: solo consume la API.
 
 ## Producto y alcance
 
@@ -29,7 +29,7 @@ El backend implementa servicios REST para esos dominios y el frontend ya integra
 | Documentación | JavaDocs, Springdoc 3.2.1 y Swagger UI | Documentación del código y contrato REST. |
 | Construcción | Maven Wrapper | Versión de Maven reproducible sin instalación global. |
 
-Spring Boot 4.2.0 administra las versiones de sus dependencias mediante su BOM. Springdoc 3.2.1 es la excepción fijada explícitamente por la compatibilidad aprobada. No se usa Prisma para leer o escribir las tablas de negocio.
+Spring Boot 4.2.0 administra las versiones de sus dependencias mediante su BOM. Springdoc 3.2.1 es la excepción fijada explícitamente por la compatibilidad aprobada. Los paquetes Prisma y el driver PostgreSQL de Node se retiraron del frontend el 23-11-2026 al confirmar que no tenían imports ni scripts de uso; la API Java mantiene la responsabilidad exclusiva de persistencia.
 
 ## Flujo lógico
 
@@ -38,7 +38,7 @@ Navegador → Next.js → API REST Java/Spring Boot → servicios modulares
           → repositorios Spring Data JPA/Hibernate → PostgreSQL
 ```
 
-Flyway es el único medio versionado para cambiar el esquema. Hibernate no genera tablas; Flyway está deshabilitado en la configuración local. El Blueprint Render lo activa solo contra el nuevo PostgreSQL aislado `amankay_render` para ejecutar V1/V2 en su primer arranque. Desarrollo local continúa sin servicios de pago obligatorio; Render se elige para la presentación con planes gratuitos y sus límites temporales documentados en `stack-tecnologico.md`.
+Flyway es el único medio versionado para cambiar el esquema. Hibernate no genera tablas; Flyway está deshabilitado en la configuración local. El Blueprint Render lo habilitó solo contra `amankay_render` y los logs confirmaron V1/V2. Desarrollo local no exige servicios de pago; Render se usa para la presentación con plan Free y sus límites documentados en `stack-tecnologico.md`.
 
 ## Módulos implementados en `backend/`
 
@@ -77,10 +77,10 @@ Los comprobantes de transferencia se almacenan fuera de la raíz pública con no
 
 Se deben proporcionar `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` en el entorno del proceso. En Render, el Blueprint las obtiene de su PostgreSQL dedicado; `DB_SSL_MODE=require`, `SERVER_ADDRESS=0.0.0.0` y el `PORT` asignado por Render se usan solo allí. En local, el backend escucha por defecto en `127.0.0.1:8081` con `DB_SSL_MODE=disable`.
 
-`spring.jpa.hibernate.ddl-auto=none`, SQL init `never`, Flyway `enabled=false` por defecto, `create-schemas=false` y `clean-disabled=true`. La propiedad puede sobrescribirse desde el entorno; habilitar Flyway ejecuta migraciones al arrancar. El único override preparado es el de Render, vinculado a la base nueva definida en Blueprint; nunca se apunta a `amankay_test`.
+`spring.jpa.hibernate.ddl-auto=none`, SQL init `never`, Flyway `enabled=false` por defecto, `create-schemas=false` y `clean-disabled=true`. La propiedad puede sobrescribirse desde el entorno; habilitar Flyway ejecuta migraciones al arrancar. El override activo de Render se vincula a la base nueva definida en el Blueprint; allí se ejecutaron V1/V2 y nunca se apunta a `amankay_test`.
 
 ## Verificación actual y próximos pasos
 
-`mvnw validate`, `mvnw test` (14 pruebas aprobadas) y `mvnw package` se ejecutaron con Temurin JDK 25.0.5.1 y `--release 25`. Flyway V1/V2, el arranque de Spring/JPA y los flujos REST principales se validaron en `amankay_test`; la suite Java y el frontend también tuvieron verificaciones locales registradas en `docs/05-desarrollo/README.md`.
+`mvnw validate`, `mvnw test` (14 pruebas aprobadas) y `mvnw package` se ejecutaron con Temurin JDK 25.0.5.1 y `--release 25`. Flyway V1/V2, el arranque de Spring/JPA y flujos REST principales se validaron en `amankay_test`; Render confirmó inicio de la API, JPA y migraciones en `amankay_render`. El frontend pasó typecheck, lint y build tras retirar las dependencias sin uso; `npm audit` reportó cero vulnerabilidades. El estado y el alcance exacto de cada comprobación están en `docs/05-desarrollo/README.md`.
 
-Siguiente etapa: vincular el repositorio a Render, revisar y crear los tres recursos de `render.yaml`, comprobar V1/V2 y la salud pública, y crear el administrador inicial sin compartir credenciales. La base de demostración será separada de `amankay_test`.
+Pendiente: completar las pruebas manuales del login administrativo y recorrido QR en el entorno publicado, confirmar el usuario administrador disponible allí, cargar existencias iniciales y aportar coordenadas/límite geográfico reales para domicilios.
