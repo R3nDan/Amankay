@@ -1,6 +1,6 @@
 # Estado documental y técnico de Amankay
 
-**Actualizado el 23-11-2026.** Resume qué documentos rigen el proyecto, cuál es el estado de implementación y qué validaciones siguen pendientes. Para estudiar el sistema completo, consultar también la [guía de estudio](../06-guia-de-estudio-del-proyecto.md).
+**Actualizado el 23-11-2026.** Resume qué documentos rigen el proyecto, cuál es el estado de implementación y qué validaciones siguen pendientes. Para estudiar el sistema completo, consultar también la [guía de estudio](06-guia-de-estudio-del-proyecto.md).
 
 ## Documentos dueños
 
@@ -54,3 +54,5 @@ El frontend y la API están desplegados en Render; `amankay_render` es su base e
 6. Definir y ejecutar el protocolo académico de usabilidad (P-18).
 
 No guardar credenciales, contraseñas, tokens ni otros secretos en Git, documentación o mensajes. No reproducir datos personales del anteproyecto en materiales públicos o de demostración.
+
+

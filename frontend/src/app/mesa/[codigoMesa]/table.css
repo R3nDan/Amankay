@@ -340,3 +340,4 @@
   .table-order-status { justify-self: start; padding: .2rem 0; font-size: .82rem; }
   .table-order-total { justify-self: end; font-size: .88rem; }
 }
+.table-language { position: absolute; top: .65rem; right: clamp(.65rem,3vw,2rem); z-index: 3; }

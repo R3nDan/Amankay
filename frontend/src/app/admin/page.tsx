@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowUpRight, Clock3, LayoutGrid, RefreshCw } from "lucide-react";
 import { useAdmin } from "@/components/admin/admin-shell";
 import { api } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
 
 type Order = { id: string; estado: string; creadoEn: string; codigoSeguimiento: string; priority?: boolean };
 type Table = { id: string; estadoSesion?: string; estadoCuenta?: string };
@@ -15,6 +16,7 @@ type Overview = { orders?: Order[]; tables?: Table[]; stocks?: Stock[]; replenis
 
 export default function AdminHome() {
   const { staff, branches, branchId } = useAdmin();
+  const { t } = useI18n();
   const branch = branches.find(row => row.id === branchId);
   const attention = staff.roles.includes("ATENCION");
   const inventory = staff.roles.includes("INVENTARIO");
@@ -55,17 +57,17 @@ export default function AdminHome() {
   const activeDeliveries = data.deliveries?.filter(row => !["ENTREGADA", "NO_ENTREGADA"].includes(row.estado)) ?? [];
 
   return <>
-    <div className="admin-page-head"><span className="admin-eyebrow">TU JORNADA EN AMANKAY</span><h1>Buen día, <em>{staff.nombre}.</em></h1><p>Información actual de tu operación en {branch?.nombre ?? "Amankay"}.</p></div>
-    <div className="admin-section-tools"><span>{loading ? "Actualizando…" : "Datos de la API"}</span><button type="button" onClick={() => void refresh()} disabled={loading}><RefreshCw size={16} aria-hidden="true" /> Actualizar</button></div>
-    {error && <p className="admin-message admin-message-error" role="alert">{error}</p>}
+    <div className="admin-page-head"><span className="admin-eyebrow">{t("TU JORNADA EN AMANKAY")}</span><h1>{t("Buen día,")} <em>{staff.nombre}.</em></h1><p>{t("Información actual de tu operación en ")}{branch?.nombre ?? "Amankay"}.</p></div>
+    <div className="admin-section-tools"><span>{loading ? t("Actualizando…") : t("Datos de la API")}</span><button type="button" onClick={() => void refresh()} disabled={loading}><RefreshCw size={16} aria-hidden="true" /> {t("Actualizar")}</button></div>
+    {error && <p className="admin-message admin-message-error" role="alert">{t(error)}</p>}
     <div className="admin-home-grid">
-      <section className="admin-feature"><LayoutGrid aria-hidden="true" /><span>OPERACIÓN</span><h2>{branch?.nombre ?? "Tu espacio de trabajo"}</h2><p>{branch?.direccion ?? "Selecciona una sucursal para comenzar."}</p>{attention && <Link href="/admin/pedidos">Atender pedidos <ArrowUpRight size={18} aria-hidden="true" /></Link>}</section>
-      <section className="admin-feature admin-feature-light"><Clock3 aria-hidden="true" /><span>ACCESO</span><h2>Todo en su lugar.</h2><p>Tu cuenta muestra las áreas de sus roles. Java vuelve a comprobar los permisos y la sucursal en cada operación.</p>{attention && <Link href="/admin/mesas">Gestionar mesas <ArrowUpRight size={18} aria-hidden="true" /></Link>}</section>
+      <section className="admin-feature"><LayoutGrid aria-hidden="true" /><span>{t("OPERACIÓN")}</span><h2>{branch?.nombre ?? t("Tu espacio de trabajo")}</h2><p>{branch?.direccion ?? t("Selecciona una sucursal para comenzar.")}</p>{attention && <Link href="/admin/pedidos">{t("Atender pedidos")} <ArrowUpRight size={18} aria-hidden="true" /></Link>}</section>
+      <section className="admin-feature admin-feature-light"><Clock3 aria-hidden="true" /><span>{t("ACCESO")}</span><h2>{t("Todo en su lugar.")}</h2><p>{t("Tu cuenta muestra las áreas de sus roles. Java vuelve a comprobar los permisos y la sucursal en cada operación.")}</p>{attention && <Link href="/admin/mesas">{t("Gestionar mesas")} <ArrowUpRight size={18} aria-hidden="true" /></Link>}</section>
     </div>
-    {attention && <section className="admin-dashboard-section"><h2>Atención en este momento</h2><div className="admin-metrics"><Metric value={pending.length} label="Por confirmar" href="/admin/pedidos" /><Metric value={urgent.length} label="Más de 3 minutos" href="/admin/pedidos" /><Metric value={activeTables.length} label="Mesas con sesión" href="/admin/mesas" /><Metric value={activeDeliveries.length} label="Entregas en curso" /></div></section>}
-    {inventory && <section className="admin-dashboard-section"><h2>Inventario y reposiciones</h2><div className="admin-metrics"><Metric value={data.stocks?.length ?? 0} label="Productos con inventario" /><Metric value={lowStock.length} label="Con 5 unidades o menos" /><Metric value={activeReplenishments.length} label="Reposiciones en curso" /></div><p className="admin-form-note">El umbral de 5 unidades es una referencia visual del tablero; no cambia las reglas de inventario.</p></section>}
-    {driver && <section className="admin-dashboard-section"><h2>Mis entregas</h2><div className="admin-metrics"><Metric value={activeDeliveries.length} label="Asignadas o en camino" /></div></section>}
-    {!attention && !inventory && !driver && <p className="admin-empty">Desde aquí podrás acceder a la configuración y los reportes autorizados para tu rol.</p>}
+    {attention && <section className="admin-dashboard-section"><h2>{t("Atención en este momento")}</h2><div className="admin-metrics"><Metric value={pending.length} label={t("Por confirmar")} href="/admin/pedidos" /><Metric value={urgent.length} label={t("Más de 3 minutos")} href="/admin/pedidos" /><Metric value={activeTables.length} label={t("Mesas con sesión")} href="/admin/mesas" /><Metric value={activeDeliveries.length} label={t("Entregas en curso")} /></div></section>}
+    {inventory && <section className="admin-dashboard-section"><h2>{t("Inventario y reposiciones")}</h2><div className="admin-metrics"><Metric value={data.stocks?.length ?? 0} label={t("Productos con inventario")} /><Metric value={lowStock.length} label={t("Con 5 unidades o menos")} /><Metric value={activeReplenishments.length} label={t("Reposiciones en curso")} /></div><p className="admin-form-note">{t("El umbral de 5 unidades es una referencia visual del tablero; no cambia las reglas de inventario.")}</p></section>}
+    {driver && <section className="admin-dashboard-section"><h2>{t("Mis entregas")}</h2><div className="admin-metrics"><Metric value={activeDeliveries.length} label={t("Asignadas o en camino")} /></div></section>}
+    {!attention && !inventory && !driver && <p className="admin-empty">{t("Desde aquí podrás acceder a la configuración y los reportes autorizados para tu rol.")}</p>}
   </>;
 }
 

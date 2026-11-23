@@ -7,6 +7,7 @@ import { useSiteReducedMotion } from "@/components/ui/motion-preference";
 import { useEffect, useState } from "react";
 import { ActionLink } from "@/components/ui/action-link";
 import { BakerySymbolPattern } from "@/components/ui/bakery-symbol-pattern";
+import { useI18n } from "@/lib/i18n";
 
 const frames = [
   { src: "/imagenes/portada/proceso/amasar.webp", alt: "Manos amasando la masa sobre una mesa enharinada" },
@@ -16,13 +17,15 @@ const frames = [
 ];
 
 function HeroActions({ mobile = false }: { mobile?: boolean }) {
+  const { t } = useI18n();
   return <div className={`hero-actions ${mobile ? "hero-actions-mobile" : "hero-actions-desktop"}`}>
-    <a className="process-button" href="#proceso">Ver el proceso <ArrowDown size={17} aria-hidden /></a>
-    <ActionLink href="/menu">Ver el catálogo</ActionLink>
+    <a className="process-button" href="#proceso">{t("Ver el proceso")} <ArrowDown size={17} aria-hidden /></a>
+    <ActionLink href="/menu">{t("Ver el catálogo")}</ActionLink>
   </div>;
 }
 
 export function HomeHero() {
+  const { t } = useI18n();
   const [activeFrame, setActiveFrame] = useState(0);
   const reduceMotion = useSiteReducedMotion();
 
@@ -32,13 +35,13 @@ export function HomeHero() {
     return () => window.clearInterval(timer);
   }, [reduceMotion]);
 
-  return <section className="hero-story" id="inicio" aria-label="Inicio">
+  return <section className="hero-story" id="inicio" aria-label={t("Inicio")}>
     <div className="hero-sticky">
       <div className="hero">
         <BakerySymbolPattern />
         <div className="hero-paper-grain" aria-hidden />
         <div className="hero-copy">
-          <h1 id="portada">Pan del día.<br /><em>Y algo más.</em></h1>
+          <h1 id="portada">{t("Pan del día.")}<br /><em>{t("Y algo más.")}</em></h1>
           <HeroActions />
         </div>
         <div className="hero-art">

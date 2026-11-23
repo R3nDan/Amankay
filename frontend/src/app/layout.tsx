@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { AppChrome } from "@/components/app-chrome";
+import { LocaleProvider } from "@/lib/i18n";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return <html lang="es-CO" data-motion="full"><body><AppChrome>{children}</AppChrome></body></html>;
+  return <html lang="es-CO"><body><LocaleProvider><AppChrome>{children}</AppChrome></LocaleProvider></body></html>;
 }

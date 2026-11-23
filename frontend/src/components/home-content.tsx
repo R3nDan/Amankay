@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18n } from "@/lib/i18n";
 import { RevealSections } from "@/components/reveal-sections";
 import { BreadProcess } from "@/components/bread-process";
 import { CategoryIndex } from "@/components/category-index";
@@ -7,6 +10,7 @@ import { BranchList } from "@/components/branch-list";
 import { BakerySymbolSet } from "@/components/ui/bakery-symbol-pattern";
 
 export function HomeContent({ preview = false }: { preview?: boolean }) {
+  const { t } = useI18n();
   return <main id="contenido" className="home-page">
     {!preview && <RevealSections />}
     <HomeHero />
@@ -16,7 +20,7 @@ export function HomeContent({ preview = false }: { preview?: boolean }) {
       <div className="wrap branch-panel">
         <div className="branch-call">
           <div className="category-heading-art" aria-hidden="true"><BakerySymbolSet /></div>
-          <h2 id="branches-title"><span>Sucur</span><em>sales</em></h2>
+          <h2 id="branches-title">{t("Sucursales")}</h2>
         </div>
         <BranchList />
         <div className="branch-panel-bottom" aria-hidden="true">

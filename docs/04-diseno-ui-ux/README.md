@@ -95,8 +95,16 @@ La experiencia prioriza una mano, carga rápida, pocos pasos y lectores de panta
 
 - Diseñar mobile-first para QR y sitio público; panel optimizado para escritorio y usable en tablet/móvil para tareas urgentes.
 - HTML semántico, orden de encabezados, navegación por teclado, foco visible, etiquetas asociadas, áreas táctiles cómodas y contraste AA.
-- Respetar `prefers-reduced-motion`; animaciones de transición breves solo para continuidad, confirmación o navegación. Evitar parallax pesado y 3D en flujos de pedido/panel. El clip del proceso del pan se reproduce en bucle silenciado por solicitud expresa, sin controles visibles.
+- Respetar `prefers-reduced-motion`; detener animaciones decorativas, evitar desplazamientos automáticos y dejar el video pausado con controles disponibles cuando el sistema solicite menos movimiento. Evitar parallax pesado y 3D en flujos de pedido/panel.
 - Imágenes optimizadas, tamaños reservados para evitar saltos, lazy loading fuera del primer viewport y texto alternativo según finalidad.
+
+### Implementación vigente de internacionalización y accesibilidad
+
+- El sitio público y la experiencia QR ofrecen español de Colombia e inglés. El selector actualiza `lang` en el documento y conserva la preferencia localmente; los textos públicos, categorías, productos, estados QR y valores monetarios compatibles usan el idioma seleccionado.
+- El inicio de sesión y la navegación común del panel también traducen los controles compartidos; las pantallas operativas del panel se mantienen en español en esta entrega.
+- Hay enlaces para saltar al contenido, foco visible para teclado, etiquetas y nombres accesibles para controles, anuncios de estado en los flujos de pedido y gestión de foco/teclado dentro de los diálogos de bolsa y carrito QR.
+- La preferencia de movimiento reducido desactiva el desplazamiento animado y el video automático; el usuario puede reproducir el video manualmente con controles visibles.
+- Esta implementación mejora los criterios técnicos de internacionalización y accesibilidad; no sustituye una auditoría WCAG completa ni una evaluación de usabilidad. La evaluación de usabilidad P-18 sigue pendiente y fuera de este cambio.
 
 ## Flujos a diseñar antes de desarrollo
 

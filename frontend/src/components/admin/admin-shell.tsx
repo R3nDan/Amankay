@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { ArrowRight, House, LogOut, PanelsTopLeft, RefreshCw, ClipboardList, Boxes, Truck, Wallet, ReceiptText, BookOpen, UsersRound, MapPin, ChartNoAxesCombined } from "lucide-react";
 import { api, logout, type Branch, type Staff } from "@/lib/api";
+import { LanguageSwitch, useI18n } from "@/lib/i18n";
 
 type AdminState = { staff: Staff; branches: Branch[]; branchId: string; setBranchId: (id: string) => void };
 const Context = createContext<AdminState | null>(null);
@@ -18,6 +19,7 @@ export function useAdmin() {
 export function AdminShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const router = useRouter();
+  const { t } = useI18n();
   const [staff, setStaff] = useState<Staff | null>(null);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [branchId, setBranchId] = useState("");
@@ -45,23 +47,23 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }, [path, router]);
 
   if (path === "/admin/login") return <>{children}</>;
-  if (loading) return <main className="admin-wait" aria-live="polite"><RefreshCw aria-hidden="true" /> Preparando tu espacio…</main>;
-  if (problem) return <main className="admin-wait" role="alert"><p>{problem}</p><button className="action" onClick={() => location.reload()}>Reintentar</button></main>;
+  if (loading) return <main className="admin-wait" aria-live="polite"><RefreshCw aria-hidden="true" /> {t("Preparando tu espacio…")}</main>;
+  if (problem) return <main className="admin-wait" role="alert"><p>{t(problem)}</p><button className="action" type="button" onClick={() => location.reload()}>{t("Reintentar")}</button></main>;
   if (!staff) return null;
 
   const links = [
-    { href: "/admin", label: "Inicio", icon: House, roles: ["ADMINISTRADOR", "ATENCION", "INVENTARIO", "REPARTIDOR"] },
-    { href: "/admin/pedidos", label: "Pedidos", icon: ClipboardList, roles: ["ATENCION"] },
-    { href: "/admin/inventario", label: "Inventario", icon: Boxes, roles: ["INVENTARIO"] },
-    { href: "/admin/reposiciones", label: "Reposiciones", icon: Truck, roles: ["INVENTARIO"] },
-    { href: "/admin/entregas", label: "Entregas", icon: Truck, roles: ["ATENCION", "REPARTIDOR"] },
-    { href: "/admin/pagos", label: "Pagos", icon: Wallet, roles: ["ATENCION"] },
-    { href: "/admin/conciliaciones", label: "Conciliaciones", icon: ReceiptText, roles: ["ATENCION"] },
-    { href: "/admin/catalogo", label: "Catálogo", icon: BookOpen, roles: ["ADMINISTRADOR"] },
-    { href: "/admin/usuarios", label: "Usuarios", icon: UsersRound, roles: ["ADMINISTRADOR"] },
-    { href: "/admin/sucursales", label: "Sucursales", icon: MapPin, roles: ["ADMINISTRADOR"] },
-    { href: "/admin/reportes", label: "Reportes", icon: ChartNoAxesCombined, roles: ["ADMINISTRADOR", "ATENCION", "INVENTARIO"] },
-    { href: "/admin/mesas", label: "Mesas y QR", icon: PanelsTopLeft, roles: ["ADMINISTRADOR", "ATENCION"] },
+    { href: "/admin", label: t("Inicio"), icon: House, roles: ["ADMINISTRADOR", "ATENCION", "INVENTARIO", "REPARTIDOR"] },
+    { href: "/admin/pedidos", label: t("Pedidos"), icon: ClipboardList, roles: ["ATENCION"] },
+    { href: "/admin/inventario", label: t("Inventario"), icon: Boxes, roles: ["INVENTARIO"] },
+    { href: "/admin/reposiciones", label: t("Reposiciones"), icon: Truck, roles: ["INVENTARIO"] },
+    { href: "/admin/entregas", label: t("Entregas"), icon: Truck, roles: ["ATENCION", "REPARTIDOR"] },
+    { href: "/admin/pagos", label: t("Pagos"), icon: Wallet, roles: ["ATENCION"] },
+    { href: "/admin/conciliaciones", label: t("Conciliaciones"), icon: ReceiptText, roles: ["ATENCION"] },
+    { href: "/admin/catalogo", label: t("Catálogo"), icon: BookOpen, roles: ["ADMINISTRADOR"] },
+    { href: "/admin/usuarios", label: t("Usuarios"), icon: UsersRound, roles: ["ADMINISTRADOR"] },
+    { href: "/admin/sucursales", label: t("Sucursales"), icon: MapPin, roles: ["ADMINISTRADOR"] },
+    { href: "/admin/reportes", label: t("Reportes"), icon: ChartNoAxesCombined, roles: ["ADMINISTRADOR", "ATENCION", "INVENTARIO"] },
+    { href: "/admin/mesas", label: t("Mesas y QR"), icon: PanelsTopLeft, roles: ["ADMINISTRADOR", "ATENCION"] },
   ].filter(item => item.roles.some(role => staff.roles.includes(role)));
 
   const leave = async () => {
@@ -71,16 +73,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return <Context.Provider value={{ staff, branches, branchId, setBranchId }}>
     <div className="admin-frame">
+      <a className="skip" href="#contenido">{t("Saltar al contenido")}</a>
       <aside className="admin-side">
-        <Link className="admin-brand" href="/admin" aria-label="Amankay, inicio del panel"><Image src="/imagenes/marca/amankay.svg" alt="Amankay" width={68} height={70} /><span>Espacio de trabajo</span></Link>
-        <nav aria-label="Panel administrativo">{links.map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={path === href ? "page" : undefined}><Icon size={19} aria-hidden="true" />{label}<ArrowRight size={15} className="admin-nav-arrow" aria-hidden="true" /></Link>)}</nav>
+        <Link className="admin-brand" href="/admin" aria-label={t("Amankay, inicio del panel")}><Image src="/imagenes/marca/amankay.svg" alt="Amankay" width={68} height={70} /><span>{t("Espacio de trabajo")}</span></Link>
+        <nav aria-label={t("Panel administrativo")}>{links.map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={path === href ? "page" : undefined}><Icon size={19} aria-hidden="true" />{label}<ArrowRight size={15} className="admin-nav-arrow" aria-hidden="true" /></Link>)}</nav>
       </aside>
       <div className="admin-main">
         <header className="admin-topbar">
           <div className="admin-identity"><strong>{staff.nombre} {staff.apellido}</strong><small>{staff.roles.join(" · ")}</small></div>
           <div className="admin-top-actions">
-            {branches.length > 0 && <label>Sucursal <select className="admin-branch-select" value={branchId} onChange={event => setBranchId(event.target.value)}>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.nombre}</option>)}</select></label>}
-            <button className="admin-logout-button" type="button" onClick={leave} aria-label="Cerrar sesión"><LogOut size={19} aria-hidden="true" /></button>
+            <LanguageSwitch />
+            {branches.length > 0 && <label>{t("Sucursal")} <select className="admin-branch-select" value={branchId} onChange={event => setBranchId(event.target.value)}>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.nombre}</option>)}</select></label>}
+            <button className="admin-logout-button" type="button" onClick={leave} aria-label={t("Cerrar sesión")}><LogOut size={19} aria-hidden="true" /></button>
           </div>
         </header>
         <main id="contenido" className="admin-content" key={branchId}>{children}</main>

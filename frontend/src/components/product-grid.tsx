@@ -9,6 +9,7 @@ import { type Product } from "@/data/bakery";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { ProductSymbol } from "@/components/ui/bakery-symbol-pattern";
 import { useOrder } from "@/components/order-experience";
+import { useI18n } from "@/lib/i18n";
 
 export function ProductGrid({ items }: { items: readonly Product[] }) {
   return <ul className="product-grid">{items.map(product => <li key={product.id}><ProductCard product={product} /></li>)}</ul>;
@@ -16,6 +17,7 @@ export function ProductGrid({ items }: { items: readonly Product[] }) {
 
 function ProductCard({ product }: { product: Product }) {
   const order = useOrder();
+  const { t } = useI18n();
   const reducedMotion = useReducedMotion();
   const [flipped, setFlipped] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -45,28 +47,28 @@ function ProductCard({ product }: { product: Product }) {
       onKeyDown={event => { if (event.key === "Escape" && flipped) turn(false); }}
     >
       <article className="product-face product-face-front" inert={flipped} aria-hidden={flipped}>
-        <button ref={front} className="product-card-trigger" type="button" onClick={() => { setQuantity(1); turn(true); }} aria-label={`Ver ${product.name} y agregar a la bolsa`} aria-expanded={flipped}>
-          {product.photo ? <div className="product-photo"><Image src={product.photo} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 900px) 43vw, (max-width: 1100px) 29vw, 24vw" /></div>
-            : <div className="product-photo product-pending"><span aria-hidden>{product.category === "bebidas" ? <CupSoda /> : <Utensils />}</span><span>Pronto, en imágenes.</span></div>}
-          <div className="product-front-caption"><h3>{product.name}</h3><span className="product-front-price">{formatPrice(product.price || 0)}</span></div>
+        <button ref={front} className="product-card-trigger" type="button" onClick={() => { setQuantity(1); turn(true); }} aria-label={`${t("Ver ")}${t(product.name)}${t(" y agregar a la bolsa")}`} aria-expanded={flipped}>
+          {product.photo ? <div className="product-photo"><Image src={product.photo} alt={t(product.name)} fill sizes="(max-width: 600px) 45vw, (max-width: 900px) 43vw, (max-width: 1100px) 29vw, 24vw" /></div>
+            : <div className="product-photo product-pending"><span aria-hidden>{product.category === "bebidas" ? <CupSoda /> : <Utensils />}</span><span>{t("Pronto, en imágenes.")}</span></div>}
+          <div className="product-front-caption"><h3>{t(product.name)}</h3><span className="product-front-price">{formatPrice(product.price || 0)}</span></div>
         </button>
       </article>
-      <article className="product-face product-face-back" aria-label={product.name} inert={!flipped} aria-hidden={!flipped} onClick={event => { if (!(event.target as HTMLElement).closest("button, a, input, select, textarea, [role='button']")) turn(false); }}>
+      <article className="product-face product-face-back" aria-label={t(product.name)} inert={!flipped} aria-hidden={!flipped} onClick={event => { if (!(event.target as HTMLElement).closest("button, a, input, select, textarea, [role='button']")) turn(false); }}>
         <div className="product-back-content">
           <span ref={symbol} className="product-back-symbol" aria-hidden><ProductSymbol id={product.id} category={product.category} /></span>
-          <h3>{product.name}</h3>
-          <p>{product.description}</p>
+          <h3>{t(product.name)}</h3>
+          <p>{t(product.description ?? "")}</p>
           <div className="product-back-price">
-            <span>Precio unitario <b>{formatPrice(product.price || 0)}</b></span>
-            <strong aria-live="polite"><small>Total · {quantity} {quantity === 1 ? "unidad" : "unidades"}</small>{formatPrice((product.price || 0) * quantity)}</strong>
+            <span>{t("Precio unitario")} <b>{formatPrice(product.price || 0)}</b></span>
+            <strong aria-live="polite"><small>{t("Total · ")}{quantity} {t(quantity === 1 ? "unidad" : "unidades")}</small>{formatPrice((product.price || 0) * quantity)}</strong>
           </div>
           <div className="product-back-actions">
-            <div className="order-stepper" aria-label={`Cantidad de ${product.name}`}>
-              <button type="button" aria-label="Quitar uno" onClick={() => setQuantity(value => Math.max(1, value - 1))}><Minus size={16} /></button>
+            <div className="order-stepper" aria-label={`${t("Cantidad de ")}${product.name}`}>
+              <button type="button" aria-label={t("Quitar uno")} onClick={() => setQuantity(value => Math.max(1, value - 1))}><Minus size={16} /></button>
               <output aria-live="polite">{quantity}</output>
-              <button type="button" aria-label="Agregar uno" onClick={() => setQuantity(value => Math.min(99, value + 1))}><Plus size={16} /></button>
+              <button type="button" aria-label={t("Agregar uno")} onClick={() => setQuantity(value => Math.min(99, value + 1))}><Plus size={16} /></button>
             </div>
-            <button ref={back} className="order-primary" type="button" onClick={() => { order.addProduct(product, quantity, symbol.current?.getBoundingClientRect()); turn(false); }}>Agregar a la bolsa</button>
+            <button ref={back} className="order-primary" type="button" onClick={() => { order.addProduct(product, quantity, symbol.current?.getBoundingClientRect()); turn(false); }}>{t("Agregar a la bolsa")}</button>
           </div>
         </div>
       </article>

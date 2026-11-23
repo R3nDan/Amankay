@@ -1,8 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { categories } from "@/data/bakery";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { BakerySymbolSet } from "@/components/ui/bakery-symbol-pattern";
+import { useI18n } from "@/lib/i18n";
 
 const categoryVisuals = [
   { image: "/imagenes/productos/panaderia/pan-queso.webp", alt: "Pan de queso recién horneado" },
@@ -11,19 +14,20 @@ const categoryVisuals = [
 ];
 
 export function CategoryIndex() {
+  const { t } = useI18n();
   return <section className="category-showcase wrap" aria-labelledby="category-title">
     <div className="category-showcase-head">
       <div className="category-heading-art" aria-hidden><BakerySymbolSet /></div>
-      <h2 id="category-title">¿Qué se te <em>antoja hoy?</em></h2></div>
-    <nav className="category-index" aria-label="Explorar categorías">
+      <h2 id="category-title">{t("¿Qué se te ")}<em>{t("antoja hoy?")}</em></h2></div>
+    <nav className="category-index" aria-label={t("Explorar categorías")}>
       {categories.map((category, index) => {
         const visual = categoryVisuals[index];
         return <Link key={category.slug} href={`/menu/${category.slug}`}>
           <TiltCard>
           <div className={`category-image category-image-${category.slug}`}>
-            <Image src={visual.image} alt={visual.alt} fill sizes="(max-width: 600px) 90vw, 31vw" />
+            <Image src={visual.image} alt={t(visual.alt)} fill sizes="(max-width: 600px) 90vw, 31vw" />
           </div>
-          <div className="category-card-copy"><h3>{category.name}</h3><p>{category.detail}</p></div>
+          <div className="category-card-copy"><h3>{t(category.name)}</h3><p>{t(category.detail)}</p></div>
           </TiltCard>
         </Link>;
       })}
