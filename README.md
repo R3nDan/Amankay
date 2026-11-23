@@ -22,6 +22,14 @@ npm run dev
 
 Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 3100`. Comprobaciones: `npm run typecheck`, `npm run lint` y `npm run build`.
 
+### Despliegue en Render
+
+El Blueprint `Amankay` está aplicado y creó tres recursos Free en Ohio: `amankay-frontend`, `amankay-api` y una base PostgreSQL nueva llamada `amankay_render`. La base es independiente de `amankay_test`, que no se modificó. La web pública está disponible en [amankay-frontend.onrender.com](https://amankay-frontend.onrender.com); la API responde `{"status":"UP"}` en `/api/v1/health`, también a través del proxy del frontend.
+
+Render construyó la API con Java 25 y Spring Boot 4.2.0, conectó PostgreSQL por la red interna con SSL, aplicó Flyway V1/V2 e inicializó JPA. El frontend compiló con Node 24.22.1 y Next.js; también carga `/admin/login`. No existe todavía un administrador en la base remota: debe crearse con el bootstrap autorizado, permitiendo temporalmente la IP del equipo en el acceso externo de PostgreSQL y retirándola al terminar. Nunca compartas contraseñas por el chat ni las guardes en el repositorio.
+
+El plan Free es adecuado para la presentación, pero no permanente: los servicios web se suspenden después de 15 minutos sin tráfico y pueden tardar cerca de un minuto en despertar; PostgreSQL Free vence a los 30 días, tiene 1 GB y no ofrece copias de seguridad. El sistema de archivos web es temporal, así que los comprobantes necesitan almacenamiento persistente fuera de este plan. No se configuró un plan pago.
+
 ### Código
 
 - `frontend/src/app/`: rutas y estilos globales.

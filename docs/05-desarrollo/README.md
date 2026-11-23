@@ -1,12 +1,16 @@
 # Plan y estado de desarrollo de Amankay
 
-## Actualización del 23-11-2026: preparación de despliegue en Render
+## Actualización del 23-11-2026: despliegue inicial en Render
 
-El usuario eligió Render para presentar el ecosistema al profesor. Se preparó `render.yaml` con tres recursos independientes: Next.js, backend Java 25 y PostgreSQL nuevo. La configuración no se ha aplicado en Render; todavía no se han creado servicios ni una base remota. El frontend apunta a la API mediante `AMANKAY_API_ORIGIN`, mientras Spring utiliza `AMANKAY_FRONTEND_ORIGIN`, `PORT` y `SERVER_ADDRESS` del entorno de Render. Localmente se conservan los valores existentes.
+El Blueprint `Amankay` quedó aplicado en el workspace de Render y creó `amankay-postgres`, `amankay-api` y `amankay-frontend`, todos en plan Free y región Ohio. El commit desplegado fue `021bde7` (`Prepare Amankay Render deployment`). La web pública está en https://amankay-frontend.onrender.com y la API en https://amankay-api.onrender.com. `GET /api/v1/health` devolvió `{"status":"UP"}` tanto en el dominio de la API como por el proxy `/api/v1` del frontend; `/admin/login` también carga.
 
-El Blueprint usa planes Free, bloquea conexiones externas a PostgreSQL por defecto y activa Flyway únicamente para esa base remota nueva. V1/V2 no se ejecutaron desde esta tarea y `amankay_test` no se modifica. Render Free hace dormir los servicios web tras 15 minutos, PostgreSQL expira a los 30 días y el almacenamiento local no persiste; por eso la carga de comprobantes no se habilita con este plan. El primer administrador deberá crearse después con el bootstrap desde el equipo local, autorizando temporalmente su IP pública en Render.
+La API inició con Java 25/Spring Boot 4.2.0, conectó por SSL a la base nueva `amankay_render` y los logs confirmaron la validación y aplicación de Flyway V1/V2, inicialización de JPA y descubrimiento de 26 repositorios. Next.js 16.4.6 compiló con Node 24.22.1 y Render marcó ambos servicios web como Live. La base local `amankay_test` no se modificó. Render indicó 7 vulnerabilidades al instalar dependencias del frontend (4 moderadas y 3 altas); no se ejecutó `npm audit fix` ni se alteraron paquetes.
 
-Las actualizaciones fechadas el 22-11-2026 que aparecen debajo son registros de etapas anteriores. Para el estado actual del despliegue, prevalece esta actualización y el `render.yaml` de la raíz.
+No se creó un administrador en la base remota ni se probaron login, sesiones, mesas/QR o flujos administrativos contra ese entorno. El siguiente paso es ejecutar el bootstrap de administrador con `amankay_render`; el acceso externo a PostgreSQL está bloqueado (`ipAllowList: []`), por lo que habrá que autorizar temporalmente solo la IP del equipo para el bootstrap y retirarla después. No se guardaron credenciales en el repositorio.
+
+El plan Free es temporal y limita la presentación: Render duerme servicios web tras 15 minutos sin tráfico; PostgreSQL Free expira a los 30 días con 1 GB y sin copias de seguridad. El almacenamiento local web no es persistente, así que los comprobantes no deben considerarse archivados. No se configuró un plan pago.
+
+Las actualizaciones fechadas el 22-11-2026 que aparecen debajo son registros de etapas anteriores. Para el estado vigente del despliegue, prevalecen esta actualización y `render.yaml` en la raíz.
 
 ## Actualización del 22-11-2026: panel administrativo progresivo
 
