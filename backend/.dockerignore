@@ -1,0 +1,8 @@
+target/
+logs/
+.git/
+.env
+.env.*
+application-local-override.yml
+application-*.local.yml
+*.log

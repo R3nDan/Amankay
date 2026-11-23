@@ -13,7 +13,7 @@ Dirección aprobada para el MVP por el usuario el 22-11-2026.
 | Animación | Motion + GSAP | Seleccionados para usos puntuales; verificar qué paquetes están instalados realmente antes de modificar dependencias. |
 | Backend | Java con Spring Boot, monolito modular | Aprobado |
 | API | Servicios web REST bajo /api/v1 | Aprobada |
-| Base de datos | PostgreSQL local | Aprobada |
+| Base de datos | PostgreSQL; local para desarrollo y una instancia Render separada para la presentación pública | Aprobada como destino de demostración; nunca reutilizar `amankay_test` |
 | Persistencia | Spring Data JPA/Hibernate; único ORM propietario de las tablas | Aprobada |
 | Migraciones | Flyway, con `flyway-database-postgresql` para el motor PostgreSQL | Aprobado |
 | Construcción | Maven Wrapper; no se requiere Maven global | Aprobada |
@@ -50,13 +50,13 @@ Spring Boot administra versiones compatibles de sus dependencias mediante el BOM
 
 ## Comparación de base de datos
 
-PostgreSQL se mantiene como base de datos del MVP, instalada localmente para desarrollo y demostración sin servicio administrado de pago obligatorio. Flyway será el mecanismo de evolución del esquema; JPA/Hibernate validará y accederá al esquema, sin crearlo ni cambiarlo automáticamente. Prisma queda excluido de la administración de esas tablas para evitar dos ORM con autoridad de escritura.
+PostgreSQL se mantiene como base de datos del MVP. El desarrollo local utiliza su instancia local; la presentación pública aprobada se prepara en Render con una base independiente llamada `amankay_render`. Flyway evoluciona el esquema; Hibernate valida y accede a él sin crearlo o cambiarlo automáticamente. Prisma queda excluido de la administración de esas tablas para evitar dos ORM con autoridad de escritura.
 
 ## Restricción de costos
 
-No exigir despliegue en Vercel ni servicio de pago. Desarrollo/presentación en el equipo local con PostgreSQL local es el escenario aceptado. Un despliegue público se evaluará en otra fase y debe revisarse con precios y límites vigentes; no prometer gratuidad perpetua ni permitir cargos automáticos.
+El usuario eligió Render para presentar el ecosistema al profesor. La configuración del repositorio usa planes gratuitos para no exigir pagos ni habilitar cargos. Esta aprobación cubre una demostración académica, no un servicio productivo ni la aceptación de un plan de pago. Los límites vigentes son materiales: los servicios web Free se duermen tras 15 minutos sin tráfico y pueden tardar cerca de un minuto en reactivarse; PostgreSQL Free expira 30 días después de crearse, tiene 1 GB y no cuenta con copias de seguridad. Confirmar esos límites en Render antes de crear recursos; no pasar a planes pagos sin nueva autorización.
 
-La idea de Render + Neon se formuló como solicitud dentro del cuadro de texto al final de una conversación compartida, no como decisión completada en la respuesta final. No queda aprobada como arquitectura de despliegue y además puede cambiar en precio/disponibilidad; no adoptarla sin nueva evaluación y autorización.
+La idea histórica de Render + Neon no quedó aprobada como combinación. La decisión posterior del usuario el 23-11-2026 es preparar Render para frontend, API y una base Render PostgreSQL separada; Neon no forma parte del despliegue vigente. La configuración usa `render.yaml` y debe revisarse si cambian los planes o límites del proveedor.
 
 ## No incorporar por defecto
 

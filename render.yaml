@@ -1,0 +1,65 @@
+services:
+  - type: web
+    name: amankay-api
+    runtime: docker
+    plan: free
+    region: ohio
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: SERVER_ADDRESS
+        value: 0.0.0.0
+      - key: AMANKAY_SESSION_COOKIE_SECURE
+        value: "true"
+      - key: AMANKAY_FRONTEND_ORIGIN
+        value: https://amankay-frontend.onrender.com
+      - key: DB_HOST
+        fromDatabase:
+          name: amankay-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: amankay-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: amankay-postgres
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: amankay-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: amankay-postgres
+          property: password
+      - key: DB_SSL_MODE
+        value: require
+      - key: SPRING_FLYWAY_ENABLED
+        value: "true"
+
+  - type: web
+    name: amankay-frontend
+    runtime: node
+    plan: free
+    region: ohio
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start -- --hostname 0.0.0.0
+    envVars:
+      - key: NODE_VERSION
+        value: 24.22.1
+      - key: AMANKAY_API_ORIGIN
+        fromService:
+          type: web
+          name: amankay-api
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+
+databases:
+  - name: amankay-postgres
+    plan: free
+    region: ohio
+    databaseName: amankay_render
+    user: amankay_app
+    ipAllowList: []

@@ -34,12 +34,15 @@ Spring Boot lee variables del entorno del proceso; `.env.example` es solo una pl
 |---|---|
 | `DB_HOST`, `DB_PORT`, `DB_NAME` | Ubicación de la base PostgreSQL autorizada. |
 | `DB_USERNAME`, `DB_PASSWORD` | Credenciales locales; nunca deben guardarse en Git. |
+| `DB_SSL_MODE` | Modo TLS PostgreSQL; por defecto `disable` localmente. Render usa `require`. |
+| `SERVER_ADDRESS` | Dirección de escucha; por defecto `127.0.0.1`. Render usa `0.0.0.0`. |
+| `PORT` | Puerto HTTP; por defecto `8081`. Render proporciona este valor al servicio. |
 | `AMANKAY_QR_SESSION_TTL` | Vigencia del token QR; predeterminado `PT8H`. |
 | `AMANKAY_PRIVATE_FILES_DIR` | Directorio privado local para comprobantes; si falta, la carga responde como no disponible. |
 | `AMANKAY_FRONTEND_ORIGIN` | Origen permitido para el frontend; predeterminado `http://localhost:3000`. |
 | `AMANKAY_SESSION_COOKIE_SECURE` | Marca Secure de cookie; debe activarse detrás de HTTPS. |
 
-No se debe iniciar la aplicación hasta confirmar que las variables de DB apuntan al destino elegido. El servidor escucha por defecto en `127.0.0.1:8081`.
+No se debe iniciar la aplicación hasta confirmar que las variables de DB apuntan al destino elegido. El servidor escucha por defecto en `127.0.0.1:8081`; solo el despliegue Render fija explícitamente `SERVER_ADDRESS=0.0.0.0` y usa el `PORT` asignado por la plataforma.
 
 ## Administrador inicial (comando local de una sola vez)
 
@@ -58,9 +61,17 @@ Si el bootstrap informa que ya existe `ADMINISTRADOR` y confirmas en pgAdmin que
 
 ## Flyway y PostgreSQL
 
-V1 crea las 26 tablas, restricciones, índices y el trigger append-only de `MovimientoInventario`. V2 carga los datos iniciales confirmados. Flyway permanece deshabilitado en `application.yml` y `application-local.yml`; Hibernate usa `ddl-auto=none`, la inicialización SQL está desactivada y `clean` está bloqueado.
+V1 crea las 26 tablas, restricciones, índices y el trigger append-only de `MovimientoInventario`. V2 carga los datos iniciales confirmados. V1/V2 se ejecutaron en la base local autorizada `amankay_test`. Flyway permanece deshabilitado en `application.yml` y `application-local.yml`; Hibernate usa `ddl-auto=none`, la inicialización SQL está desactivada y `clean` está bloqueado.
 
-Una propiedad externa puede sobrescribir la configuración. Habilitar `spring.flyway.enabled` provoca que Spring Boot ejecute migraciones al arrancar. Solo se debe habilitar después de revisar los scripts y autorizar expresamente una base/esquema de prueba aislado. La implementación de esta tarea no se conectó a PostgreSQL, no ejecutó DDL/DML, no creó `flyway_schema_history` y no migró datos.
+Una propiedad externa puede sobrescribir la configuración. Habilitar `spring.flyway.enabled` provoca que Spring Boot ejecute migraciones al arrancar. En Render se activa mediante `SPRING_FLYWAY_ENABLED=true` solo para la base nueva y exclusiva `amankay_render` creada por el Blueprint. No se usa ni modifica `amankay_test` durante el despliegue. En el primer arranque Render deberá registrar V1/V2 en la base remota; inspecciona sus logs y la salud del backend antes de continuar.
+
+## Despliegue académico en Render
+
+La definición está en `../render.yaml`. Crea tres recursos en Ohio: `amankay-frontend` (Next.js), `amankay-api` (Java 25 en Docker) y `amankay-postgres` (PostgreSQL). Las referencias del Blueprint llevan las credenciales generadas de la base directamente al proceso API; no hay claves ni contraseñas guardadas en Git. La API usa el host interno de PostgreSQL, TLS requerido y la base bloquea conexiones externas por defecto. El proxy `/api/v1` usa el hostname de la API desde Render; CORS y los QR usan `https://amankay-frontend.onrender.com`. Si Render muestra otro hostname, actualiza la variable de origen correspondiente antes de probar las mesas.
+
+El administrador no se crea con una cuenta de demostración. Créalo después del despliegue con el comando bootstrap existente, desde una terminal local y contra la base Render. Como el acceso externo de PostgreSQL se bloquea por defecto, permite temporalmente la IP pública de tu equipo en la lista de acceso del servicio de base, utiliza los datos externos solo en variables del proceso y vuelve a bloquear el acceso externo al terminar. No uses los datos de `amankay_test` ni compartas la contraseña en mensajes.
+
+El plan gratuito es solo para demostración: los servicios web se duermen tras 15 minutos sin tráfico; el primer acceso puede tardar cerca de un minuto. PostgreSQL Free expira a los 30 días, queda limitado a 1 GB y no incluye backups. El sistema de comprobantes necesita almacenamiento privado persistente y no está disponible en este plan; no se configuró almacenamiento efímero que pudiera perder archivos.
 
 ## Rutas principales
 
@@ -92,8 +103,8 @@ Todas las rutas están bajo `/api/v1`. La lista completa y los esquemas se publi
 ## Límites conocidos
 
 - JDK 25 y un destino PostgreSQL de prueba aún deben configurarse explícitamente.
-- Las migraciones no se han ejecutado ni validado contra PostgreSQL; la inicialización completa de Spring/JPA tampoco se ha probado.
-- La integración de Next.js, vistas de panel y QR, y pruebas de extremo a extremo quedan pendientes.
+- Las migraciones fueron ejecutadas en `amankay_test`; el despliegue Render usa una base independiente donde V1/V2 se ejecutarán al primer arranque.
+- La integración Next.js/API y las vistas de panel/QR ya están implementadas; la validación manual de extremo a extremo y el despliegue Render permanecen pendientes.
 - Se debe cargar stock inicial real desde el módulo inventario antes de que una sucursal pueda aceptar pedidos con verificación de disponibilidad.
 - Para domicilios en Neiva se debe configurar el límite geográfico aprobado y las coordenadas reales de sucursales; sin ellos, el backend no puede garantizar la cobertura GPS. Sin ubicación GPS se usa dirección/barrio y asignación manual.
 - JavaDocs, OpenAPI generado en ejecución y seguridad HTTP con el frontend no se han verificado en un arranque integral.

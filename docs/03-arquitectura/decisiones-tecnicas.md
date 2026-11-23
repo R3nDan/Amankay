@@ -133,8 +133,8 @@ El usuario aprobó la dirección y precisiones funcionales siguientes. Se implem
 | Área | Decisión vigente | Estado / límite |
 |---|---|---|
 | Arquitectura | Frontend Next.js/React/TypeScript; backend Java 25, Spring Boot 4.2.0, Springdoc 3.2.1, REST `/api/v1`, monolito modular; JPA/Hibernate como único ORM; PostgreSQL; Flyway; Spring Security; Maven Wrapper. | Implementado en parte. Temurin JDK 25.0.5.1 instalado y usado para validar; Prisma no participa en persistencia. |
-| MER y esquema | 24 entidades de dominio y 2 asociativas, 26 en total. `tipoOrigen` + `idOrigen` identifica el origen de cada movimiento; FK autorreferenciada opcional identifica compensación. | Entidades y scripts preparados; no se altera el MER ni se ejecutaron scripts. |
-| Pedido web/WhatsApp | Guardar desde Java antes de abrir WhatsApp; confirmación manual, vence a los 30 minutos, sin reserva de stock ni API WhatsApp. | Implementado en servicio REST; integración del frontend pendiente. |
+| MER y esquema | 24 entidades de dominio y 2 asociativas, 26 en total. `tipoOrigen` + `idOrigen` identifica el origen de cada movimiento; FK autorreferenciada opcional identifica compensación. | Entidades y scripts ejecutados en la base de prueba `amankay_test`; el nuevo destino Render tendrá una base separada. |
+| Pedido web/WhatsApp | Guardar desde Java antes de abrir WhatsApp; confirmación manual, vence a los 30 minutos, sin reserva de stock ni API WhatsApp. | Integrado desde la bolsa pública al servicio REST; atención también puede registrar manualmente pedidos recibidos directamente por WhatsApp. |
 | WhatsApp recibido por el negocio | Atención registra manualmente el pedido externo en la misma cola de confirmación; no vence automáticamente a los 30 minutos, regla exclusiva del pedido web. | Implementado en `POST /api/v1/staff/orders/whatsapp`; sin integración automática. |
 | Pagos | Cada intento cubre el saldo completo. Reintentos conservados; sin pago parcial ni sobrepago; reembolso manual total. | Servicio Java transaccional implementado; requiere integración y prueba con PostgreSQL. |
 | Cancelación | Atención autorizada aprueba cancelaciones antes de iniciar preparación. | Validación de estado y rol implementada. |
@@ -150,12 +150,12 @@ El usuario aprobó la dirección y precisiones funcionales siguientes. Se implem
 
 ## Pendientes técnicos reales y límites de verificación
 
-- Elegir y autorizar una base/esquema PostgreSQL de prueba aislado; no se conocen DB_NAME, esquema ni credenciales y no se intentó conexión.
-- Revisar V1/V2 y obtener aprobación expresa del destino antes de habilitar Flyway. El Flyway deshabilitado sigue siendo sobrescribible por configuración externa; no iniciar la aplicación con variables de DB no verificadas.
-- Probar arranque completo de Spring/JPA, integración de constraints, bloqueos/transacciones y migraciones contra el destino autorizado.
-- Configurar `AMANKAY_PRIVATE_FILES_DIR` para comprobantes; configurar coordenadas y stock real de sucursales/productos.
-- Integrar frontend Next.js, panel operativo y QR con la API; probar seguridad desde ambos clientes.
-- Definir el protocolo académico medible de usabilidad y aceptación (P-18); no bloquea este primer desarrollo.
+- Desplegar el Blueprint `render.yaml` desde la cuenta Render del usuario; la creación de los tres servicios y de la base nueva aún requiere confirmar el repositorio y aplicar los recursos en el Dashboard.
+- Revisar los logs de primer arranque, la salud pública y la ejecución de Flyway V1/V2 en la base Render independiente. No se han creado recursos ni conectado a Render desde el repositorio.
+- Crear el primer administrador de esa base con el bootstrap existente. Para ello será necesario permitir temporalmente la IP pública del equipo en la lista de acceso de la base Render y retirarla al terminar.
+- La carga de comprobantes necesita almacenamiento privado persistente; no se habilita en el disco efímero del plan gratuito. Configurar coordenadas y stock real de sucursales/productos antes de validar pedidos de domicilio.
+- Completar las pruebas manuales de login, persistencia, apertura/escaneo QR y pedidos con el teléfono del usuario.
+- Definir el protocolo académico medible de usabilidad y aceptación (P-18); no bloquea la demostración técnica.
 
 No hay decisiones funcionales abiertas para los flujos aprobados en la solicitud del 22-11-2026. Los detalles reales del catálogo/stock y la configuración local son datos de puesta en marcha, no autorización para inventarlos.
 

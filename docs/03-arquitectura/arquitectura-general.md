@@ -2,9 +2,9 @@
 
 ## Estado vigente
 
-El usuario aprobó la arquitectura Java, el MER de 26 entidades y las precisiones funcionales para continuar con la implementación. La base de datos y el backend tienen esquema físico, migraciones Flyway y módulos REST iniciales en `backend/`. No se ha conectado a PostgreSQL ni se han ejecutado migraciones porque todavía no se definió un destino local aislado.
+El usuario aprobó la arquitectura Java, el MER de 26 entidades y las precisiones funcionales para continuar con la implementación. El esquema físico y los módulos REST están implementados en `backend/`; Flyway V1/V2 se aplicaron a la base de prueba local autorizada `amankay_test`. El frontend Next.js ya consume la API para el sitio público, panel y experiencia QR. El 23-11-2026 el usuario eligió Render para una presentación pública y se prepara un PostgreSQL remoto distinto, sin crear recursos aún.
 
-La web Next.js ya existe, pero aún no consume la API Java. Temurin JDK 25.0.5.1 está instalado y configurado en `JAVA_HOME`; JDK 27 permanece disponible, pero el proyecto se ejecuta con JDK 25. No hay Maven global; se usa Maven Wrapper. Prisma permanece instalado y fuera del camino de persistencia.
+La web Next.js consume la API Java mediante rutas `/api/v1`; la URL se conserva localmente como `127.0.0.1:8081` y se hace configurable para Render. Temurin JDK 25.0.5.1 está instalado y configurado en `JAVA_HOME`; JDK 27 permanece disponible, pero el proyecto se ejecuta con JDK 25. No hay Maven global; se usa Maven Wrapper. Prisma permanece instalado y fuera del camino de persistencia.
 
 ## Producto y alcance
 
@@ -14,7 +14,7 @@ Amankay es una aplicación web para operar un negocio de alimentos con varias su
 2. Experiencia de mesa QR: catálogo, pedido y consulta de sesión/cuenta.
 3. Panel administrativo: atención, mesas, pagos, productos, inventario, reposiciones, entregas, usuarios y reportes.
 
-El backend implementa servicios REST para esos dominios; las vistas de panel, cliente QR y la integración del frontend con la API aún deben construirse. WhatsApp permanece como canal externo manual: Java guarda la solicitud web antes de abrir la conversación y atención puede registrar en la cola los pedidos recibidos directamente por WhatsApp. No utiliza la API de WhatsApp.
+El backend implementa servicios REST para esos dominios y el frontend ya integra el panel y la experiencia QR. WhatsApp permanece como canal externo manual: Java guarda la solicitud web antes de abrir la conversación y atención puede registrar en la cola los pedidos recibidos directamente por WhatsApp. No utiliza la API de WhatsApp.
 
 ## Stack aprobado
 
@@ -38,7 +38,7 @@ Navegador → Next.js → API REST Java/Spring Boot → servicios modulares
           → repositorios Spring Data JPA/Hibernate → PostgreSQL
 ```
 
-Flyway es el único medio versionado para cambiar el esquema. La configuración impide la generación automática de tablas por Hibernate y deshabilita migraciones Flyway durante el arranque. No habilitarlas contra una base desconocida. Desarrollo y demostración se mantienen locales y sin servicios obligatorios de pago.
+Flyway es el único medio versionado para cambiar el esquema. Hibernate no genera tablas; Flyway está deshabilitado en la configuración local. El Blueprint Render lo activa solo contra el nuevo PostgreSQL aislado `amankay_render` para ejecutar V1/V2 en su primer arranque. Desarrollo local continúa sin servicios de pago obligatorio; Render se elige para la presentación con planes gratuitos y sus límites temporales documentados en `stack-tecnologico.md`.
 
 ## Módulos implementados en `backend/`
 
@@ -75,12 +75,12 @@ Los comprobantes de transferencia se almacenan fuera de la raíz pública con no
 
 ## Configuración y protección de PostgreSQL
 
-Se deben proporcionar `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` en el entorno del proceso. Ningún nombre de base, esquema o secreto se inventó. El backend escucha por defecto en `127.0.0.1:8081`; no hay perfil público activo.
+Se deben proporcionar `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` en el entorno del proceso. En Render, el Blueprint las obtiene de su PostgreSQL dedicado; `DB_SSL_MODE=require`, `SERVER_ADDRESS=0.0.0.0` y el `PORT` asignado por Render se usan solo allí. En local, el backend escucha por defecto en `127.0.0.1:8081` con `DB_SSL_MODE=disable`.
 
-`spring.jpa.hibernate.ddl-auto=none`, SQL init `never`, Flyway `enabled=false`, `create-schemas=false` y `clean-disabled=true`. La propiedad se puede sobrescribir desde el entorno; habilitar Flyway ejecuta las migraciones al arrancar. La prueba real deberá usar una base/esquema aprobado y revisado, con autorización expresa.
+`spring.jpa.hibernate.ddl-auto=none`, SQL init `never`, Flyway `enabled=false` por defecto, `create-schemas=false` y `clean-disabled=true`. La propiedad puede sobrescribirse desde el entorno; habilitar Flyway ejecuta migraciones al arrancar. El único override preparado es el de Render, vinculado a la base nueva definida en Blueprint; nunca se apunta a `amankay_test`.
 
 ## Verificación actual y próximos pasos
 
-`mvnw validate`, `mvnw test` (14 pruebas aprobadas) y `mvnw package` se ejecutaron con Temurin JDK 25.0.5.1 y `--release 25`. Las migraciones V1/V2 son archivos preparados, pero no se han cargado ni ejecutado. No se verificaron el arranque completo de Spring/JPA ni la conexión real a PostgreSQL.
+`mvnw validate`, `mvnw test` (14 pruebas aprobadas) y `mvnw package` se ejecutaron con Temurin JDK 25.0.5.1 y `--release 25`. Flyway V1/V2, el arranque de Spring/JPA y los flujos REST principales se validaron en `amankay_test`; la suite Java y el frontend también tuvieron verificaciones locales registradas en `docs/05-desarrollo/README.md`.
 
-Antes de la validación de integración: determinar una base PostgreSQL de prueba, establecer variables seguras, revisar las migraciones y autorizar explícitamente ejecutarlas. Luego probar reglas de integridad, seguridad, transacciones y contratos OpenAPI; finalmente conectar el frontend sin duplicar las reglas Java.
+Siguiente etapa: vincular el repositorio a Render, revisar y crear los tres recursos de `render.yaml`, comprobar V1/V2 y la salud pública, y crear el administrador inicial sin compartir credenciales. La base de demostración será separada de `amankay_test`.

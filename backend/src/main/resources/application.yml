@@ -2,7 +2,7 @@ spring:
   application:
     name: amankay-backend
   datasource:
-    url: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}"
+    url: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSL_MODE:disable}"
     username: "${DB_USERNAME}"
     password: "${DB_PASSWORD}"
   jpa:
@@ -29,8 +29,8 @@ springdoc:
     path: /swagger-ui.html
 
 server:
-  address: 127.0.0.1
-  port: 8081
+  address: "${SERVER_ADDRESS:127.0.0.1}"
+  port: "${PORT:8081}"
   servlet:
     session:
       cookie:

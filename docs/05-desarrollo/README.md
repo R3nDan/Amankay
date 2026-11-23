@@ -1,5 +1,13 @@
 # Plan y estado de desarrollo de Amankay
 
+## Actualización del 23-11-2026: preparación de despliegue en Render
+
+El usuario eligió Render para presentar el ecosistema al profesor. Se preparó `render.yaml` con tres recursos independientes: Next.js, backend Java 25 y PostgreSQL nuevo. La configuración no se ha aplicado en Render; todavía no se han creado servicios ni una base remota. El frontend apunta a la API mediante `AMANKAY_API_ORIGIN`, mientras Spring utiliza `AMANKAY_FRONTEND_ORIGIN`, `PORT` y `SERVER_ADDRESS` del entorno de Render. Localmente se conservan los valores existentes.
+
+El Blueprint usa planes Free, bloquea conexiones externas a PostgreSQL por defecto y activa Flyway únicamente para esa base remota nueva. V1/V2 no se ejecutaron desde esta tarea y `amankay_test` no se modifica. Render Free hace dormir los servicios web tras 15 minutos, PostgreSQL expira a los 30 días y el almacenamiento local no persiste; por eso la carga de comprobantes no se habilita con este plan. El primer administrador deberá crearse después con el bootstrap desde el equipo local, autorizando temporalmente su IP pública en Render.
+
+Las actualizaciones fechadas el 22-11-2026 que aparecen debajo son registros de etapas anteriores. Para el estado actual del despliegue, prevalece esta actualización y el `render.yaml` de la raíz.
+
 ## Actualización del 22-11-2026: panel administrativo progresivo
 
 El panel administrativo ahora integra Next.js con la API Java para pedidos y su cola cronológica, dashboard por rol, inventario, reposiciones, entregas, pagos, conciliaciones de efectivo, catálogo, usuarios, sucursales/configuración y reportes. La experiencia de mesas y QR temporal también está conectada. Se conserva el MER de 26 entidades y las migraciones V1/V2 ya aplicadas a `amankay_test` en la validación anterior.
@@ -16,7 +24,7 @@ Se inició el panel administrativo de Next.js con rutas directas `/admin`, `/adm
 
 Las notas de estado anteriores a esta actualización se conservan abajo como historial y no describen el estado vigente de PostgreSQL ni de la integración inicial.
 
-## Estado actual
+## Estado anterior a la integración y despliegue (histórico)
 
 Análisis y diseño concluidos; el MER lógico de 24 entidades de dominio y 2 asociativas está aprobado. El sitio público Next.js está implementado. Se autorizó e implementó una primera entrega integral del backend Java y el esquema físico en `backend/` y `docs/02-modelado/modelo-fisico-postgresql.md`.
 
@@ -36,7 +44,7 @@ Stack: Java 25 objetivo, Spring Boot 4.2.0, Springdoc 3.2.1, Spring Data JPA/Hib
 - Domicilios con GPS voluntario y persistido con consentimiento para la entrega; sin GPS se exige dirección/barrio y se asigna manualmente. Una sola sucursal debe completar el pedido entero. Falta el límite geográfico de Neiva y geocodificación real para validar cobertura GPS.
 - La gestión formal de devoluciones e inspecciones está fuera del MVP; productos retornados no se reincorporan automáticamente.
 
-## Próximos pasos
+## Próximos pasos de esa etapa (histórico)
 
 | Orden | Trabajo | Estado / condición |
 |---|---|---|
@@ -48,7 +56,7 @@ Stack: Java 25 objetivo, Spring Boot 4.2.0, Springdoc 3.2.1, Spring Data JPA/Hib
 | 6 | Verificar seguridad, accesibilidad, pruebas de extremo a extremo, reportes y OpenAPI desde un arranque autorizado. | En espera de configuración integrada. |
 | 7 | Definir protocolo académico de usabilidad con tareas, muestra y criterios medibles. | Pendiente en P-18; no bloquea construcción técnica. |
 
-## Comprobaciones registradas
+## Comprobaciones registradas en esa etapa (histórico)
 
 Las verificaciones separan los siguientes resultados:
 
