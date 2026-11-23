@@ -100,8 +100,9 @@ La experiencia prioriza una mano, carga rápida, pocos pasos y lectores de panta
 
 ### Implementación vigente de internacionalización y accesibilidad
 
-- El sitio público y la experiencia QR ofrecen español de Colombia e inglés. El selector actualiza `lang` en el documento y conserva la preferencia localmente; los textos públicos, categorías, productos, estados QR y valores monetarios compatibles usan el idioma seleccionado.
-- El inicio de sesión y la navegación común del panel también traducen los controles compartidos; las pantallas operativas del panel se mantienen en español en esta entrega.
+- La internacionalización se implementa en JavaScript, sin biblioteca de traducción externa: diccionarios explícitos para los textos y las API nativas `Intl` para fechas, números y moneda. Los locales disponibles son español de Colombia (`es-CO`), inglés (`en`) y portugués de Brasil (`pt-BR`).
+- El selector existente conserva su diseño compacto: se abre al pasar el cursor en escritorio y al tocarlo en pantallas táctiles; permite elegir cualquiera de los tres idiomas y guarda la preferencia en `localStorage`. También actualiza el atributo `lang` del documento.
+- Los textos del sitio público, el flujo QR, el inicio de sesión, la navegación compartida y el inicio del panel usan los tres locales. Las pantallas operativas internas del panel continúan en español, de acuerdo con el alcance actual.
 - Hay enlaces para saltar al contenido, foco visible para teclado, etiquetas y nombres accesibles para controles, anuncios de estado en los flujos de pedido y gestión de foco/teclado dentro de los diálogos de bolsa y carrito QR.
 - La preferencia de movimiento reducido desactiva el desplazamiento animado y el video automático; el usuario puede reproducir el video manualmente con controles visibles.
 - Esta implementación mejora los criterios técnicos de internacionalización y accesibilidad; no sustituye una auditoría WCAG completa ni una evaluación de usabilidad. La evaluación de usabilidad P-18 sigue pendiente y fuera de este cambio.

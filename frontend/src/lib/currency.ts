@@ -1,4 +1,4 @@
 export const formatPrice = (value: number) => {
-  const locale = typeof document !== "undefined" && document.documentElement.lang === "en" ? "en-US" : "es-CO";
+  const locale = typeof document !== "undefined" && document.documentElement.lang ? document.documentElement.lang : "es-CO";
   return new Intl.NumberFormat(locale, { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value);
 };

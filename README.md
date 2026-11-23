@@ -35,7 +35,7 @@ El plan Free es adecuado para la presentación, pero no permanente: los servicio
 - `frontend/src/app/`: rutas y estilos globales.
 - `frontend/src/components/`: cabecera, navegación, tarjetas, ilustraciones SVG originales, recorrido del pan y componentes de interfaz.
 - `frontend/src/data/`: catálogo visual tipado con los precios indicados; disponibilidad por confirmar.
-- `frontend/src/lib/`: utilidades compartidas.
+- `frontend/src/lib/`: utilidades compartidas e internacionalización JavaScript (`es-CO`, `en`, `pt-BR`) con API nativa `Intl` y sin dependencia externa.
 
 ## Orden de trabajo acordado
 
