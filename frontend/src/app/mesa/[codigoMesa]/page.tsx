@@ -133,7 +133,7 @@ export default function TablePage() {
         <div className="table-texture-divider" aria-hidden="true"><BakerySymbolPattern /></div>
         <section className="table-orders" aria-labelledby="table-orders-title">
           <div className="table-orders-heading">
-            <h2 id="table-orders-title" className="table-orders-table-id">MESA {session?.mesa}</h2>
+            <h2 id="table-orders-title" className="table-orders-table-id">{session?.mesa}</h2>
           </div>
           {session?.pedidos.length ? <ul className="table-order-list">{session.pedidos.map(order => <li className="table-order-card" key={order.id}>
             <div className="table-order-code"><strong>{order.codigoSeguimiento}</strong></div>
