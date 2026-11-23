@@ -7,6 +7,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { Check, Minus, Plus, X } from "lucide-react";
 import { products, type Product } from "@/data/bakery";
 import { branches } from "@/data/branches";
+import { api, type Branch as ApiBranch } from "@/lib/api";
 import { formatPrice } from "@/lib/currency";
 import { ProductSymbol } from "@/components/ui/bakery-symbol-pattern";
 import { PaperBreadBag } from "@/components/ui/paper-bread-bag";
@@ -109,71 +110,112 @@ function OrderDrawer({ rows, subtotal, update, clearCart, close }: { rows: { pro
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
   const [reference, setReference] = useState("");
   const [payment, setPayment] = useState<"efectivo" | "transferencia">("efectivo");
   const [awaitingWhatsAppConfirmation, setAwaitingWhatsAppConfirmation] = useState(false);
+  const [whatsAppUrl, setWhatsAppUrl] = useState("");
+  const [trackingCode, setTrackingCode] = useState("");
   const [whatsAppOpenFailed, setWhatsAppOpenFailed] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [orderError, setOrderError] = useState("");
   const fee = mode === "domicilio" ? 2000 : 0;
-  const send = (event: React.FormEvent<HTMLFormElement>) => {
+  const send = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!rows.length) return;
+    if (!rows.length || sending) return;
     const selectedBranch = branches.find(item => item.id === branch) ?? branches[0];
-    const deliveryDetails = mode === "domicilio"
-      ? ["Modalidad: Domicilio en Neiva", `Dirección: ${address.trim()}`, `Referencia: ${reference.trim() || "Sin referencia"}`]
-      : ["Modalidad: Recoger en sucursal", `Sucursal: ${selectedBranch.name}`, `Dirección: ${selectedBranch.address}`];
-    const lines = [
-      "*AMANKAY*",
-      "SOLICITUD DE PEDIDO",
-      "────────────────────",
-      "Hola, quiero realizar el siguiente pedido:",
-      "",
-      "*PRODUCTOS*",
-      ...rows.map(({ product, quantity }) => `• ${quantity} × ${product.name}  —  ${formatPrice((product.price || 0) * quantity)}`),
-      "",
-      "*RESUMEN DEL PEDIDO*",
-      `Subtotal: ${formatPrice(subtotal)}`,
-      mode === "domicilio" ? `Domicilio: ${formatPrice(fee)}` : "Recogida: Sin costo adicional",
-      `*TOTAL ESTIMADO: ${formatPrice(subtotal + fee)}*`,
-      "",
-      "*ENTREGA*",
-      ...deliveryDetails,
-      "Disponibilidad: Por confirmar al atender la solicitud.",
-      "",
-      "*DATOS DE CONTACTO*",
-      `Nombre: ${name.trim()}`,
-      `Teléfono: ${phone.trim()}`,
-      `Pago preferido: ${payment === "efectivo" ? "Efectivo" : "Transferencia"}`,
-      "",
-      "────────────────────",
-      "Por favor, confirma la disponibilidad y el valor final del pedido.",
-    ];
     const chat = window.open("about:blank", "_blank");
     if (!chat) {
       setWhatsAppOpenFailed(true);
       return;
     }
     chat.opener = null;
-    chat.location.href = `https://wa.me/573125864045?text=${encodeURIComponent(lines.join("\n"))}`;
-    setWhatsAppOpenFailed(false);
-    setAwaitingWhatsAppConfirmation(true);
+    setSending(true);
+    setOrderError("");
+    try {
+      const [catalog, apiBranches] = await Promise.all([
+        api<{ id: string; nombre: string; precio: number }[]>("/catalog/products"),
+        api<ApiBranch[]>("/branches"),
+      ]);
+      const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("es");
+      const productByName = new Map(catalog.map(item => [normalize(item.nombre), item]));
+      const orderItems = rows.map(({ product, quantity }) => {
+        const backendProduct = productByName.get(normalize(product.name));
+        if (!backendProduct) throw new Error(`“${product.name}” no está disponible en el catálogo actual.`);
+        return { productoId: backendProduct.id, cantidad: quantity, name: backendProduct.nombre, unitPrice: backendProduct.precio };
+      });
+      const backendBranch = mode === "recoger"
+        ? apiBranches.find(item => normalize(item.nombre) === normalize(selectedBranch.name))
+        : undefined;
+      if (mode === "recoger" && !backendBranch) throw new Error("La sucursal seleccionada no está disponible. Actualiza la página e inténtalo de nuevo.");
+
+      const savedOrder = await api<{ id: string; codigoSeguimiento: string; total: number; venceEn: string }>("/orders/web", {
+        method: "POST",
+        body: JSON.stringify({
+          modalidad: mode === "recoger" ? "RECOGER" : "DOMICILIO",
+          sucursalId: backendBranch?.id ?? null,
+          nombre: name.trim(),
+          telefono: phone.trim(),
+          direccion: mode === "domicilio" ? address.trim() : null,
+          barrio: mode === "domicilio" ? neighborhood.trim() : null,
+          referencia: mode === "domicilio" ? reference.trim() || null : null,
+          ubicacionConsentida: false,
+          latitud: null,
+          longitud: null,
+          items: orderItems.map(({ productoId, cantidad }) => ({ productoId, cantidad })),
+        }),
+      });
+      const savedLines = orderItems.map(item => `• ${item.cantidad} × ${item.name} — ${formatPrice(item.unitPrice * item.cantidad)}`);
+      const serverSubtotal = orderItems.reduce((sum, item) => sum + item.unitPrice * item.cantidad, 0);
+      const serverDeliveryFee = savedOrder.total - serverSubtotal;
+      const deliveryDetails = mode === "domicilio"
+        ? ["Modalidad: Domicilio en Neiva", `Dirección: ${address.trim()}`, `Barrio: ${neighborhood.trim()}`, `Referencia: ${reference.trim() || "Sin referencia"}`]
+        : ["Modalidad: Recoger en sucursal", `Sucursal: ${backendBranch!.nombre}`, `Dirección: ${backendBranch!.direccion}`];
+      const lines = [
+        "*AMANKAY*", "SOLICITUD DE PEDIDO", "────────────────────",
+        "Hola, quiero realizar el siguiente pedido:", "", "*PRODUCTOS*", ...savedLines, "",
+        "*RESUMEN DEL PEDIDO*", `Subtotal: ${formatPrice(serverSubtotal)}`,
+        mode === "domicilio" ? `Domicilio: ${formatPrice(serverDeliveryFee)}` : "Recogida: Sin costo adicional",
+        `*TOTAL ESTIMADO: ${formatPrice(savedOrder.total)}*`,
+        "Disponibilidad y valor final por confirmar al atender la solicitud.", "",
+        "*ENTREGA*", ...deliveryDetails, "",
+        "*DATOS DE CONTACTO*", `Nombre: ${name.trim()}`, `Teléfono: ${phone.trim()}`,
+        `Pago preferido: ${payment === "efectivo" ? "Efectivo" : "Transferencia"}`, "",
+        `Código de seguimiento: ${savedOrder.codigoSeguimiento}`,
+        "────────────────────", "Por favor, confirma la disponibilidad y el valor final del pedido.",
+      ];
+      const whatsAppHref = `https://wa.me/573125864045?text=${encodeURIComponent(lines.join("\n"))}`;
+      setWhatsAppOpenFailed(false);
+      setWhatsAppUrl(whatsAppHref);
+      setTrackingCode(savedOrder.codigoSeguimiento);
+      setAwaitingWhatsAppConfirmation(true);
+      chat.location.href = whatsAppHref;
+    } catch (failure) {
+      chat.close();
+      setWhatsAppOpenFailed(false);
+      setOrderError(failure instanceof Error ? failure.message : "No se pudo registrar el pedido. La bolsa sigue intacta.");
+    } finally {
+      setSending(false);
+    }
   };
   return <div className="order-drawer-layer">
     <motion.button className="order-drawer-scrim" aria-label="Cerrar bolsa" onClick={close} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
     <motion.aside className="order-drawer" role="dialog" aria-modal="true" aria-labelledby="order-drawer-title" initial={{ x: "105%" }} animate={{ x: 0 }} exit={{ x: "105%" }} transition={{ type: "spring", stiffness: 260, damping: 30 }}>
       <div className="order-drawer-head"><div><h2 id="order-drawer-title">Tu bolsa</h2></div><button onClick={close} aria-label="Cerrar bolsa"><X size={22} /></button></div>
       {sent ? <div className="order-sent" aria-live="polite"><span className="order-sent-mark"><Check size={22} /></span><h3>Solicitud enviada</h3><p>La bolsa quedó libre. Amankay confirmará disponibilidad y valor final por WhatsApp.</p><Link className="order-primary" href="/menu" onClick={close}>Seguir explorando</Link></div>
-        : rows.length && awaitingWhatsAppConfirmation ? <div className="order-whatsapp-pending"><PaperBreadBag /><h3>¿Ya enviaste tu solicitud?</h3><p>Envía el mensaje preparado en WhatsApp. Al confirmar aquí que lo enviaste, liberaremos la bolsa.</p><button className="order-primary" type="button" onClick={() => { clearCart(); setAwaitingWhatsAppConfirmation(false); setSent(true); }}>Sí, ya lo envié</button><button className="order-whatsapp-return" type="button" onClick={() => setAwaitingWhatsAppConfirmation(false)}>Volver a revisar la bolsa</button></div>
+        : rows.length && awaitingWhatsAppConfirmation ? <div className="order-whatsapp-pending"><PaperBreadBag /><h3>¿Ya enviaste tu solicitud?</h3><p>Pedido {trackingCode}. Envía el mensaje preparado en WhatsApp; al confirmar aquí que lo enviaste, liberaremos la bolsa.</p><a className="order-primary" href={whatsAppUrl} target="_blank" rel="noreferrer">Abrir WhatsApp de nuevo</a><button className="order-primary" type="button" onClick={() => { clearCart(); setAwaitingWhatsAppConfirmation(false); setSent(true); }}>Sí, ya lo envié</button></div>
         : rows.length ? <form onSubmit={send} className="order-drawer-body">
         <ul className="order-cart-list">{rows.map(({ product, quantity }) => <li key={product.id} className="order-cart-item"><div className="order-cart-photo">{product.photo && <Image src={product.photo} alt="" fill sizes="76px" />}</div><div><h3>{product.name}</h3><span>{formatPrice((product.price || 0) * quantity)}</span><div className="order-stepper"><button type="button" aria-label={`Quitar un ${product.name}`} onClick={() => update(product.id, quantity - 1)}><Minus size={15} /></button><output>{quantity}</output><button type="button" aria-label={`Agregar un ${product.name}`} onClick={() => update(product.id, quantity + 1)}><Plus size={15} /></button></div></div></li>)}</ul>
         <div className="order-totals"><p><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></p><p><span>Domicilio</span><strong>{formatPrice(fee)}</strong></p><p className="order-grand-total"><span>Total estimado</span><strong>{formatPrice(subtotal + fee)}</strong></p></div>
         <fieldset className="order-mode"><legend>¿Cómo quieres recibirlo?</legend><label><input type="radio" name="mode" checked={mode === "recoger"} onChange={() => setMode("recoger")} /> Recoger</label><label><input type="radio" name="mode" checked={mode === "domicilio"} onChange={() => setMode("domicilio")} /> Domicilio</label></fieldset>
-        {mode === "recoger" ? <label className="order-field">Sucursal para recoger<select value={branch} onChange={event => setBranch(event.target.value)}>{branches.map(item => <option key={item.id} value={item.id}>{item.name} · {item.address}</option>)}</select></label> : <p className="order-hint order-delivery-hint">Domicilios disponibles solo para Neiva, la tarifa es de 2.000 pesos adicionales, y la disponibilidad se confirma al atender su solicitud.</p>}
+        {mode === "recoger" ? <label className="order-field">Sucursal para recoger<select value={branch} onChange={event => setBranch(event.target.value)}>{branches.map(item => <option key={item.id} value={item.id}>{item.name} · {item.address}</option>)}</select></label> : <><label className="order-field">Barrio en Neiva<input value={neighborhood} onChange={event => setNeighborhood(event.target.value)} autoComplete="address-level3" required maxLength={120} /></label><p className="order-hint order-delivery-hint">Domicilios disponibles solo para Neiva, la tarifa es de 2.000 pesos adicionales, y la disponibilidad se confirma al atender su solicitud.</p></>}
         <fieldset className="order-mode"><legend>¿Cómo prefieres pagar?</legend><label><input type="radio" name="payment" checked={payment === "efectivo"} onChange={() => setPayment("efectivo")} /> Efectivo</label><label><input type="radio" name="payment" checked={payment === "transferencia"} onChange={() => setPayment("transferencia")} /> Transferencia</label></fieldset>
         <div className="order-fields"><label className="order-field">Nombre<input value={name} onChange={event => setName(event.target.value)} autoComplete="name" required maxLength={80} /></label><label className="order-field">Teléfono<input value={phone} onChange={event => setPhone(event.target.value)} autoComplete="tel" inputMode="tel" pattern="[0-9+() .-]{7,20}" required /></label>{mode === "domicilio" && <><label className="order-field">Dirección en Neiva<input value={address} onChange={event => setAddress(event.target.value)} autoComplete="street-address" required maxLength={160} /></label><label className="order-field">Referencia para la entrega<input value={reference} onChange={event => setReference(event.target.value)} maxLength={160} /></label></>}</div>
         <p className="order-hint">Al continuar se abrirá WhatsApp con tu solicitud. Amankay confirmará precio final y disponibilidad antes de aceptar el pedido.</p>
-        {whatsAppOpenFailed && <p className="order-whatsapp-error" role="alert">No se pudo abrir WhatsApp. Permite las ventanas emergentes e inténtalo de nuevo; tu bolsa sigue intacta.</p>}
-        <button className="order-primary order-submit" type="submit" aria-label="Enviar solicitud por WhatsApp" title="Enviar solicitud por WhatsApp"><PaperBreadBag /></button>
+        {orderError && <p className="order-whatsapp-error" role="alert">{orderError}</p>}
+        {whatsAppOpenFailed && <p className="order-whatsapp-error" role="alert">Permite las ventanas emergentes para continuar a WhatsApp; tu pedido no se registró y la bolsa sigue intacta.</p>}
+        <button className="order-primary order-submit" type="submit" disabled={sending} aria-label="Enviar solicitud por WhatsApp" title="Enviar solicitud por WhatsApp">{sending ? "Registrando pedido…" : <PaperBreadBag />}</button>
       </form> : <div className="order-empty"><PaperBreadBag /><p>Tu bolsa espera algo rico.</p><Link className="order-primary" href="/menu" onClick={close}>Explorar el catálogo</Link></div>}
     </motion.aside>
   </div>;

@@ -6,7 +6,7 @@ El panel administrativo ahora integra Next.js con la API Java para pedidos y su 
 
 Verificación local de esta entrega: `npm run lint`, `npm run build`, `backend\\mvnw.cmd -q test` con Temurin JDK 25 y `git diff --check` finalizaron correctamente. Los tests Java incluyen cobertura de la actualización de roles y desactivación sobre sesiones abiertas, además de los reportes de ventas. No se arrancó el backend ni se consultó PostgreSQL en esta ronda. Las pruebas manuales de login, persistencia, apertura/escaneo QR y uso real de pedidos con personal y teléfono siguen pendientes.
 
-La integración pública de pedidos continúa pendiente. Reportes cubre ventas completadas, historial/estados, inventario actual y movimientos, y reposiciones; no incluye productos más vendidos, excluido del MVP.
+La bolsa pública ya crea el pedido con `POST /api/v1/orders/web` antes de abrir WhatsApp; los pedidos web quedan pendientes de confirmación manual y vencen a los 30 minutos. El personal sigue registrando manualmente los pedidos recibidos por WhatsApp directo. La validación manual de extremo a extremo con PostgreSQL y la confirmación de aparición en la cola administrativa siguen pendientes. Reportes cubre ventas completadas, historial/estados, inventario actual y movimientos, y reposiciones; no incluye productos más vendidos, excluido del MVP.
 
 ## Actualización del 22-11-2026: integración frontend
 

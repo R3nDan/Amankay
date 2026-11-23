@@ -34,13 +34,27 @@ Spring Boot lee variables del entorno del proceso; `.env.example` es solo una pl
 |---|---|
 | `DB_HOST`, `DB_PORT`, `DB_NAME` | Ubicación de la base PostgreSQL autorizada. |
 | `DB_USERNAME`, `DB_PASSWORD` | Credenciales locales; nunca deben guardarse en Git. |
-| `AMANKAY_BOOTSTRAP_ADMIN_*` | Crea el primer administrador únicamente si se definen explícitamente y aún no existe uno. |
 | `AMANKAY_QR_SESSION_TTL` | Vigencia del token QR; predeterminado `PT8H`. |
 | `AMANKAY_PRIVATE_FILES_DIR` | Directorio privado local para comprobantes; si falta, la carga responde como no disponible. |
 | `AMANKAY_FRONTEND_ORIGIN` | Origen permitido para el frontend; predeterminado `http://localhost:3000`. |
 | `AMANKAY_SESSION_COOKIE_SECURE` | Marca Secure de cookie; debe activarse detrás de HTTPS. |
 
 No se debe iniciar la aplicación hasta confirmar que las variables de DB apuntan al destino elegido. El servidor escucha por defecto en `127.0.0.1:8081`.
+
+## Administrador inicial (comando local de una sola vez)
+
+El bootstrap se ejecuta solo con el argumento explícito `--amankay.bootstrap-admin=true`; no hay endpoint de registro ni se aceptan credenciales por variables de entorno. Requiere una terminal interactiva real. Solicita nombre, apellido, teléfono, correo, sucursal activa y contraseña (oculta, con confirmación). La contraseña usa el `PasswordEncoder` BCrypt de Spring Security y no se imprime ni se guarda en archivos. El comando falla si ya hay cualquier usuario asignado al rol `ADMINISTRADOR`, si el correo ya existe, si falta el rol o si no hay sucursales activas. Usuario, relación `UsuarioRol` y relación `UsuarioSucursal` se guardan en una transacción. Flyway sigue desactivado y Hibernate no genera esquema.
+
+Desde PowerShell, en `backend/`, con `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` configuradas únicamente en esa sesión de PowerShell:
+
+```powershell
+.\mvnw.cmd -DskipTests package
+java -jar .\target\amankay-backend-0.1.0-SNAPSHOT.jar --amankay.bootstrap-admin=true --spring.main.web-application-type=none
+```
+
+En la segunda orden, introduce los datos solicitados en la terminal. La contraseña del administrador se escribe en modo oculto. No pongas contraseñas en argumentos, variables persistentes, archivos ni mensajes. Ejecuta el bootstrap solo contra la base local autorizada `amankay_test`; no cambia contraseñas ni registros existentes. Si el comando se interrumpe o falla, revisa el mensaje y verifica el estado antes de intentarlo de nuevo.
+
+Si el bootstrap informa que ya existe `ADMINISTRADOR` y confirmas en pgAdmin que es la cuenta dedicada `integration-admin@…` sin sucursal asignada, puedes convertir esa misma cuenta (conserva su ID y rol) desde PowerShell con `java -jar .\target\amankay-backend-0.1.0-SNAPSHOT.jar --amankay.claim-integration-admin=true --spring.main.web-application-type=none`. El comando pide el correo actual exacto y comprueba que empiece por `integration-admin@`, que tenga rol administrador y que aún no tenga sucursal. Aborta si alguna comprobación no coincide, si el nuevo correo pertenece a otra cuenta o si no hay sucursal activa. Nunca elimina usuarios ni restablece otras cuentas.
 
 ## Flyway y PostgreSQL
 
