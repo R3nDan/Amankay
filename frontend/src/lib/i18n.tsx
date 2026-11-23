@@ -1,7 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type Locale = "es-CO" | "en";
 
@@ -281,54 +280,8 @@ export function useI18n() {
 
 export function LanguageSwitch({ className = "" }: { className?: string }) {
   const { locale, setLocale, t } = useI18n();
-  const [open, setOpen] = useState(false);
-  const id = useId();
-  const root = useRef<HTMLDivElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    const closeOnOutside = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        trigger.current?.blur();
-      }
-    };
-    document.addEventListener("pointerdown", closeOnOutside);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOnOutside);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, []);
-
-  const toggle = () => {
-    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-    setOpen(value => !value);
-  };
-  const selectLocale = (next: Locale) => {
-    setLocale(next);
-    setOpen(false);
-  };
-
-  return <div
-    ref={root}
-    className={`language-switch ${open ? "is-open" : ""} ${className}`}
-    role="group"
-    aria-label={t("Idioma")}
-    onMouseEnter={() => { if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) setOpen(true); }}
-    onMouseLeave={() => { if (!root.current?.contains(document.activeElement)) setOpen(false); }}
-    onFocus={event => { if (event.currentTarget.matches(":focus-visible")) setOpen(true); }}
-    onBlur={event => { if (!root.current?.contains(event.relatedTarget as Node | null)) setOpen(false); }}
-  >
-    <div className="language-switch-options" id={id}>
-      <button className="language-switch-option" type="button" lang="es-CO" aria-label="Español (Colombia)" aria-pressed={locale === "es-CO"} onClick={() => selectLocale("es-CO")}>ES</button>
-      <button className="language-switch-option" type="button" lang="en" aria-label="English" aria-pressed={locale === "en"} onClick={() => selectLocale("en")}>EN</button>
-    </div>
-    <button ref={trigger} className="language-switch-tab" type="button" aria-label={t("Idioma")} aria-expanded={open} aria-controls={id} onClick={toggle}>
-      <span aria-hidden="true">{locale === "en" ? "EN" : "ES"}</span><ChevronDown size={13} aria-hidden="true" />
-    </button>
+  return <div className={`language-switch ${className}`} role="group" aria-label={t("Idioma")}>
+    <button type="button" lang="es-CO" aria-label="Español (Colombia)" aria-pressed={locale === "es-CO"} onClick={() => setLocale("es-CO")}>ES</button>
+    <button type="button" lang="en" aria-label="English" aria-pressed={locale === "en"} onClick={() => setLocale("en")}>EN</button>
   </div>;
 }
