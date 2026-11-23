@@ -74,6 +74,28 @@ public class DeliveryService {
         return deliveries.findBySucursalId(branchId).stream().map(this::view).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<DriverView> availableDrivers(UUID branchId) {
+        access.requireRoleAtBranch("ATENCION", branchId);
+        return users.findAllById(userBranches.findUserIdsByBranchId(branchId)).stream()
+                .filter(user -> Boolean.TRUE.equals(user.getActivo()) && hasRole(user.getId(), "REPARTIDOR"))
+                .map(user -> new DriverView(user.getId(), user.getNombre(), user.getApellido()))
+                .sorted(java.util.Comparator.comparing(DriverView::nombre).thenComparing(DriverView::apellido))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ReconciliationStatus reconciliationStatus(UUID deliveryId) {
+        Entrega delivery = deliveries.findById(deliveryId)
+                .orElseThrow(() -> DomainException.notFound("No se encontró la entrega."));
+        Pedido order = orders.findById(delivery.getPedidoId()).orElseThrow();
+        access.requireRoleAtBranch("ATENCION", order.getSucursalId());
+        ReconciliationView view = reconciliations.findByEntregaId(deliveryId)
+                .map(row -> new ReconciliationView(row.getId(), row.getMontoDeclarado(), row.getMontoRecibido(),
+                        row.getMotivoDiferencia(), row.getFechaConciliacion())).orElse(null);
+        return new ReconciliationStatus(view != null, view);
+    }
+
     @Transactional
     public DeliveryView driverUpdate(UUID deliveryId, String next, String observations) {
         Usuario driver = access.currentUser(); access.requireRole("REPARTIDOR");
@@ -228,5 +250,7 @@ public class DeliveryService {
             String destinatario, String telefono, String direccion, String barrio, String referencia,
             BigDecimal latitud, BigDecimal longitud, List<DeliveryLineView> productos) {}
     public record DeliveryLineView(String producto, Integer cantidad) {}
+    public record DriverView(UUID id, String nombre, String apellido) {}
     public record ReconciliationView(UUID id, BigDecimal declarado, BigDecimal recibido, String motivo, Instant fecha) {}
+    public record ReconciliationStatus(boolean registrada, ReconciliationView conciliacion) {}
 }

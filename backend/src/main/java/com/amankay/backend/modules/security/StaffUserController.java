@@ -46,15 +46,22 @@ public class StaffUserController {
     private final UsuarioRolRepository userRoles;
     private final UsuarioSucursalRepository userBranches;
     private final PasswordEncoder passwords;
+    private final StaffAccess access;
 
     public StaffUserController(UsuarioRepository users, RolRepository roles, SucursalRepository branches,
-            UsuarioRolRepository userRoles, UsuarioSucursalRepository userBranches, PasswordEncoder passwords) {
+            UsuarioRolRepository userRoles, UsuarioSucursalRepository userBranches, PasswordEncoder passwords, StaffAccess access) {
         this.users = users; this.roles = roles; this.branches = branches;
         this.userRoles = userRoles; this.userBranches = userBranches; this.passwords = passwords;
+        this.access = access;
     }
 
     @GetMapping
     public List<UserView> list() { return users.findAll().stream().map(this::view).toList(); }
+
+    @GetMapping("/roles")
+    public List<RoleView> availableRoles() {
+        return roles.findAll().stream().map(row -> new RoleView(row.getNombre(), row.getDescripcion())).toList();
+    }
 
     @PostMapping
     @Transactional
@@ -81,6 +88,8 @@ public class StaffUserController {
         Set<Rol> assignedRoles = resolveRoles(body.roles());
         Set<UUID> branchIds = resolveBranches(body.sucursales());
         requireBranchScope(assignedRoles, branchIds);
+        if (id.equals(access.currentUserId()) && assignedRoles.stream().noneMatch(role -> "ADMINISTRADOR".equals(role.getNombre())))
+            throw DomainException.conflict("No puedes retirar tu propio rol de administración.");
         userRoles.findAll().stream().filter(row -> row.getId().getUsuarioId().equals(id)).forEach(userRoles::delete);
         userBranches.findAll().stream().filter(row -> row.getId().getUsuarioId().equals(id)).forEach(userBranches::delete);
         for (Rol role : assignedRoles) userRoles.save(new UsuarioRol(new UsuarioRolId(id, role.getId())));
@@ -91,8 +100,17 @@ public class StaffUserController {
     @PatchMapping("/{id}/deactivate")
     @Transactional
     public UserView deactivate(@PathVariable UUID id) {
+        if (id.equals(access.currentUserId())) throw DomainException.conflict("No puedes desactivar tu propia cuenta.");
         Usuario user = users.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró el usuario."));
         user.setActivo(false);
+        return view(users.save(user));
+    }
+
+    @PatchMapping("/{id}/activate")
+    @Transactional
+    public UserView activate(@PathVariable UUID id) {
+        Usuario user = users.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró el usuario."));
+        user.setActivo(true);
         return view(users.save(user));
     }
 
@@ -128,4 +146,5 @@ public class StaffUserController {
     public record AssignmentsRequest(@NotEmpty List<String> roles, List<UUID> sucursales) {}
     public record UserView(UUID id, String nombre, String apellido, String correo, String telefono, Boolean activo,
             List<String> roles, List<UUID> sucursales) {}
+    public record RoleView(String nombre, String descripcion) {}
 }

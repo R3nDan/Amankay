@@ -8,9 +8,18 @@ El anteproyecto describe una panadería con una sede principal y una segunda sed
 
 ## 2. Fuentes y criterio de autoridad
 
-Se consultaron en el navegador las once conversaciones compartidas de la sección “Fuentes” en `docs/03-arquitectura/decisiones-tecnicas.md`. Se pudieron abrir y leer sus mensajes relevantes; varios chats presentan respuestas anteriores colapsadas visualmente, que se expandieron con el control de copia del propio mensaje. Este SRS consolida requisitos y decisiones, no reproduce palabra por palabra cada turno. Las expresiones del usuario tienen precedencia sobre recomendaciones del asistente; cuando el usuario acepta una recomendación, se registra como aprobada.
+Los sistemas web para restaurantes pueden facilitar la consulta del menú y el registro de pedidos desde distintos dispositivos. Gómez Aiquipa, Ibarra Cabrera y Ñahuinlla Velasquez (2023) describen un prototipo de autoservicio responsivo que permite al cliente hacer pedidos desde un dispositivo móvil o un equipo con pantalla táctil. El trabajo también organiza el desarrollo en etapas de planificación, diseño, programación y pruebas. Esto se relaciona con Amankay porque el catálogo y el flujo de pedidos se diseñaron para que los clientes puedan consultarlos desde la web, mientras que la interfaz debe adaptarse a las pantallas utilizadas en el negocio.
 
-La secuencia de decisiones importa: en caso de cambio explícito, usar la instrucción posterior. Un mensaje como “sí” solo confirma la propuesta inmediatamente anterior disponible en ese chat; no autoriza asumir opciones que no se ven.
+En una revisión de investigaciones sobre sistemas de gestión de pedidos en restaurantes, Alayo Rojas, León Rodríguez y Vílchez Sánchez (2025) analizan tecnologías y módulos que aparecen en estos sistemas, como aplicaciones móviles, autoservicio e integración con otros procesos del restaurante. Esta revisión es pertinente para Amankay porque su alcance considera diferentes operaciones del negocio, como pedidos, pagos, inventario y entregas. La decisión de reunirlas en una misma plataforma responde a la intención de organizar procesos relacionados y permitir que el sistema pueda ampliarse a futuro.
+
+La usabilidad debe comprobarse mediante tareas y usuarios, no solo a partir de la apariencia de las pantallas. En un estudio sobre portales web de bibliotecas universitarias españolas, González-Fernández-Villavicencio y colegas (2017) evalúan la usabilidad mediante un modelo heurístico que considera la experiencia y las necesidades de los usuarios. Aunque el contexto estudiado es distinto al de un negocio de alimentos, el método aporta una referencia para revisar si una interfaz permite encontrar información y completar tareas. En Amankay, ese enfoque puede aplicarse a tareas como consultar un producto, crear un pedido o registrar una recepción de reposición.
+
+En conjunto, estas fuentes orientan decisiones de diseño y evaluación de Amankay: ofrecer un flujo de pedidos accesible desde dispositivos cotidianos, relacionar los pedidos con otros procesos operativos y evaluar la facilidad con que los usuarios completan tareas concretas. Los estudios aportan antecedentes y métodos; no prueban por sí mismos los resultados del sistema Amankay, que deben justificarse con las pruebas realizadas en el proyecto.
+
+Referencias bibliográficas
+- Alayo Rojas, E. J., León Rodríguez, M. E., & Vílchez Sánchez, J. A. (2025). Sistemas de gestión de pedidos en restaurantes: Una revisión sistemática. Sciéndo, 28(3). https://doi.org/10.17268/sciendo.2025.047
+- Gómez Aiquipa, E., Ibarra Cabrera, M. J., & Ñahuinlla Velasquez, E. (2023). Una aplicación responsiva de autoservicio para realizar pedidos en restaurantes. Micaela: Revista de Investigación, 4(1), 7–12. https://doi.org/10.57166/micaela.v4.n1.2023.90
+- González-Fernández-Villavicencio, N., Domínguez-Aroca, M.-I., Calderón-Rehecho, A., & García-Hernández, P. (2017). Evaluación de usabilidad de los portales web de las bibliotecas universitarias españolas a partir de un modelo heurístico cognitivo-emocional. Revista Española de Documentación Científica, 40(1), e165. https://doi.org/10.3989/redc.2017.1.1379
 
 ## 3. Actores y perfiles
 
@@ -21,8 +30,6 @@ Los cinco actores consolidados en el diagrama general son:
 3. **Encargado de inventario:** consulta/ajusta inventario y participa en reposiciones. Es un actor lógico único; sus operaciones cambian según la sucursal: la secundaria solicita y recibe; la principal revisa, aprueba, prepara y despacha.
 4. **Administrador:** administra usuarios, roles y configuración del negocio. Los permisos operativos no se heredan por ser administrador; se asignan explícitamente si también debe atender operaciones.
 5. **Repartidor:** consulta y actualiza únicamente entregas que le fueron asignadas.
-
-Las decisiones “Encargados: one” y “Atención: both” se conservan como expresiones originales del chat. Su significado exacto (un actor encargado generalizado y el alcance de “both” para atención) no quedó explicado semánticamente; los casos de uso posteriores adoptan los cinco actores listados arriba. No crear actores separados para sucursal principal/secundaria sin nueva decisión.
 
 El modelo de clases registra repartidores como `Usuario` con un rol, no como una clase de identidad aparte. El usuario de entrega tiene acceso limitado a las asignaciones propias.
 
@@ -189,19 +196,3 @@ Las decisiones funcionales de pedidos web, pagos, permisos, GPS opcional, expira
 4. **Configuración local:** definir JDK 25 y una base/esquema de prueba PostgreSQL conocidos antes de iniciar Spring/JPA o autorizar Flyway. Las credenciales deben residir en el entorno del proceso.
 
 El modelo físico, incluidos tipos, nulabilidad, índices y restricciones, está documentado en `../02-modelado/modelo-fisico-postgresql.md`. Las migraciones Flyway están preparadas, pero no ejecutadas. La conexión real con PostgreSQL y la integración del frontend son verificaciones/etapas posteriores, no decisiones funcionales pendientes.
-
-## 10. Trazabilidad histórica
-
-Enlaces de las once conversaciones consultadas:
-
-1. [Requisitos iniciales y decisiones finales del MVP](https://chatgpt.com/share/6b01d0a2-035c-83ea-aee5-39db38d3b578)
-2. [Actores y casos de uso](https://chatgpt.com/share/6b01d0bf-a34c-83ea-a330-a71f677250f8)
-3. [Consolidación del diagrama general y reposiciones por sucursal](https://chatgpt.com/share/6b01d0b0-86d8-83e8-859a-dd93e89cd206)
-4. [Recepciones parciales y módulo de repartos](https://chatgpt.com/share/6b01d0d0-fd70-83e9-b681-8e1f6b1baf3b)
-5. [Devoluciones fallidas e inspección de productos](https://chatgpt.com/share/6b01d0da-89f0-83e9-948c-4dd392481859)
-6. [Pagos, comprobantes, reembolsos y conciliación](https://chatgpt.com/share/6b01d0e3-468c-83e9-82b3-22dcec98c569)
-7. [Clases UML y correcciones técnicas](https://chatgpt.com/share/6b01d0f1-4d10-83e9-a5e7-6e075dedce85)
-8. [Relaciones y cardinalidades MER](https://chatgpt.com/share/6b01d103-6fe8-83e9-953e-5403db925930)
-9. [Secuencia de fases y alcance MER](https://chatgpt.com/share/6b01d114-7e04-83e9-bb40-c135412f6824)
-10. [Stack y análisis de dependencias](https://chatgpt.com/share/6b01d123-58a4-83e9-ba45-329495ddbd6d)
-11. [Arquitectura y despliegue sin gasto obligatorio](https://chatgpt.com/share/6b01d131-5274-83e9-938e-5488f72f99f5)

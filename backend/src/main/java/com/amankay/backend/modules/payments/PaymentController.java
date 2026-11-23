@@ -35,6 +35,8 @@ public class PaymentController {
     public PaymentService.PaymentView accountAttempt(@PathVariable UUID accountId, @Valid @RequestBody AttemptRequest request) {
         return service.createForTableAccount(accountId, request.metodo());
     }
+    @GetMapping("/accounts/{accountId}")
+    public List<PaymentService.PaymentView> accountAttempts(@PathVariable UUID accountId) { return service.accountAttempts(accountId); }
     @PostMapping("/{paymentId}/confirm-cash")
     public PaymentService.PaymentView confirmCash(@PathVariable UUID paymentId) { return service.confirmCash(paymentId); }
     @PostMapping("/{paymentId}/verification")

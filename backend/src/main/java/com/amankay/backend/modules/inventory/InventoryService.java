@@ -36,6 +36,13 @@ public class InventoryService {
     }
 
     @Transactional(readOnly = true)
+    public List<StockView> stockForReport(UUID branchId) {
+        access.requireRoleAtBranchOrAdmin("INVENTARIO", branchId);
+        return stocks.findBySucursalIdOrderByProductoId(branchId).stream()
+                .map(row -> new StockView(row.getId(), row.getSucursalId(), row.getProductoId(), row.getStockDisponible(), row.getFechaActualizacion())).toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<MovementView> history(UUID inventoryId) {
         InventarioSucursal stock = stocks.findById(inventoryId).orElseThrow(() -> DomainException.notFound("No se encontró el inventario."));
         access.requireRoleAtBranch("INVENTARIO", stock.getSucursalId());

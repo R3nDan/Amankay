@@ -13,4 +13,6 @@ public interface RegistroAuditoriaRepository extends JpaRepository<RegistroAudit
 
     List<RegistroAuditoria> findByFechaHoraBetweenOrderByFechaHoraDesc(Instant desde, Instant hasta);
     List<RegistroAuditoria> findByEntidadAndEntidadIdOrderByFechaHoraAsc(String entidad, UUID entidadId);
+    List<RegistroAuditoria> findByEntidadAndOperacionAndFechaHoraBetweenOrderByFechaHoraDesc(
+            String entidad, String operacion, Instant desde, Instant hasta);
 }

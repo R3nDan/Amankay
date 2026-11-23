@@ -23,8 +23,12 @@ public class ReplenishmentController {
 
     @GetMapping
     public List<ReplenishmentService.RequestView> mine(@RequestParam UUID sucursalId) { return service.list(sucursalId); }
+    @GetMapping("/provided")
+    public List<ReplenishmentService.RequestView> provided(@RequestParam UUID sucursalId) { return service.listProvided(sucursalId); }
     @GetMapping("/review-queue")
     public List<ReplenishmentService.RequestView> queue(@RequestParam UUID sucursalProveedoraId) { return service.reviewQueue(sucursalProveedoraId); }
+    @GetMapping("/{id}")
+    public ReplenishmentService.RequestDetail detail(@PathVariable UUID id) { return service.detail(id); }
     @PostMapping
     public ReplenishmentService.RequestView create(@Valid @RequestBody ReplenishmentService.CreateRequest request) { return service.create(request); }
     @PostMapping("/{id}/review")

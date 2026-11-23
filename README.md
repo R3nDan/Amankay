@@ -6,9 +6,9 @@ Amankay es el sistema web para atender pedidos y organizar la operación de un n
 
 Aplicación web con Next.js App Router, React, TypeScript, Tailwind CSS y Lucide React. Incluye inicio público, catálogo y sus tres categorías (Panadería, Fritos, Bebidas), sucursales y el proceso del pan.
 
-Las dos sedes están disponibles como opciones para recoger pedidos, con horarios y teléfonos de contacto. El sitio público conserva su experiencia visual existente. La integración para consumir la API Java queda pendiente.
+Las dos sedes están disponibles como opciones para recoger pedidos, con horarios y teléfonos de contacto. El sitio público conserva su experiencia visual existente. El panel administrativo de Next.js ya consume la API Java para autenticación, mesas y QR temporal, pedidos, inventario, reposiciones, entregas, pagos, conciliaciones, catálogo, usuarios, sucursales y reportes. La experiencia pública de pedidos continúa en su flujo local mientras se completa su integración.
 
-La arquitectura aprobada conserva Next.js, React y TypeScript como frontend, y usa un backend Java 25 LTS con Spring Boot 4.2.0, monolito modular y API REST bajo `/api/v1`. `backend/` ya contiene entidades JPA para las 26 tablas aprobadas, migraciones Flyway, seguridad de personal, catálogo, pedidos, mesas/QR, pagos, inventario, reposiciones, entregas y reportes. PostgreSQL local todavía no tiene nombre, esquema ni credenciales de conexión confirmados. Por seguridad, Flyway sigue deshabilitado y no se ha ejecutado ninguna migración. Temurin JDK 25.0.5.1 está instalado y configurado como `JAVA_HOME` del usuario; Java 27 permanece instalado, pero Maven Wrapper se verificó con JDK 25. No hay Maven global; se usa Maven Wrapper. Prisma permanece instalado, pero no administra las tablas de la aplicación.
+La arquitectura aprobada conserva Next.js, React y TypeScript como frontend, y usa un backend Java 25 LTS con Spring Boot 4.2.0, monolito modular y API REST bajo `/api/v1`. `backend/` contiene entidades JPA para las 26 tablas aprobadas, migraciones Flyway y módulos de seguridad, catálogo, pedidos, mesas/QR, pagos, inventario, reposiciones, entregas y reportes. La base de pruebas autorizada `amankay_test` recibió V1/V2 y permitió validar el arranque de Spring y JPA. Flyway continúa deshabilitado por defecto; las credenciales se introdujeron en una terminal local y no se guardaron en el repositorio. Temurin JDK 25.0.5.1 está instalado y configurado como `JAVA_HOME` del usuario; Java 27 permanece instalado, pero Maven Wrapper se verificó con JDK 25. No hay Maven global; se usa Maven Wrapper. Prisma permanece instalado, pero no administra las tablas de la aplicación.
 
 ### Ejecución local
 
@@ -29,10 +29,11 @@ Abrir `http://localhost:3000`. Para usar otro puerto: `npm run dev -- --port 310
 ## Orden de trabajo acordado
 
 1. Análisis, diseño, arquitectura y MER de 26 entidades: completados y aprobados.
-2. Esquema físico PostgreSQL, migraciones y módulos iniciales del backend: implementados en `backend/`.
-3. Configurar JDK 25 y definir explícitamente una base/esquema de prueba local.
-4. Revisar las migraciones y autorizar expresamente su ejecución contra ese destino aislado.
-5. Completar pruebas con PostgreSQL autorizado e integrar Next.js con la API Java.
+2. Esquema físico PostgreSQL, migraciones y módulos del backend: implementados en `backend/`.
+3. Panel administrativo Next.js integrado a los contratos REST para los módulos operativos.
+4. Lint, build de producción de Next.js y pruebas Java automatizadas aprobados en la última verificación local.
+5. Completar el recorrido manual de login/QR con la cuenta del personal y teléfono; validar los módulos con sesión autenticada en el navegador.
+6. Integrar el flujo público de pedidos al API y terminar las pruebas de extremo a extremo con PostgreSQL.
 
 ## Documentación central
 

@@ -5,6 +5,7 @@ import com.amankay.backend.modules.domain.model.ConfiguracionDomicilio;
 import com.amankay.backend.modules.domain.model.DetallePedido;
 import com.amankay.backend.modules.domain.model.InventarioSucursal;
 import com.amankay.backend.modules.domain.model.MovimientoInventario;
+import com.amankay.backend.modules.domain.model.Pago;
 import com.amankay.backend.modules.domain.model.Pedido;
 import com.amankay.backend.modules.domain.model.Producto;
 import com.amankay.backend.modules.domain.model.RegistroAuditoria;
@@ -14,6 +15,7 @@ import com.amankay.backend.modules.domain.repository.ConfiguracionDomicilioRepos
 import com.amankay.backend.modules.domain.repository.DetallePedidoRepository;
 import com.amankay.backend.modules.domain.repository.InventarioSucursalRepository;
 import com.amankay.backend.modules.domain.repository.MovimientoInventarioRepository;
+import com.amankay.backend.modules.domain.repository.PagoRepository;
 import com.amankay.backend.modules.domain.repository.PedidoRepository;
 import com.amankay.backend.modules.domain.repository.ProductoRepository;
 import com.amankay.backend.modules.domain.repository.RegistroAuditoriaRepository;
@@ -52,15 +54,16 @@ public class OrderService {
     private final ConfiguracionDomicilioRepository deliveryConfigs;
     private final InventarioSucursalRepository stockRows;
     private final MovimientoInventarioRepository movements;
+    private final PagoRepository payments;
     private final RegistroAuditoriaRepository audit;
     private final StaffAccess access;
 
     public OrderService(PedidoRepository orders, DetallePedidoRepository lines, ProductoRepository products,
             SucursalRepository branches, ConfiguracionDomicilioRepository deliveryConfigs,
-            InventarioSucursalRepository stockRows, MovimientoInventarioRepository movements,
+            InventarioSucursalRepository stockRows, MovimientoInventarioRepository movements, PagoRepository payments,
             RegistroAuditoriaRepository audit, StaffAccess access) {
         this.orders = orders; this.lines = lines; this.products = products; this.branches = branches;
-        this.deliveryConfigs = deliveryConfigs; this.stockRows = stockRows; this.movements = movements;
+        this.deliveryConfigs = deliveryConfigs; this.stockRows = stockRows; this.movements = movements; this.payments = payments;
         this.audit = audit; this.access = access;
     }
 
@@ -193,6 +196,35 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
+    public List<OrderSummary> queue(UUID branchId) {
+        access.requireRoleAtBranch("ATENCION", branchId);
+        return orders.findBySucursalIdAndEstadoInOrderByFechaCreacionAsc(branchId,
+                List.of(PENDING, "CANCELACION_SOLICITADA", "ACEPTADO", "EN_PREPARACION", "LISTO"))
+                .stream().map(this::summary).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderSummary> recentHistory(UUID branchId) {
+        access.requireRoleAtBranch("ATENCION", branchId);
+        return orders.findBySucursalIdAndEstadoInOrderByFechaCreacionDesc(branchId,
+                List.of("COMPLETADO", "CANCELADO", "RECHAZADO", "VENCIDO"),
+                org.springframework.data.domain.PageRequest.of(0, 30))
+                .getContent().stream().map(this::summary).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public StaffOrderDetail staffDetail(UUID orderId) {
+        Pedido order = orders.findById(orderId).orElseThrow(() -> DomainException.notFound("No se encontró el pedido."));
+        if (order.getSucursalId() == null) access.requireRoleWithAnyBranch("ATENCION");
+        else access.requireRoleAtBranch("ATENCION", order.getSucursalId());
+        List<OrderLineView> items = lines.findByPedidoIdOrderById(orderId).stream()
+                .map(line -> new OrderLineView(line.getNombreProductoHistorico(), line.getCantidad(), line.getPrecioUnitarioHistorico())).toList();
+        return new StaffOrderDetail(summary(order), order.getTipo(), order.getCanalOrigen(), order.getNombreCliente(),
+                order.getTelefonoCliente(), order.getDireccionEntrega(), order.getBarrio(), order.getReferenciaDireccion(),
+                order.getNombreDestinatario(), order.getTelefonoDestinatario(), order.getCuentaMesaId(), items);
+    }
+
+    @Transactional(readOnly = true)
     public List<OrderSummary> unassignedPending() {
         access.requireRoleWithAnyBranch("ATENCION");
         return orders.findBySucursalIdIsNullAndEstadoOrderByFechaCreacionAsc(PENDING).stream().map(this::summary).toList();
@@ -260,6 +292,12 @@ public class OrderService {
                 "EN_PREPARACION", List.of("LISTO"),
                 "LISTO", List.of("COMPLETADO"));
         if (!allowed.getOrDefault(order.getEstado(), List.of()).contains(nextState)) throw DomainException.conflict("La transición de estado no está permitida.");
+        if ("EN_PREPARACION".equals(nextState) && "EXTERNO".equals(order.getTipo())) {
+            boolean pendingTransfer = payments.findByPedidoIdOrderByFechaCreacionDesc(orderId).stream()
+                    .anyMatch(payment -> "TRANSFERENCIA".equals(payment.getMetodo())
+                            && List.of("PENDIENTE", "PENDIENTE_VERIFICACION").contains(payment.getEstado()));
+            if (pendingTransfer) throw DomainException.conflict("Verifica o rechaza la transferencia pendiente antes de preparar el pedido.");
+        }
         String old = order.getEstado(); order.setEstado(nextState); order = orders.save(order);
         statusAudit(order, old, nextState, "Cambio de estado del pedido.", access.currentUser());
         return summary(order);
@@ -418,7 +456,7 @@ public class OrderService {
         audit(order.getId(), "CAMBIO_ESTADO", user == null ? "SISTEMA" : "USUARIO", user == null ? null : user.getId(), oldState, newState, description);
     }
     private OrderSummary summary(Pedido order) {
-        return new OrderSummary(order.getId(), order.getCodigoSeguimiento(), order.getEstado(), order.getModalidadEntrega(), order.getFechaCreacion(), order.getFechaVencimiento(), order.getTotal(), order.getSucursalId());
+        return new OrderSummary(order.getId(), order.getCodigoSeguimiento(), order.getEstado(), order.getModalidadEntrega(), order.getFechaCreacion(), order.getFechaVencimiento(), order.getTotal(), order.getSucursalId(), order.getTipo());
     }
     private DomainException invalid(String message) { return new DomainException(HttpStatus.BAD_REQUEST, message); }
     private record ProductLine(Producto product, int quantity) {}
@@ -439,5 +477,8 @@ public class OrderService {
     public record OrderTracking(String codigoSeguimiento, String estado, Instant creadoEn, BigDecimal total,
             UUID sucursalId, List<OrderLineView> items, List<StatusEvent> historial) {}
     public record OrderSummary(UUID id, String codigoSeguimiento, String estado, String modalidad,
-            Instant creadoEn, Instant venceEn, BigDecimal total, UUID sucursalId) {}
+            Instant creadoEn, Instant venceEn, BigDecimal total, UUID sucursalId, String tipo) {}
+    public record StaffOrderDetail(OrderSummary pedido, String tipo, String canalOrigen, String nombreCliente,
+            String telefonoCliente, String direccionEntrega, String barrio, String referenciaDireccion,
+            String nombreDestinatario, String telefonoDestinatario, UUID cuentaMesaId, List<OrderLineView> items) {}
 }

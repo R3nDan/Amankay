@@ -34,6 +34,14 @@ public class DeliveryController {
     @GetMapping("/staff/deliveries")
     @PreAuthorize("hasRole('ATENCION')")
     public List<DeliveryService.DeliveryView> branchDeliveries(@RequestParam UUID sucursalId) { return service.branchDeliveries(sucursalId); }
+    @GetMapping("/staff/drivers")
+    @PreAuthorize("hasRole('ATENCION')")
+    public List<DeliveryService.DriverView> drivers(@RequestParam UUID sucursalId) { return service.availableDrivers(sucursalId); }
+    @GetMapping("/staff/deliveries/{deliveryId}/cash-reconciliation")
+    @PreAuthorize("hasRole('ATENCION')")
+    public DeliveryService.ReconciliationStatus reconciliationStatus(@PathVariable UUID deliveryId) {
+        return service.reconciliationStatus(deliveryId);
+    }
     @PostMapping("/driver/deliveries/{deliveryId}/status")
     @PreAuthorize("hasRole('REPARTIDOR')")
     public DeliveryService.DeliveryView update(@PathVariable UUID deliveryId, @Valid @RequestBody StateRequest request) {

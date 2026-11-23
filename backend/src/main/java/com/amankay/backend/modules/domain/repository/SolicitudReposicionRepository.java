@@ -16,6 +16,8 @@ public interface SolicitudReposicionRepository extends JpaRepository<SolicitudRe
 
     List<SolicitudReposicion> findByEstadoOrderByFechaSolicitudAsc(String estado);
     List<SolicitudReposicion> findBySucursalSolicitanteIdOrderByFechaSolicitudDesc(UUID sucursalSolicitanteId);
+    List<SolicitudReposicion> findBySucursalProveedoraIdOrderByFechaSolicitudDesc(UUID sucursalProveedoraId);
+    List<SolicitudReposicion> findBySucursalSolicitanteIdOrSucursalProveedoraIdOrderByFechaSolicitudDesc(UUID solicitanteId, UUID proveedoraId);
     List<SolicitudReposicion> findBySucursalProveedoraIdAndEstadoOrderByFechaSolicitudAsc(UUID sucursalProveedoraId, String estado);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

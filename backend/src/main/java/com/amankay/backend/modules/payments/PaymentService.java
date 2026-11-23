@@ -38,6 +38,7 @@ public class PaymentService {
     public PaymentView createForOrder(UUID orderId, String method) {
         Pedido order = orders.lockById(orderId).orElseThrow(() -> DomainException.notFound("No se encontró el pedido."));
         access.requireRoleAtBranch("ATENCION", order.getSucursalId());
+        if (!"EXTERNO".equals(order.getTipo())) throw DomainException.conflict("Los pedidos de mesa se cobran mediante su cuenta común.");
         if (!List.of("EFECTIVO", "TRANSFERENCIA").contains(method)) throw invalid("Método de pago no permitido.");
         if (!List.of("ACEPTADO", "EN_PREPARACION", "LISTO", "COMPLETADO").contains(order.getEstado()))
             throw DomainException.conflict("El pedido no admite pagos en su estado actual.");
@@ -72,6 +73,16 @@ public class PaymentService {
         Pedido order = orders.findById(orderId).orElseThrow(() -> DomainException.notFound("No se encontró el pedido."));
         access.requireRoleAtBranch("ATENCION", order.getSucursalId());
         return payments.findByPedidoIdOrderByFechaCreacionDesc(orderId).stream().map(this::view).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaymentView> accountAttempts(UUID accountId) {
+        accounts.findById(accountId).orElseThrow(() -> DomainException.notFound("No se encontró la cuenta de mesa."));
+        UUID branchId = orders.findByCuentaMesaId(accountId).stream().map(Pedido::getSucursalId)
+                .filter(java.util.Objects::nonNull).findFirst()
+                .orElseThrow(() -> DomainException.conflict("La cuenta aún no tiene pedidos asociados."));
+        access.requireRoleAtBranch("ATENCION", branchId);
+        return payments.findByCuentaMesaIdOrderByFechaCreacionDesc(accountId).stream().map(this::view).toList();
     }
 
     @Transactional
@@ -194,7 +205,7 @@ public class PaymentService {
     }
 
     private BigDecimal accountTotal(UUID accountId) {
-        return orders.findByCuentaMesaId(accountId).stream().filter(order -> !List.of("RECHAZADO", "CANCELADO", "VENCIDO").contains(order.getEstado()))
+        return orders.findByCuentaMesaId(accountId).stream().filter(order -> List.of("ACEPTADO", "EN_PREPARACION", "LISTO", "COMPLETADO").contains(order.getEstado()))
                 .map(Pedido::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     private BigDecimal confirmedAmount(List<Pago> rows) {

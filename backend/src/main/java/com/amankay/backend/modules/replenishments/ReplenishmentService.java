@@ -63,10 +63,29 @@ public class ReplenishmentService {
     }
 
     @Transactional(readOnly = true)
+    public List<RequestView> listProvided(UUID branchId) {
+        access.requireRoleAtBranch("INVENTARIO", branchId);
+        return requests.findBySucursalProveedoraIdOrderByFechaSolicitudDesc(branchId).stream().map(this::view).toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<RequestView> reviewQueue(UUID providerBranchId) {
         access.requireRoleAtBranch("INVENTARIO", providerBranchId);
         return requests.findBySucursalProveedoraIdAndEstadoOrderByFechaSolicitudAsc(providerBranchId, "PENDIENTE_REVISION")
                 .stream().map(this::view).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public RequestDetail detail(UUID requestId) {
+        SolicitudReposicion request = requests.findById(requestId)
+                .orElseThrow(() -> DomainException.notFound("No se encontró la solicitud de reposición."));
+        access.requireRoleAtEitherBranch("INVENTARIO", request.getSucursalSolicitanteId(), request.getSucursalProveedoraId());
+        List<DispatchView> dispatchHistory = dispatches.findBySolicitudIdOrderByFechaDespachoAsc(requestId).stream()
+                .map(this::dispatchView).toList();
+        List<ReceiptView> receiptHistory = dispatchHistory.stream()
+                .flatMap(dispatch -> receipts.findByDespachoIdOrderByFechaRecepcionAsc(dispatch.id()).stream())
+                .map(this::receiptView).toList();
+        return new RequestDetail(view(request), dispatchHistory, receiptHistory);
     }
 
     @Transactional
@@ -408,6 +427,7 @@ public class ReplenishmentService {
     public record RequestLineView(UUID id, UUID productoId, int solicitada, Integer aprobada, int enviada,
             int pendienteEnvio, Integer faltanteCerrado, Instant reversaCierreEn) {}
     public record RequestView(UUID id, UUID sucursalSolicitanteId, UUID sucursalProveedoraId, String estado, Instant fecha, List<RequestLineView> items) {}
+    public record RequestDetail(RequestView solicitud, List<DispatchView> despachos, List<ReceiptView> recepciones) {}
     public record DispatchLineView(UUID id, UUID detalleSolicitudId, int enviada, int recibida, int pendienteRecepcion,
             Integer faltanteCerrado, Instant reversaCierreEn) {}
     public record DispatchView(UUID id, UUID solicitudId, Instant fecha, boolean anulado, String motivoAnulacion, List<DispatchLineView> items) {}

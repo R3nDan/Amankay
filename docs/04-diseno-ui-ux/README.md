@@ -59,12 +59,12 @@ El usuario autorizó usar el SVG recibido y sus colores en el prototipo. Conserv
 
 | Pantalla/estado | Objetivo/usuario | Información y acciones | Componentes y relación |
 |---|---|---|---|
-| QR permanente → `/mesa/[codigoQR]` | Cliente en mesa | El código identifica mesa y sucursal, pero no autoriza pedidos por sí solo. El servidor valida sesión activa y habilita el token temporal. | Catálogo, navegación táctil y carrito; solo personal autorizado puede abrir sesión. |
+| QR permanente → `/mesa/[codigoQR]` | Cliente en mesa | El código identifica mesa y sucursal, pero no autoriza pedidos por sí solo. Atención abre la sesión y muestra un QR temporal distinto para acceder. | Catálogo, navegación táctil y carrito; solo personal autorizado puede abrir sesión. |
 | Carrito y confirmación | Enviar pedido asociado a cuenta | Líneas, cantidades y confirmación | Controles grandes, resumen y confirmación inequívoca. |
 | Pedido enviado | Consultar resultado/estado | Estado de cada pedido | Lista de pedidos de la sesión; enlaza a catálogo y cuenta si permitido por SRS. |
 | Token inválido/sesión cerrada | Evitar pedido fuera de sesión | Mensaje claro y ayuda para llamar al personal | Estado de error sin reintento engañoso. |
 
-La experiencia prioriza una mano, carga rápida, pocos pasos y lectores de pantalla. La ruta usa el código QR permanente para identificar mesa/sucursal; tras validar sesión activa se habilita el token temporal y cerrar sesión lo invalida. El cliente no puede abrir sesiones.
+La experiencia prioriza una mano, carga rápida, pocos pasos y lectores de pantalla. El QR físico permanente identifica mesa/sucursal sin autorizar pedidos. Al abrir la sesión, Java genera un QR temporal que el personal muestra al cliente desde el panel; al escanearlo, el cliente llega a `/mesa/[codigoQR]` y valida el token de sesión. Cerrar la sesión invalida el token inmediatamente; su expiración no cierra la cuenta. El cliente no puede abrir sesiones.
 
 ### Panel administrativo y operativo
 

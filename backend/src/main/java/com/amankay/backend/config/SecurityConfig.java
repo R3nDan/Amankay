@@ -1,5 +1,6 @@
 package com.amankay.backend.config;
 
+import com.amankay.backend.modules.security.CurrentStaffAuthoritiesFilter;
 import com.amankay.backend.modules.domain.model.Rol;
 import com.amankay.backend.modules.domain.model.Usuario;
 import com.amankay.backend.modules.domain.repository.RolRepository;
@@ -23,6 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -63,15 +65,17 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, CorsConfigurationSource cors, AuthenticationProvider provider) throws Exception {
+    SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, CorsConfigurationSource cors, AuthenticationProvider provider,
+            UserDetailsService staffDetails) throws Exception {
         CookieCsrfTokenRepository csrfRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrfRepository.setHeaderName("X-XSRF-TOKEN");
         http
                 .cors(config -> config.configurationSource(cors))
                 .csrf(config -> config.csrfTokenRepository(csrfRepository))
                 .authenticationProvider(provider)
+                .addFilterBefore(new CurrentStaffAuthoritiesFilter(staffDetails), AuthorizationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.GET, "/api/v1/health", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/api/v1/auth/csrf", "/api/v1/catalog/**", "/api/v1/branches", "/api/v1/delivery/config", "/api/v1/orders/track/**", "/api/v1/tables/sessions/status").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/health", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/api/v1/auth/csrf", "/api/v1/catalog/**", "/api/v1/branches", "/api/v1/delivery/config", "/api/v1/orders/track/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/orders/web", "/api/v1/tables/sessions/validate", "/api/v1/tables/orders").permitAll()
                         .anyRequest().authenticated());
         return http.build();

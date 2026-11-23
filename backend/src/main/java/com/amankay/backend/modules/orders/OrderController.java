@@ -42,6 +42,18 @@ public class OrderController {
     @PreAuthorize("hasRole('ATENCION')")
     public List<OrderService.OrderSummary> pending(@RequestParam UUID sucursalId) { return service.pending(sucursalId); }
 
+    @GetMapping("/staff/orders/queue")
+    @PreAuthorize("hasRole('ATENCION')")
+    public List<OrderService.OrderSummary> queue(@RequestParam UUID sucursalId) { return service.queue(sucursalId); }
+
+    @GetMapping("/staff/orders/history")
+    @PreAuthorize("hasRole('ATENCION')")
+    public List<OrderService.OrderSummary> history(@RequestParam UUID sucursalId) { return service.recentHistory(sucursalId); }
+
+    @GetMapping("/staff/orders/{id}")
+    @PreAuthorize("hasRole('ATENCION')")
+    public OrderService.StaffOrderDetail detail(@PathVariable UUID id) { return service.staffDetail(id); }
+
     @GetMapping("/staff/orders/unassigned")
     @PreAuthorize("hasRole('ATENCION')")
     public List<OrderService.OrderSummary> unassignedPending() { return service.unassignedPending(); }

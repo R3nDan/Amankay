@@ -61,10 +61,23 @@ public class CatalogController {
                 product.getDescripcion(), product.getImagen(), product.getPrecio())).toList();
     }
 
+    @GetMapping("/api/v1/admin/categories")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public List<AdminCategoryView> allCategories() {
+        return categories.findAll().stream().map(row -> new AdminCategoryView(row.getId(), row.getNombre(), row.getDescripcion(), row.getActiva())).toList();
+    }
+
+    @GetMapping("/api/v1/admin/products")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public List<AdminProductView> allProducts() {
+        return products.findAll().stream().map(row -> new AdminProductView(row.getId(), row.getCategoriaId(), row.getNombre(),
+                row.getDescripcion(), row.getImagen(), row.getPrecio(), row.getActivo())).toList();
+    }
+
     @GetMapping("/api/v1/branches")
     public List<BranchView> branches() {
         return branches.findByActivaTrueOrderByNombreAsc().stream().map(branch -> new BranchView(
-                branch.getId(), branch.getNombre(), branch.getDireccion(), branch.getTelefono(),
+                branch.getId(), branch.getNombre(), branch.getDireccion(), branch.getTelefono(), branch.getTipo(),
                 schedules.findBySucursalIdOrderByDiaSemanaAsc(branch.getId()).stream()
                         .map(schedule -> new ScheduleView(schedule.getDiaSemana(), schedule.getHoraApertura(), schedule.getHoraCierre(), schedule.getActivo())).toList()))
                 .toList();
@@ -72,8 +85,8 @@ public class CatalogController {
 
     @GetMapping("/api/v1/admin/branches")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public List<BranchView> allBranches() {
-        return branches.findAll().stream().map(branch -> new BranchView(branch.getId(), branch.getNombre(), branch.getDireccion(), branch.getTelefono(),
+    public List<AdminBranchView> allBranches() {
+        return branches.findAll().stream().map(branch -> new AdminBranchView(branch.getId(), branch.getNombre(), branch.getDireccion(), branch.getTelefono(), branch.getTipo(), branch.getActiva(), branch.getLatitud(), branch.getLongitud(),
                 schedules.findBySucursalIdOrderByDiaSemanaAsc(branch.getId()).stream()
                         .map(schedule -> new ScheduleView(schedule.getDiaSemana(), schedule.getHoraApertura(), schedule.getHoraCierre(), schedule.getActivo())).toList())).toList();
     }
@@ -87,7 +100,7 @@ public class CatalogController {
             throw com.amankay.backend.modules.common.DomainException.conflict("Ya existe una sucursal principal.");
         Sucursal row = new Sucursal(); apply(row, body); row.setActiva(true); row.setFechaCreacion(Instant.now());
         row = branches.save(row);
-        return new BranchView(row.getId(), row.getNombre(), row.getDireccion(), row.getTelefono(), List.of());
+        return new BranchView(row.getId(), row.getNombre(), row.getDireccion(), row.getTelefono(), row.getTipo(), List.of());
     }
 
     @PutMapping("/api/v1/admin/branches/{id}")
@@ -95,8 +108,11 @@ public class CatalogController {
     public BranchView updateBranch(@PathVariable UUID id, @Valid @RequestBody BranchRequest body) {
         validateCoordinates(body.latitud(), body.longitud());
         Sucursal row = branches.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró la sucursal."));
+        if ("PRINCIPAL".equals(body.tipo()) && branches.findAll().stream()
+                .anyMatch(other -> !other.getId().equals(id) && "PRINCIPAL".equals(other.getTipo())))
+            throw DomainException.conflict("Ya existe una sucursal principal.");
         apply(row, body); row = branches.save(row);
-        return new BranchView(row.getId(), row.getNombre(), row.getDireccion(), row.getTelefono(), schedules.findBySucursalIdOrderByDiaSemanaAsc(id).stream()
+        return new BranchView(row.getId(), row.getNombre(), row.getDireccion(), row.getTelefono(), row.getTipo(), schedules.findBySucursalIdOrderByDiaSemanaAsc(id).stream()
                 .map(schedule -> new ScheduleView(schedule.getDiaSemana(), schedule.getHoraApertura(), schedule.getHoraCierre(), schedule.getActivo())).toList());
     }
 
@@ -105,6 +121,13 @@ public class CatalogController {
     public void deactivateBranch(@PathVariable UUID id) {
         Sucursal row = branches.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró la sucursal."));
         row.setActiva(false); branches.save(row);
+    }
+
+    @PatchMapping("/api/v1/admin/branches/{id}/activate")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public void activateBranch(@PathVariable UUID id) {
+        Sucursal row = branches.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró la sucursal."));
+        row.setActiva(true); branches.save(row);
     }
 
     @PutMapping("/api/v1/admin/branches/{id}/schedules")
@@ -151,13 +174,22 @@ public class CatalogController {
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public void deactivateCategory(@PathVariable UUID id) {
         Categoria row = categories.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró la categoría."));
+        if (!products.findByActivoTrueAndCategoriaIdOrderByNombreAsc(id).isEmpty())
+            throw DomainException.conflict("Desactiva primero los productos activos de esta categoría.");
         row.setActiva(false); categories.save(row);
+    }
+
+    @PatchMapping("/api/v1/admin/categories/{id}/activate")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public void activateCategory(@PathVariable UUID id) {
+        Categoria row = categories.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró la categoría."));
+        row.setActiva(true); categories.save(row);
     }
 
     @PostMapping("/api/v1/admin/products")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ProductView createProduct(@Valid @RequestBody ProductRequest body) {
-        categories.findById(body.categoriaId()).orElseThrow(() -> DomainException.notFound("No se encontró la categoría."));
+        requireActiveCategory(body.categoriaId());
         Producto row = new Producto(); apply(row, body); row.setActivo(true); row.setFechaCreacion(Instant.now());
         row.setFechaActualizacion(Instant.now()); row = products.save(row);
         return view(row);
@@ -166,7 +198,7 @@ public class CatalogController {
     @PutMapping("/api/v1/admin/products/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ProductView updateProduct(@PathVariable UUID id, @Valid @RequestBody ProductRequest body) {
-        categories.findById(body.categoriaId()).orElseThrow(() -> DomainException.notFound("No se encontró la categoría."));
+        requireActiveCategory(body.categoriaId());
         Producto row = products.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró el producto."));
         apply(row, body); row.setFechaActualizacion(Instant.now());
         return view(products.save(row));
@@ -177,6 +209,14 @@ public class CatalogController {
     public void deactivateProduct(@PathVariable UUID id) {
         Producto row = products.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró el producto."));
         row.setActivo(false); row.setFechaActualizacion(Instant.now()); products.save(row);
+    }
+
+    @PatchMapping("/api/v1/admin/products/{id}/activate")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public void activateProduct(@PathVariable UUID id) {
+        Producto row = products.findById(id).orElseThrow(() -> DomainException.notFound("No se encontró el producto."));
+        requireActiveCategory(row.getCategoriaId());
+        row.setActivo(true); row.setFechaActualizacion(Instant.now()); products.save(row);
     }
 
     @PutMapping("/api/v1/admin/delivery/config")
@@ -195,6 +235,10 @@ public class CatalogController {
         row.setCategoriaId(body.categoriaId()); row.setNombre(body.nombre().trim()); row.setDescripcion(body.descripcion());
         row.setImagen(body.imagen()); row.setPrecio(body.precio());
     }
+    private void requireActiveCategory(UUID categoryId) {
+        Categoria category = categories.findById(categoryId).orElseThrow(() -> DomainException.notFound("No se encontró la categoría."));
+        if (!Boolean.TRUE.equals(category.getActiva())) throw DomainException.conflict("La categoría debe estar activa.");
+    }
     private void apply(Sucursal row, BranchRequest body) {
         row.setNombre(body.nombre().trim()); row.setDireccion(body.direccion().trim()); row.setTelefono(body.telefono());
         row.setTipo(body.tipo()); row.setLatitud(body.latitud()); row.setLongitud(body.longitud());
@@ -210,8 +254,12 @@ public class CatalogController {
     }
 
     public record CategoryView(UUID id, String nombre, String descripcion) {}
+    public record AdminCategoryView(UUID id, String nombre, String descripcion, Boolean activa) {}
     public record ProductView(UUID id, UUID categoriaId, String nombre, String descripcion, String imagen, BigDecimal precio) {}
-    public record BranchView(UUID id, String nombre, String direccion, String telefono, List<ScheduleView> horarios) {}
+    public record AdminProductView(UUID id, UUID categoriaId, String nombre, String descripcion, String imagen, BigDecimal precio, Boolean activo) {}
+    public record BranchView(UUID id, String nombre, String direccion, String telefono, String tipo, List<ScheduleView> horarios) {}
+    public record AdminBranchView(UUID id, String nombre, String direccion, String telefono, String tipo, Boolean activa,
+            BigDecimal latitud, BigDecimal longitud, List<ScheduleView> horarios) {}
     public record ScheduleView(String dia, java.time.LocalTime apertura, java.time.LocalTime cierre, Boolean abierto) {}
     public record BranchRequest(@NotBlank @Size(max = 100) String nombre, @NotBlank @Size(max = 240) String direccion,
             @Size(max = 30) String telefono, @NotBlank String tipo, BigDecimal latitud, BigDecimal longitud) {}

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/v1/tables")
@@ -21,15 +23,22 @@ public class TableController {
     private final TableService service;
     public TableController(TableService service) { this.service = service; }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ATENCION')")
+    public List<TableService.TableOverview> branchTables(@RequestParam UUID sucursalId) { return service.branchTables(sucursalId); }
+
+    @GetMapping("/sessions/{sessionId}")
+    @PreAuthorize("hasRole('ATENCION')")
+    public TableService.SessionStatus staffStatus(@PathVariable UUID sessionId) { return service.staffStatus(sessionId); }
+
     @PostMapping("/{tableId}/sessions")
     @PreAuthorize("hasRole('ATENCION')")
-    public TableService.OpenSessionResponse open(@PathVariable UUID tableId) { return service.open(tableId); }
+    public ResponseEntity<TableService.OpenSessionResponse> open(@PathVariable UUID tableId) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.open(tableId));
+    }
 
     @PostMapping("/sessions/validate")
     public TableService.SessionStatus validate(@Valid @RequestBody TokenRequest request) { return service.validate(request.token()); }
-
-    @GetMapping("/sessions/status")
-    public TableService.SessionStatus status(@RequestParam String token) { return service.status(token); }
 
     @PostMapping("/sessions/{sessionId}/close")
     @PreAuthorize("hasRole('ATENCION')")

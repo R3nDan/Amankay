@@ -12,5 +12,6 @@ public interface SesionMesaRepository extends JpaRepository<SesionMesa, UUID> {
 
     Optional<SesionMesa> findByTokenSeguro(String tokenSeguro);
     List<SesionMesa> findByMesaIdAndEstado(UUID mesaId, String estado);
+    List<SesionMesa> findByMesaIdOrderByFechaAperturaDesc(UUID mesaId);
     List<SesionMesa> findByEstadoAndFechaAperturaBefore(String estado, java.time.Instant cutoff);
 }

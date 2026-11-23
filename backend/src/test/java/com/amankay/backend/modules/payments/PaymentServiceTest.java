@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.amankay.backend.modules.common.DomainException;
 import com.amankay.backend.modules.domain.model.Pedido;
+import com.amankay.backend.modules.domain.model.CuentaMesa;
 import com.amankay.backend.modules.domain.repository.CuentaMesaRepository;
 import com.amankay.backend.modules.domain.repository.PagoRepository;
 import com.amankay.backend.modules.domain.repository.PedidoRepository;
@@ -45,6 +46,7 @@ class PaymentServiceTest {
         Pedido order = new Pedido();
         order.setId(orderId);
         order.setSucursalId(branchId);
+        order.setTipo("EXTERNO");
         order.setEstado("ACEPTADO");
         order.setTotal(new BigDecimal("8500.00"));
         when(orders.lockById(orderId)).thenReturn(Optional.of(order));
@@ -63,6 +65,7 @@ class PaymentServiceTest {
         Pedido order = new Pedido();
         order.setId(orderId);
         order.setSucursalId(UUID.randomUUID());
+        order.setTipo("EXTERNO");
         order.setEstado("ACEPTADO");
         order.setTotal(new BigDecimal("8500.00"));
         var pending = new com.amankay.backend.modules.domain.model.Pago();
@@ -79,6 +82,7 @@ class PaymentServiceTest {
         Pedido order = new Pedido();
         order.setId(orderId);
         order.setSucursalId(UUID.randomUUID());
+        order.setTipo("EXTERNO");
         order.setTotal(new BigDecimal("8500.00"));
         for (String state : List.of("PENDIENTE_CONFIRMACION", "CANCELACION_SOLICITADA", "CANCELADO", "RECHAZADO", "VENCIDO")) {
             order.setEstado(state);
@@ -86,5 +90,35 @@ class PaymentServiceTest {
             assertThrows(DomainException.class, () -> service.createForOrder(orderId, "TRANSFERENCIA"), state);
         }
         verify(payments, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void tableOrdersCanOnlyBePaidThroughTheirSharedAccount() {
+        UUID orderId = UUID.randomUUID();
+        Pedido order = new Pedido();
+        order.setId(orderId); order.setTipo("MESA"); order.setEstado("ACEPTADO");
+        order.setSucursalId(UUID.randomUUID());
+        when(orders.lockById(orderId)).thenReturn(Optional.of(order));
+
+        assertThrows(DomainException.class, () -> service.createForOrder(orderId, "EFECTIVO"));
+        verify(payments, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void tableAccountChargesOnlyAcceptedOrders() {
+        UUID accountId = UUID.randomUUID();
+        UUID branchId = UUID.randomUUID();
+        CuentaMesa account = new CuentaMesa(); account.setId(accountId); account.setEstado("ABIERTA");
+        Pedido accepted = new Pedido(); accepted.setSucursalId(branchId); accepted.setEstado("ACEPTADO"); accepted.setTotal(new BigDecimal("6000.00"));
+        Pedido pending = new Pedido(); pending.setSucursalId(branchId); pending.setEstado("PENDIENTE_CONFIRMACION"); pending.setTotal(new BigDecimal("3000.00"));
+        when(accounts.lockById(accountId)).thenReturn(Optional.of(account));
+        when(orders.findByCuentaMesaId(accountId)).thenReturn(List.of(accepted, pending));
+        when(payments.findByCuentaMesaIdOrderByFechaCreacionDesc(accountId)).thenReturn(List.of());
+        when(payments.save(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        PaymentService.PaymentView result = service.createForTableAccount(accountId, "EFECTIVO");
+
+        assertEquals(new BigDecimal("6000.00"), result.importe());
+        verify(access).requireRoleAtBranch("ATENCION", branchId);
     }
 }

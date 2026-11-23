@@ -56,4 +56,17 @@ public class StaffAccess {
             throw DomainException.forbidden("No tienes sucursales asignadas para esta operación.");
         }
     }
+
+    public void requireRoleAtEitherBranch(String role, UUID firstBranchId, UUID secondBranchId) {
+        requireRole(role);
+        UUID userId = currentUser().getId();
+        if (!branches.userHasBranch(userId, firstBranchId) && !branches.userHasBranch(userId, secondBranchId)) {
+            throw DomainException.forbidden("No tienes asignada ninguna de las sucursales de esta operación.");
+        }
+    }
+
+    public void requireRoleAtBranchOrAdmin(String role, UUID branchId) {
+        if (hasRole("ADMINISTRADOR")) { currentUser(); return; }
+        requireRoleAtBranch(role, branchId);
+    }
 }

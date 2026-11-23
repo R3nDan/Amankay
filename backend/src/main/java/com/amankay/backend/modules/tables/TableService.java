@@ -40,12 +40,17 @@ public class TableService {
     private final StaffAccess access;
     private final Duration sessionTtl;
     private final SecureRandom random = new SecureRandom();
+    private final TemporaryQr temporaryQr;
+    private final String frontendOrigin;
 
     public TableService(MesaRepository tables, SesionMesaRepository sessions, CuentaMesaRepository accounts,
             PedidoRepository orders, PagoRepository payments, OrderService orderService, StaffAccess access,
-            @Value("${amankay.qr.session-ttl:PT8H}") Duration sessionTtl) {
+            @Value("${amankay.qr.session-ttl:PT8H}") Duration sessionTtl,
+            @Value("${amankay.frontend-origin:http://localhost:3000}") String frontendOrigin,
+            TemporaryQr temporaryQr) {
         this.tables = tables; this.sessions = sessions; this.accounts = accounts; this.orders = orders; this.payments = payments;
         this.orderService = orderService; this.access = access; this.sessionTtl = sessionTtl;
+        this.frontendOrigin = frontendOrigin; this.temporaryQr = temporaryQr;
     }
 
     @Transactional
@@ -66,20 +71,35 @@ public class TableService {
         session = sessions.save(session);
         CuentaMesa account = new CuentaMesa(); account.setSesionMesaId(session.getId()); account.setFechaApertura(now); account.setEstado("ABIERTA");
         accounts.save(account);
-        return new OpenSessionResponse(session.getId(), rawToken, now.plus(sessionTtl), account.getId());
+        String accessUrl = frontendOrigin.replaceAll("/+$", "") + "/mesa/" + table.getIdentificadorQr() + "#t=" + rawToken;
+        return new OpenSessionResponse(session.getId(), rawToken, now.plus(sessionTtl), account.getId(), temporaryQr.svg(accessUrl));
     }
 
     @Transactional
     public SessionStatus validate(String rawToken) {
         SesionMesa session = sessions.findByTokenSeguro(hash(rawToken)).orElseThrow(() -> DomainException.notFound("El QR no corresponde a una sesión activa."));
         if (!isValid(session)) throw DomainException.conflict("La sesión QR expiró o fue cerrada.");
-        return status(session);
+        return statusView(session);
     }
 
     @Transactional(readOnly = true)
-    public SessionStatus status(String rawToken) {
-        SesionMesa session = sessions.findByTokenSeguro(hash(rawToken)).orElseThrow(() -> DomainException.notFound("El QR no corresponde a una sesión activa."));
-        if (expired(session)) throw DomainException.conflict("La sesión QR expiró o fue cerrada.");
+    public List<TableOverview> branchTables(UUID branchId) {
+        access.requireRoleAtBranch("ATENCION", branchId);
+        return tables.findBySucursalIdOrderByIdentificadorAsc(branchId).stream().map(table -> {
+            SesionMesa latest = sessions.findByMesaIdOrderByFechaAperturaDesc(table.getId()).stream().findFirst().orElse(null);
+            CuentaMesa account = latest == null ? null : accounts.findBySesionMesaId(latest.getId()).orElse(null);
+            return new TableOverview(table.getId(), table.getIdentificador(), table.getIdentificadorQr(),
+                    table.getActiva(), latest == null ? null : latest.getId(),
+                    latest == null ? null : latest.getEstado(), account == null ? null : account.getId(),
+                    account == null ? null : account.getEstado());
+        }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public SessionStatus staffStatus(UUID sessionId) {
+        SesionMesa session = sessions.findById(sessionId).orElseThrow(() -> DomainException.notFound("No se encontró la sesión QR."));
+        Mesa table = tables.findById(session.getMesaId()).orElseThrow();
+        access.requireRoleAtBranch("ATENCION", table.getSucursalId());
         return statusView(session);
     }
 
@@ -123,7 +143,7 @@ public class TableService {
         if (!"ABIERTA".equals(account.getEstado())) throw DomainException.conflict("La cuenta ya está cerrada.");
         List<Pago> paymentRows = payments.findByCuentaMesaIdOrderByFechaCreacionDesc(accountId);
         BigDecimal paid = paymentRows.stream().filter(row -> "CONFIRMADO".equals(row.getEstado())).map(Pago::getImporte).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal total = orders.findByCuentaMesaId(accountId).stream().filter(row -> !List.of("CANCELADO", "RECHAZADO", "VENCIDO").contains(row.getEstado()))
+        BigDecimal total = orders.findByCuentaMesaId(accountId).stream().filter(row -> List.of("ACEPTADO", "EN_PREPARACION", "LISTO", "COMPLETADO").contains(row.getEstado()))
                 .map(Pedido::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
         if (paid.compareTo(total) < 0) throw DomainException.conflict("No se puede cerrar la cuenta hasta cubrir el saldo pendiente completo.");
         account.setEstado("CERRADA"); account.setFechaCierre(Instant.now()); accounts.save(account);
@@ -138,14 +158,13 @@ public class TableService {
         return "ACTIVA".equals(session.getEstado());
     }
     private boolean expired(SesionMesa session) { return !session.getFechaApertura().plus(sessionTtl).isAfter(Instant.now()); }
-    private SessionStatus status(SesionMesa session) { return statusView(session); }
     private SessionStatus statusView(SesionMesa session) {
         Mesa table = tables.findById(session.getMesaId()).orElseThrow();
         CuentaMesa account = accounts.findBySesionMesaId(session.getId()).orElseThrow();
         List<OrderService.OrderSummary> summaries = orders.findByCuentaMesaId(account.getId()).stream().map(order ->
                 new OrderService.OrderSummary(order.getId(), order.getCodigoSeguimiento(), order.getEstado(), order.getModalidadEntrega(),
-                        order.getFechaCreacion(), order.getFechaVencimiento(), order.getTotal(), order.getSucursalId())).toList();
-        return new SessionStatus(session.getId(), table.getId(), table.getIdentificador(), table.getSucursalId(), session.getEstado(),
+                        order.getFechaCreacion(), order.getFechaVencimiento(), order.getTotal(), order.getSucursalId(), order.getTipo())).toList();
+        return new SessionStatus(session.getId(), table.getId(), table.getIdentificador(), table.getIdentificadorQr(), table.getSucursalId(), session.getEstado(),
                 session.getFechaApertura().plus(sessionTtl), account.getId(), account.getEstado(), summaries);
     }
     private String hash(String rawToken) {
@@ -154,8 +173,10 @@ public class TableService {
         catch (Exception exception) { throw new IllegalStateException("No se pudo validar el token.", exception); }
     }
 
-    public record OpenSessionResponse(UUID sesionId, String tokenTemporal, Instant expiraEn, UUID cuentaId) {}
-    public record SessionStatus(UUID sesionId, UUID mesaId, String mesa, UUID sucursalId, String estadoSesion,
+    public record OpenSessionResponse(UUID sesionId, String tokenTemporal, Instant expiraEn, UUID cuentaId, String qrSvg) {}
+    public record TableOverview(UUID id, String identificador, String identificadorQr, Boolean activa,
+            UUID sesionId, String estadoSesion, UUID cuentaId, String estadoCuenta) {}
+    public record SessionStatus(UUID sesionId, UUID mesaId, String mesa, String codigoQrMesa, UUID sucursalId, String estadoSesion,
             Instant expiraEn, UUID cuentaId, String estadoCuenta, List<OrderService.OrderSummary> pedidos) {}
     public record AccountView(UUID id, String estado, BigDecimal total, BigDecimal pagado) {}
 }

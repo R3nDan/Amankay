@@ -1,5 +1,21 @@
 # Plan y estado de desarrollo de Amankay
 
+## Actualización del 22-11-2026: panel administrativo progresivo
+
+El panel administrativo ahora integra Next.js con la API Java para pedidos y su cola cronológica, dashboard por rol, inventario, reposiciones, entregas, pagos, conciliaciones de efectivo, catálogo, usuarios, sucursales/configuración y reportes. La experiencia de mesas y QR temporal también está conectada. Se conserva el MER de 26 entidades y las migraciones V1/V2 ya aplicadas a `amankay_test` en la validación anterior.
+
+Verificación local de esta entrega: `npm run lint`, `npm run build`, `backend\\mvnw.cmd -q test` con Temurin JDK 25 y `git diff --check` finalizaron correctamente. Los tests Java incluyen cobertura de la actualización de roles y desactivación sobre sesiones abiertas, además de los reportes de ventas. No se arrancó el backend ni se consultó PostgreSQL en esta ronda. Las pruebas manuales de login, persistencia, apertura/escaneo QR y uso real de pedidos con personal y teléfono siguen pendientes.
+
+La integración pública de pedidos continúa pendiente. Reportes cubre ventas completadas, historial/estados, inventario actual y movimientos, y reposiciones; no incluye productos más vendidos, excluido del MVP.
+
+## Actualización del 22-11-2026: integración frontend
+
+Se autorizó y ejecutó Flyway V1/V2 únicamente en `amankay_test`; Spring Boot, JPA/Hibernate y diez flujos REST principales iniciaron y respondieron con PostgreSQL real. La suite Java existente aprobó 14 pruebas. El conteo SQL directo de todas las restricciones y los flujos de vencimiento y comprobantes HTTP siguen pendientes de verificación. Flyway permanece deshabilitado por defecto y no se conservaron credenciales en Git.
+
+Se inició el panel administrativo de Next.js con rutas directas `/admin`, `/admin/login` y `/admin/mesas`, identidad visual heredada del sitio público y autenticación por sesión y CSRF del backend Java. El backend expone roles y sucursales asignadas en `/api/v1/auth/me` y una consulta operativa de mesas/sesiones restringida a Atención por sucursal. El usuario aprobó que Java genere un QR temporal al abrir la sesión para que el personal lo muestre al cliente; la ruta `/mesa/[codigoMesa]` valida el token y permite catálogo, carrito, pedido y sondeo de estados. El identificador permanente no autoriza el acceso. La verificación en ejecución de estas incorporaciones requiere reiniciar el backend con la configuración segura de PostgreSQL.
+
+Las notas de estado anteriores a esta actualización se conservan abajo como historial y no describen el estado vigente de PostgreSQL ni de la integración inicial.
+
 ## Estado actual
 
 Análisis y diseño concluidos; el MER lógico de 24 entidades de dominio y 2 asociativas está aprobado. El sitio público Next.js está implementado. Se autorizó e implementó una primera entrega integral del backend Java y el esquema físico en `backend/` y `docs/02-modelado/modelo-fisico-postgresql.md`.
