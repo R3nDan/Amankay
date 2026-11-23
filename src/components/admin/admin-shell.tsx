@@ -72,17 +72,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
   return <Context.Provider value={{ staff, branches, branchId, setBranchId }}>
     <div className="admin-frame">
       <aside className="admin-side">
-        <Link className="admin-brand" href="/admin"><Image src="/imagenes/marca/amankay.svg" alt="" width={62} height={64} /><span>Amankay<small>Espacio de trabajo</small></span></Link>
-        <p className="admin-nav-label">NAVEGACIÓN</p>
+        <Link className="admin-brand" href="/admin" aria-label="Amankay, inicio del panel"><Image src="/imagenes/marca/amankay.svg" alt="Amankay" width={68} height={70} /><span>Espacio de trabajo</span></Link>
         <nav aria-label="Panel administrativo">{links.map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={path === href ? "page" : undefined}><Icon size={19} aria-hidden="true" />{label}<ArrowRight size={15} className="admin-nav-arrow" aria-hidden="true" /></Link>)}</nav>
-        <div className="admin-side-end"><Link href="/">Ir al sitio público <ArrowRight size={16} aria-hidden="true" /></Link></div>
       </aside>
       <div className="admin-main">
         <header className="admin-topbar">
-          <div><span className="admin-eyebrow">AMANKAY · OPERACIÓN</span><strong>{staff.nombre} {staff.apellido}</strong><small>{staff.roles.join(" · ")}</small></div>
+          <div className="admin-identity"><strong>{staff.nombre} {staff.apellido}</strong><small>{staff.roles.join(" · ")}</small></div>
           <div className="admin-top-actions">
-            {branches.length > 0 && <label>Sucursal <select value={branchId} onChange={event => setBranchId(event.target.value)}>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.nombre}</option>)}</select></label>}
-            <button type="button" onClick={leave} aria-label="Cerrar sesión"><LogOut size={19} aria-hidden="true" /><span>Salir</span></button>
+            {branches.length > 0 && <label>Sucursal <select className="admin-branch-select" value={branchId} onChange={event => setBranchId(event.target.value)}>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.nombre}</option>)}</select></label>}
+            <button className="admin-logout-button" type="button" onClick={leave} aria-label="Cerrar sesión"><LogOut size={19} aria-hidden="true" /></button>
           </div>
         </header>
         <main id="contenido" className="admin-content" key={branchId}>{children}</main>
